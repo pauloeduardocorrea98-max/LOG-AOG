@@ -1,62 +1,13 @@
+<!-- index.html (COMPLETO) - cole no Apps Script (HTML) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
 <title>Logística AOG | LATAM</title>
 
 <style>
 *{box-sizing:border-box;font-family:Segoe UI,Arial}
 body{ margin:0; display:flex; background:#0b2440; color:#e5e7eb; }
-
-/* ===== PIN OVERLAY ===== */
-.pinOverlay{
-  position:fixed; inset:0; z-index:999999;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(2,6,23,.72);
-  padding:18px;
-}
-.pinCard{
-  width:min(520px, 100%);
-  background:#0f172a;
-  border:1px solid #334155;
-  border-radius:18px;
-  box-shadow:0 22px 60px rgba(0,0,0,.35);
-  padding:18px;
-}
-.pinTitle{ font-size:18px; font-weight:800; color:#38bdf8; margin:0 0 8px; }
-.pinSub{ margin:0 0 14px; font-size:13px; color:#cbd5e1; opacity:.95; line-height:1.4; }
-.pinRow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-.pinInput{
-  flex:1; min-width:220px;
-  padding:12px 12px;
-  border-radius:12px;
-  border:1px solid #334155;
-  background:#0b1d33;
-  color:#e5e7eb;
-  outline:none;
-}
-.pinInput:focus{ border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.18); }
-.pinBtn{
-  padding:12px 14px;
-  border:none; border-radius:12px;
-  background:#0ea5e9; color:#fff;
-  cursor:pointer; font-weight:700;
-}
-.pinBtn:hover{ filter:brightness(.96); }
-.pinErr{
-  margin-top:12px;
-  font-size:13px;
-  color:#f87171;
-  display:none;
-}
-.pinHint{
-  margin-top:12px;
-  font-size:12px;
-  color:#94a3b8;
-}
-
-/* ===== SIDEBAR ===== */
 .sidebar{ width:260px; background:#0f172a;color:#e5e7eb; display:flex;flex-direction:column;padding:12px }
 .sidebar h2{margin:0 0 10px;font-size:16px;color:#38bdf8}
 .menu button{
@@ -226,21 +177,37 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 
 <body>
 
-<!-- PIN gate -->
-<div id="pinOverlay" class="pinOverlay">
-  <div class="pinCard">
-    <h2 class="pinTitle">🔐 Acesso ao LOG-AOG</h2>
-    <p class="pinSub">
-      Digite o PIN para entrar. (Essa é uma trava do site; no próximo passo vamos travar também no GAS.)
-    </p>
-    <div class="pinRow">
-      <input id="pinInput" class="pinInput" placeholder="PIN" inputmode="numeric" autocomplete="one-time-code" />
-      <button id="pinBtn" class="pinBtn" type="button">Entrar</button>
+<!-- LOGIN (PIN) - GitHub Pages (client-side) -->
+<div id="loginOverlay" style="
+  position:fixed; inset:0; z-index:99999;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(2,6,23,.78);
+">
+  <div style="
+    width:min(520px, 92vw);
+    background:#0f172a; border:1px solid #334155;
+    border-radius:16px; padding:18px 18px 14px;
+    box-shadow:0 28px 60px rgba(0,0,0,.45);
+    color:#e5e7eb;
+  ">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="font-size:18px">🔐</div>
+      <div style="font-weight:800;font-size:16px;color:#38bdf8">Acesso ao LOG-AOG</div>
     </div>
-    <div id="pinErr" class="pinErr">PIN inválido.</div>
-    <div class="pinHint">Dica: você pode trocar o PIN mudando a hash dentro do index.html.</div>
+    <div style="font-size:13px;color:#cbd5e1;line-height:1.35;margin-bottom:12px;">
+      Digite o <b>PIN</b> para abrir o dashboard.<br>
+      <span style="opacity:.8">Obs: este PIN é salvo neste navegador.</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <input id="pinInput" type="password" autocomplete="off" placeholder="PIN"
+        style="flex:1;min-width:220px;padding:12px;border-radius:12px;border:1px solid #334155;background:#0b1d33;color:#e5e7eb;outline:none;">
+      <button id="pinBtn" class="noteBtn" type="button" style="padding:12px 14px;border-radius:12px;">Entrar</button>
+      <button id="pinClear" class="noteBtn gray" type="button" style="padding:12px 14px;border-radius:12px;">Limpar</button>
+    </div>
+    <div id="pinMsg" style="margin-top:10px;font-size:12px;color:#fca5a5;display:none;"></div>
   </div>
 </div>
+
 
 <div class="sidebar">
   <h2>LOGÍSTICA AOG</h2>
@@ -272,11 +239,14 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 
   <div id="turno" class="section active">
     <h1>Passagem de Turno</h1>
+<div class="box" id="ghNotice" style="display:none;margin-top:10px;"><b>Modo GitHub Pages:</b> Passagem de Turno/Avisos/Links ainda precisam de endpoints JSONP específicos (vamos ligar no próximo passo). As tabelas e OBS/Prio/Aeronave já funcionam.</div>
 
+    <!-- MARCADOR DE FRESCOR DOS DADOS -->
     <div id="frescorBanner" style="
       display:flex; align-items:center; gap:10px; flex-wrap:wrap;
       background:#0f172a; border:1px solid #334155; border-radius:10px;
-      padding:10px 14px; margin-bottom:12px; font-size:13px; color:#e5e7eb;">
+      padding:10px 14px; margin-bottom:12px; font-size:13px; color:#e5e7eb;
+    ">
       <span style="font-size:16px">🟢</span>
       <span id="frescorTexto">Aguardando primeira atualização…</span>
       <span id="frescorContador" style="margin-left:auto; font-size:12px; color:#94a3b8;"></span>
@@ -287,7 +257,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 
       <div class="noteTools">
         <button class="noteBtn" type="button" onclick="addTurno()">Adicionar</button>
-        <button class="noteBtn gray" type="button" onclick="refreshNowUrl()">Atualizar agora</button>
+        <button class="noteBtn gray" type="button" onclick="refreshNowUrl()">Atualizar agora (URL)</button>
         <button class="noteBtn orange" type="button" onclick="forceUpdateNow()">Forçar atualização (Sheets)</button>
       </div>
     </div>
@@ -370,6 +340,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   <div class="ctxTitle">Formatação (selecione o texto → botão direito → ajustar → Aplicar)</div>
   <div class="ctxRow">
     <button id="ctxBold" class="ctxBtn" type="button" title="Negrito">B</button>
+
     <select id="ctxFont" class="ctxSel" title="Tamanho da fonte">
       <option value="10">10</option>
       <option value="12" selected>12</option>
@@ -378,6 +349,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
       <option value="18">18</option>
       <option value="20">20</option>
     </select>
+
     <input id="ctxColor" class="ctxColor" type="color" value="#0f172a" title="Cor">
     <button id="ctxApply" class="ctxApply" type="button">Aplicar</button>
   </div>
@@ -385,24 +357,14 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 </div>
 
 <script>
-/* ======================================================================
-   ✅ CONFIG (VOCÊ EDITA AQUI)
-   ====================================================================== */
+const INITIAL_DATA = [];
+let dados = Array.isArray(INITIAL_DATA) ? INITIAL_DATA : [];
 
-// 1) Cole aqui a URL do seu WebApp do Apps Script (termina com /exec)
-const GAS_WEBAPP_URL = "COLE_AQUI_SUA_URL_DO_WEBAPP_EXEC";
+const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxVbXQvKbODA2WY6oHMFogB1o_Nigt1QoPfoGgsRjVq/dev";
+const PIN_STORAGE_KEY = "LOGAOG_PIN_V1"; // PIN local (cliente)
+function getPin(){ return String(localStorage.getItem(PIN_STORAGE_KEY) || "").trim(); }
+function setPin(v){ localStorage.setItem(PIN_STORAGE_KEY, String(v||"").trim()); }
 
-// 2) PIN: aqui vai a HASH (SHA-256 em HEX) do seu PIN.
-//    Eu deixei o exemplo do PIN "1234" => hash SHA-256:
-const PIN_HASH_HEX = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
-
-// (opcional) refresh dos dados da planilha
-const REFRESH_EVERY_MS = 150 * 1000; // 2min30s
-
-/* ======================================================================
-   ✅ STATE GLOBAL
-   ====================================================================== */
-let dados = []; // no GitHub Pages começa vazio
 const __ADMIN_MODE = (/\badmin=1\b/i.test(window.location.search) || localStorage.getItem("ADMIN_MODE")==="1");
 
 const SHARED_TABLE_KEYS = ["aog","war","fast","cargo","cargas","tools"];
@@ -431,96 +393,6 @@ function __tryRerenderPending__(){
   rerenderAll({ onlyActive: true });
 }
 
-/* ======================================================================
-   ✅ JSONP (bypass CORS)
-   ====================================================================== */
-function __jsonp__(params, timeoutMs=20000){
-  return new Promise((resolve, reject)=>{
-    if(!GAS_WEBAPP_URL || GAS_WEBAPP_URL.includes("COLE_AQUI")){
-      return reject(new Error("GAS_WEBAPP_URL não configurada."));
-    }
-
-    const cb = "__cb_" + Math.random().toString(36).slice(2);
-    const u = new URL(GAS_WEBAPP_URL);
-
-    Object.keys(params||{}).forEach(k=> u.searchParams.set(k, String(params[k])));
-    u.searchParams.set("callback", cb);
-    u.searchParams.set("ts", String(Date.now()));
-
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = u.toString();
-
-    const timer = setTimeout(()=>{
-      cleanup();
-      reject(new Error("Timeout JSONP"));
-    }, timeoutMs);
-
-    function cleanup(){
-      try{ clearTimeout(timer); }catch(e){}
-      try{ delete window[cb]; }catch(e){}
-      try{ if(script && script.parentNode) script.parentNode.removeChild(script); }catch(e){}
-    }
-
-    window[cb] = (payload)=>{
-      cleanup();
-      resolve(payload);
-    };
-
-    script.onerror = ()=>{
-      cleanup();
-      reject(new Error("Falha ao carregar JSONP"));
-    };
-
-    document.head.appendChild(script);
-  });
-}
-
-/* ======================================================================
-   ✅ PIN gate (front)
-   ====================================================================== */
-async function sha256Hex(text){
-  const enc = new TextEncoder().encode(String(text||""));
-  const digest = await crypto.subtle.digest("SHA-256", enc);
-  const arr = Array.from(new Uint8Array(digest));
-  return arr.map(b=>b.toString(16).padStart(2,"0")).join("");
-}
-function showPinError(msg){
-  const el = document.getElementById("pinErr");
-  if(!el) return;
-  el.style.display = "block";
-  el.textContent = msg || "PIN inválido.";
-}
-function hidePin(){
-  const ov = document.getElementById("pinOverlay");
-  if(ov) ov.style.display = "none";
-}
-async function tryLoginWithPin(pin){
-  const h = await sha256Hex(pin);
-  if(h !== String(PIN_HASH_HEX||"").toLowerCase()){
-    showPinError("PIN inválido.");
-    return false;
-  }
-  localStorage.setItem("LOGAOG_PIN_OK", "1");
-  hidePin();
-  return true;
-}
-async function initPinGate(){
-  const ok = localStorage.getItem("LOGAOG_PIN_OK")==="1";
-  if(ok){
-    hidePin();
-    return true;
-  }
-  const btn = document.getElementById("pinBtn");
-  const inp = document.getElementById("pinInput");
-  if(btn) btn.onclick = async ()=>{ await tryLoginWithPin(inp ? inp.value : ""); };
-  if(inp) inp.onkeydown = async (e)=>{ if(e.key==="Enter"){ e.preventDefault(); await tryLoginWithPin(inp.value); } };
-  return false;
-}
-
-/* ======================================================================
-   UI CLOCK
-   ====================================================================== */
 setInterval(()=>{
   const el = document.getElementById("clock");
   if(el) el.innerText = new Date().toLocaleTimeString("pt-BR");
@@ -535,9 +407,6 @@ function updateStatusVisibility(){
   st.style.display = show ? "block" : "none";
 }
 
-/* ======================================================================
-   Tabs / Dirty flags
-   ====================================================================== */
 const __dirty = { aog:true, war:true, fast:true, cargo:true, cargas:true, tools:true, links:true, turno:true, avisos:true };
 function markDirty(key){ if(Object.prototype.hasOwnProperty.call(__dirty, key)) __dirty[key] = true; }
 function clearDirty(key){ if(Object.prototype.hasOwnProperty.call(__dirty, key)) __dirty[key] = false; }
@@ -550,6 +419,7 @@ function openTab(id,btn){
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  try{ const n=document.getElementById('ghNotice'); if(n) n.style.display='block'; }catch(e){}
   updateStatusVisibility();
 
   try{ scheduleNextRefresh(getAutoRefreshMs()); }catch(e){}
@@ -587,9 +457,6 @@ function escapeHtml(v){
 }
 function cleanVal(v){ return String(v ?? "").trim(); }
 
-/* ======================================================================
-   Date utils / filters / status logic (mantido)
-   ====================================================================== */
 function parseMaybeDate(v){
   if(!v) return null;
   const s = String(v).trim();
@@ -659,9 +526,13 @@ const STATUS_COL = "Status_material_ferramenta";
 const AIR_COL = "Aeronave";
 const TYPE_COL = "Tipo";
 
-function hasCargasKeyword(text){ return normalizeText(text || "").includes("carga"); }
-function isCargasRow(r){ return r ? hasCargasKeyword(r["Descricao_logistica"]) : false; }
-
+function hasCargasKeyword(text){
+  return normalizeText(text || "").includes("carga");
+}
+function isCargasRow(r){
+  if(!r) return false;
+  return hasCargasKeyword(r["Descricao_logistica"]);
+}
 function isFerramentaType(typeRaw){
   const raw = String(typeRaw ?? "").trim();
   if(!raw) return false;
@@ -710,15 +581,26 @@ function statusTagHtml(statusRaw){
 }
 
 const cols = [
-  "Material_ID","Status_material_ferramenta","Numero_de_solicitacao","Data_da_solicitacao",
-  "Barcode","Aeronave","PN","QTDE","Origem","Destino","Descricao_logistica",
-  "Nota_fiscal","AWB","OBS"
+  "Material_ID",
+  "Status_material_ferramenta",
+  "Numero_de_solicitacao",
+  "Data_da_solicitacao",
+  "Barcode",
+  "Aeronave",
+  "PN",
+  "QTDE",
+  "Origem",
+  "Destino",
+  "Descricao_logistica",
+  "Nota_fiscal",
+  "AWB",
+  "OBS"
 ];
 
 const tableKeysBySection = { aog:"aog", war:"war", fast:"fast", cargo:"cargo", cargas:"cargas", tools:"tools" };
 const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
-const __filterDraftByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
 
+const __filterDraftByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
 function setFilterDraft(tableKey, col, value){
   const v = String(value || "");
   if(!__filterDraftByTable[tableKey]) __filterDraftByTable[tableKey] = {};
@@ -750,26 +632,24 @@ document.addEventListener("keydown", (ev)=>{
   const st = document.getElementById("status");
   if(st && __ADMIN_MODE){
     st.innerHTML = makeStatusHtml(`✅ Filtros limpos (ESC) na aba atual`);
-    paintUpdateInfo(); paintRefreshInfo();
+    paintUpdateInfo();
+    paintRefreshInfo();
   }
 });
 
-/* ======================================================================
-   PRIO/AIR local (persist localStorage) + shared states via JSONP
-   ====================================================================== */
 const prioStoreKey = {
-  aog:"AOG_PRIOS_AOG_V1", war:"AOG_PRIOS_WAR_V1", fast:"AOG_PRIOS_FAST_V1",
-  cargo:"AOG_PRIOS_CARGO_V1", cargas:"AOG_PRIOS_CARGAS_V1", tools:"AOG_PRIOS_TOOLS_V1"
+  aog:  "AOG_PRIOS_AOG_V1",  war:  "AOG_PRIOS_WAR_V1",
+  fast: "AOG_PRIOS_FAST_V1", cargo:"AOG_PRIOS_CARGO_V1",
+  cargas:"AOG_PRIOS_CARGAS_V1", tools:"AOG_PRIOS_TOOLS_V1"
 };
 let priosByTable = {
-  aog:new Set(JSON.parse(localStorage.getItem(prioStoreKey.aog)||"[]")),
-  war:new Set(JSON.parse(localStorage.getItem(prioStoreKey.war)||"[]")),
-  fast:new Set(JSON.parse(localStorage.getItem(prioStoreKey.fast)||"[]")),
-  cargo:new Set(JSON.parse(localStorage.getItem(prioStoreKey.cargo)||"[]")),
-  cargas:new Set(JSON.parse(localStorage.getItem(prioStoreKey.cargas)||"[]")),
-  tools:new Set(JSON.parse(localStorage.getItem(prioStoreKey.tools)||"[]")),
+  aog:  new Set(JSON.parse(localStorage.getItem(prioStoreKey.aog)  || "[]")),
+  war:  new Set(JSON.parse(localStorage.getItem(prioStoreKey.war)  || "[]")),
+  fast: new Set(JSON.parse(localStorage.getItem(prioStoreKey.fast) || "[]")),
+  cargo:new Set(JSON.parse(localStorage.getItem(prioStoreKey.cargo)|| "[]")),
+  cargas:new Set(JSON.parse(localStorage.getItem(prioStoreKey.cargas)|| "[]")),
+  tools:new Set(JSON.parse(localStorage.getItem(prioStoreKey.tools)|| "[]"))
 };
-
 function rowId(r){
   if(r && r.__rid) return r.__rid;
   const id = `${(r && r.Material_ID)||""}__${(r && r.Numero_de_solicitacao)||""}__${(r && r.Aeronave)||""}__${(r && r.PN)||""}`;
@@ -791,27 +671,25 @@ const AIR_STORE_KEY = {
   cargo:"AOG_AIR_CARGO_V1", cargas:"AOG_AIR_CARGAS_V1", tools:"AOG_AIR_TOOLS_V1"
 };
 let airPinnedByTable = {
-  aog:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.aog)||"[]")),
-  war:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.war)||"[]")),
-  fast:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.fast)||"[]")),
-  cargo:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.cargo)||"[]")),
-  cargas:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.cargas)||"[]")),
-  tools:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.tools)||"[]")),
+  aog:   new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.aog)   || "[]")),
+  war:   new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.war)   || "[]")),
+  fast:  new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.fast)  || "[]")),
+  cargo: new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.cargo) || "[]")),
+  cargas:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.cargas)|| "[]")),
+  tools: new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.tools) || "[]"))
 };
 const airFocusByTable = { aog:null, war:null, fast:null, cargo:null, cargas:null, tools:null };
 function saveAirPinned(tableKey){
   try{ localStorage.setItem(AIR_STORE_KEY[tableKey], JSON.stringify(Array.from(airPinnedByTable[tableKey]))); }catch(e){}
 }
 
-/* ======================================================================
-   Data cache build (igual seu HTML)
-   ====================================================================== */
 let __cacheByTable = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
 let __cacheLastUpdate = null;
 let __dataVersion = 0;
 
 let __sortedBaseByTable = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
 let __sortedBaseVersion = -1;
+
 let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
@@ -829,28 +707,20 @@ function __compareBaseOrder__(a,b){
 function buildSortedBaseCache(){
   if(__sortedBaseVersion === __dataVersion) return;
   __sortedBaseByTable = {
-    aog:(__cacheByTable.aog||[]).slice().sort(__compareBaseOrder__),
-    war:(__cacheByTable.war||[]).slice().sort(__compareBaseOrder__),
-    fast:(__cacheByTable.fast||[]).slice().sort(__compareBaseOrder__),
-    cargo:(__cacheByTable.cargo||[]).slice().sort(__compareBaseOrder__),
+    aog:   (__cacheByTable.aog||[]).slice().sort(__compareBaseOrder__),
+    war:   (__cacheByTable.war||[]).slice().sort(__compareBaseOrder__),
+    fast:  (__cacheByTable.fast||[]).slice().sort(__compareBaseOrder__),
+    cargo: (__cacheByTable.cargo||[]).slice().sort(__compareBaseOrder__),
     cargas:(__cacheByTable.cargas||[]).slice().sort(__compareBaseOrder__),
-    tools:(__cacheByTable.tools||[]).slice().sort(__compareBaseOrder__),
+    tools: (__cacheByTable.tools||[]).slice().sort(__compareBaseOrder__)
   };
   __sortedBaseVersion = __dataVersion;
 }
-function __pushAirId__(tableKey, r){
-  const a = cleanVal(r && r[AIR_COL]);
-  if(!a) return;
-  const mid = cleanVal(r && r.Material_ID);
-  const mp = __airIdSetByTable[tableKey];
-  if(!mp) return;
-  let set = mp.get(a);
-  if(!set){ set = new Set(); mp.set(a,set); }
-  if(mid) set.add(mid);
-}
+
 function prepareDataCache(){
   const out = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
   let maxDt = null;
+
   __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
 
   const arr = Array.isArray(dados) ? dados : [];
@@ -868,7 +738,9 @@ function prepareDataCache(){
       r.__dispDateLower = String(shown || "").toLowerCase();
     }
 
-    out.cargo.push(r); __pushAirId__("cargo", r);
+    out.cargo.push(r);
+    __pushAirId__("cargo", r);
+
     if(isCargasRow(r)){ out.cargas.push(r); __pushAirId__("cargas", r); }
     if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r); }
 
@@ -885,6 +757,17 @@ function prepareDataCache(){
   __cacheLastUpdate = maxDt || new Date();
   buildSortedBaseCache();
 }
+function __pushAirId__(tableKey, r){
+  const a = cleanVal(r && r[AIR_COL]);
+  if(!a) return;
+  const mid = cleanVal(r && r.Material_ID);
+  const mp = __airIdSetByTable[tableKey];
+  if(!mp) return;
+  let set = mp.get(a);
+  if(!set){ set = new Set(); mp.set(a,set); }
+  if(mid) set.add(mid);
+}
+
 function getBaseRows(tableKey){ return (__cacheByTable[tableKey]||[]); }
 function getBaseRowsSorted(tableKey){ return (__sortedBaseByTable[tableKey]||getBaseRows(tableKey)); }
 
@@ -986,13 +869,15 @@ function getFilteredBaseRows(tableKey){
   return rows;
 }
 
-/* ======================================================================
-   OBS (shared via JSONP)
-   ====================================================================== */
-let __sharedObsState = { items:{} };
+/* =========================================================
+   OBS COMPARTILHADO
+   ========================================================= */
+let __sharedObsState = null;
 const __obsDraftGlobal = {};
 
-function __obsNormId__(materialId){ return String(materialId || "").trim(); }
+function __obsNormId__(materialId){
+  return String(materialId || "").trim();
+}
 
 function getObsFromState(_tableKeyIgnored, materialId){
   const id = __obsNormId__(materialId);
@@ -1002,27 +887,32 @@ function getObsFromState(_tableKeyIgnored, materialId){
   const it = st.items[id];
   return it && it.text ? String(it.text) : "";
 }
+
 function getObsDraft(_tableKeyIgnored, materialId){
   const id = __obsNormId__(materialId);
   if(!id) return "";
   return (__obsDraftGlobal[id] != null) ? String(__obsDraftGlobal[id]) : "";
 }
+
 function getObsTextForCell(tableKey, materialId){
   const d = getObsDraft(tableKey, materialId);
   if(d !== "") return d;
   return getObsFromState(tableKey, materialId);
 }
+
 function obsInput(ev, tableKey, materialId){
   const id = __obsNormId__(materialId);
   if(!id) return;
   __obsDraftGlobal[id] = (ev && ev.target) ? ev.target.value : "";
 }
+
 async function obsKeyDown(ev, tableKey, materialId){
   if(!ev) return;
   if(ev.key !== "Enter") return;
   if(ev.shiftKey) return;
 
   ev.preventDefault();
+
   const el = ev.target;
   if(!el) return;
 
@@ -1033,8 +923,9 @@ async function obsKeyDown(ev, tableKey, materialId){
   const text = String(el.value || "");
 
   try{
-    const resp = await __jsonp__({ sharedObsSet: "1", tableKey, materialId: id, text });
-    if(resp && resp.ok === true && resp.state) __sharedObsState = resp.state;
+    const st = await jsonpSetSharedObs(id, text);
+    __sharedObsState = st || __sharedObsState;
+
     if(__obsDraftGlobal[id] != null) delete __obsDraftGlobal[id];
 
     el.classList.remove("obsSaving");
@@ -1050,6 +941,7 @@ async function obsKeyDown(ev, tableKey, materialId){
     console.error("Erro ao salvar OBS:", e);
   }
 }
+
 function updateObsVisibleForTable(tableKey){
   const tk = String(tableKey||"").toLowerCase();
   const tbl = document.getElementById(`tbl-${tk}`);
@@ -1069,17 +961,21 @@ function updateObsVisibleForTable(tableKey){
     }catch(e){}
   }
 }
+
 function updateObsVisibleActiveTable(){
   const active = document.querySelector(".section.active");
   const tk = active ? tableKeysBySection[active.id] : null;
   if(!tk) return;
   updateObsVisibleForTable(tk);
 }
+
 async function syncSharedObs(){
   try{
-    const resp = await __jsonp__({ sharedObsGet:"1" });
-    if(resp && resp.ok === true && resp.state) __sharedObsState = resp.state;
-    try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){}
+    const st = await fetchSharedObsStateJsonp();
+    __sharedObsState = st || __sharedObsState;
+    try{
+      if(!__isUserTyping__()) updateObsVisibleActiveTable();
+    }catch(e){}
   }catch(e){}
 }
 
@@ -1097,21 +993,198 @@ function displayCell(colKey, rawValue, tableKey, row){
   return String(rawValue ?? "");
 }
 
-/* ======================================================================
-   Shared prio/air/turno/avisos/links via JSONP
-   ====================================================================== */
+/* ===== GAS (JSONP) =====
+   GitHub Pages NÃO tem google.script.run e NÃO pode usar fetch() pro WebApp (CORS).
+   Então consumimos o WebApp via JSONP (<script src=...>).
+*/
+function __qs__(obj){
+  const p = [];
+  Object.keys(obj||{}).forEach(k=>{
+    const v = obj[k];
+    if(v === undefined || v === null) return;
+    p.push(encodeURIComponent(k) + "=" + encodeURIComponent(String(v)));
+  });
+  return p.join("&");
+}
+function __jsonp__(params, timeoutMs){
+  return new Promise((resolve, reject)=>{
+    const cb = "__jsonp_cb_" + Date.now() + "_" + Math.floor(Math.random()*1e9);
+    const t = setTimeout(()=>{
+      try{ cleanup(); }catch(e){}
+      reject(new Error("JSONP timeout"));
+    }, Math.max(3000, Number(timeoutMs||15000)));
+
+    function cleanup(){
+      clearTimeout(t);
+      try{ delete window[cb]; }catch(e){ window[cb] = undefined; }
+      if(script && script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cb] = (data)=>{
+      cleanup();
+      resolve(data);
+    };
+
+    const pin = getPin();
+    const url = GAS_WEBAPP_URL + (GAS_WEBAPP_URL.includes("?") ? "&" : "?")
+      + __qs__(Object.assign({}, params||{}, { callback: cb, pin: pin, ts: Date.now() }));
+
+    const script = document.createElement("script");
+    script.src = url;
+    script.async = true;
+    script.onerror = ()=>{
+      cleanup();
+      reject(new Error("Falha ao carregar JSONP"));
+    };
+    document.head.appendChild(script);
+  });
+}
+
+/* ===== Dados / ForceUpdate via JSONP ===== */
+async function fetchDadosViaJsonp(){
+  const t0 = performance.now();
+  const data = await __jsonp__({ dados: 1 }, 25000);
+  if(!Array.isArray(data)) throw new Error("Resposta inválida (esperado Array) em ?dados=1");
+  return { data, ms: Math.round(performance.now() - t0) };
+}
+async function fetchDadosChunkViaJsonp(sheetName, offset, limit){
+  const j = await __jsonp__({ dadosChunk: 1, sheetName: sheetName || "BASE_AOG", offset: offset||0, limit: limit||250 }, 25000);
+  if(!j || j.ok !== true) throw new Error((j && j.error) ? j.error : "Chunk inválido");
+  return j;
+}
+async function fetchDadosViaJsonpChunked(sheetName, limitRows, onProgress){
+  const t0 = performance.now();
+  const all = [];
+  let offset = 0;
+  let total = null;
+  let safety = 0;
+  const lim = Math.max(50, Math.min(500, Number(limitRows||250)));
+
+  while(true){
+    safety++;
+    if(safety > 500) throw new Error("Chunk loop excedeu limite de segurança");
+    const part = await fetchDadosChunkViaJsonp(sheetName, offset, lim);
+    const rows = Array.isArray(part.rows) ? part.rows : [];
+    if(total == null) total = Number(part.total || 0) || 0;
+    for(const r of rows) all.push(r);
+
+    if(typeof onProgress === "function"){
+      const pct = total ? Math.min(100, Math.round((all.length/total)*100)) : 0;
+      onProgress({ doneCount: all.length, total, pct, offset, received: rows.length });
+    }
+
+    if(part.done === true) break;
+    const next = (part.nextOffset != null) ? Number(part.nextOffset) : (offset + rows.length);
+    if(!isFinite(next) || next <= offset) break;
+    offset = next;
+  }
+
+  return { data: all, ms: Math.round(performance.now() - t0), total: total || all.length };
+}
+async function fetchForceUpdateViaJsonp(){
+  const t0 = performance.now();
+  const data = await __jsonp__({ forceUpdate: 1 }, 60000);
+  return { data, ms: Math.round(performance.now() - t0) };
+}
+
+/* ===== Presença / Shared states via JSONP ===== */
+async function fetchPresencePingViaJsonp(){
+  const j = await __jsonp__({ presencePing: 1 }, 15000);
+  return (j && j.users) ? j.users : [];
+}
+async function fetchPresenceListViaJsonp(){
+  const j = await __jsonp__({ presenceList: 1 }, 15000);
+  return (j && j.users) ? j.users : [];
+}
+async function fetchSharedPrioStateJsonp(){
+  const j = await __jsonp__({ sharedPrioGet: 1 }, 15000);
+  return (j && j.state) ? j.state : null;
+}
+async function fetchSharedAirStateJsonp(){
+  const j = await __jsonp__({ sharedAirGet: 1 }, 15000);
+  return (j && j.state) ? j.state : null;
+}
+async function fetchSharedObsStateJsonp(){
+  const j = await __jsonp__({ sharedObsGet: 1 }, 15000);
+  return (j && j.state) ? j.state : null;
+}
+async function jsonpToggleSharedPrio(tableKey, rowId){
+  const j = await __jsonp__({ sharedPrioToggle: 1, tableKey: tableKey, rowId: rowId }, 15000);
+  return (j && j.state) ? j.state : null;
+}
+async function jsonpToggleSharedAir(tableKey, aircraft){
+  const j = await __jsonp__({ sharedAirToggle: 1, tableKey: tableKey, aircraft: aircraft }, 15000);
+  return (j && j.state) ? j.state : null;
+}
+async function jsonpSetSharedObs(materialId, text){
+  const j = await __jsonp__({ sharedObsSet: 1, materialId: materialId, text: text }, 20000);
+  return (j && j.state) ? j.state : null;
+}
+
+function hasGAS(){ return true; } // aqui significa "tem WebApp"
+* ===== Conectados ===== */
+async function fetchPresencePingViaUrl(){
+  try{
+    const url = buildWebAppUrl({ presencePing: "1" });
+    const j = await fetchJsonStrict(url);
+    if(j && j.users) return j.users;
+  }catch(e){}
+  const url2 = buildWebAppUrl({ connectedPing: "1" });
+  const j2 = await fetchJsonStrict(url2);
+  return (j2 && j2.users) ? j2.users : [];
+}
+async function fetchPresenceListViaUrl(){
+  try{
+    const url = buildWebAppUrl({ presenceList: "1" });
+    const j = await fetchJsonStrict(url);
+    if(j && j.users) return j.users;
+  }catch(e){}
+  const url2 = buildWebAppUrl({ connectedList: "1" });
+  const j2 = await fetchJsonStrict(url2);
+  return (j2 && j2.users) ? j2.users : [];
+}
+function renderConnected(users){
+  const box = document.getElementById("connectedBox");
+  if(!box) return;
+  const list = Array.isArray(users) ? users : [];
+  if(list.length === 0){
+    box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">—</div>`;
+    return;
+  }
+  box.innerHTML =
+    [`<div class="title">👥 Conectados (${list.length})</div>`]
+      .concat(list.slice(0,12).map(u=>{
+        const em = (u && u.email) ? u.email : "desconhecido";
+        return `<div class="item">${escapeHtml(em)}</div>`;
+      })).join("");
+}
+async function presenceTick(){
+  const watchdog = setTimeout(()=>{
+    const box = document.getElementById("connectedBox");
+    if(box && box.innerText && box.innerText.includes("Carregando")){
+      box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`;
+    }
+  }, 8000);
+
+  try{
+    const users = await fetchPresencePingViaJsonp();
+    renderConnected(users || []);
+  }catch(err){
+    const box = document.getElementById("connectedBox");
+    if(box) box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`;
+  } finally { clearTimeout(watchdog); }
+}
+
+/* ===== Shared PRIORIDADE / AERONAVE ===== */
 let __sharedPrioState = null;
 let __sharedAirState  = null;
-let __sharedTurnoState  = { items:[] };
-let __sharedAvisosState = { items:[] };
-let __sharedLinksState  = { items:[] };
 
 async function syncSharedAllTables(){
   try{
-    const pr = await __jsonp__({ sharedPrioGet:"1" });
-    const ar = await __jsonp__({ sharedAirGet:"1" });
-    if(pr && pr.ok === true && pr.state) __sharedPrioState = pr.state;
-    if(ar && ar.ok === true && ar.state) __sharedAirState = ar.state;
+    const pr = await fetchSharedPrioStateJsonp();
+    const ar = await fetchSharedAirStateJsonp();
+    __sharedPrioState = pr || __sharedPrioState;
+    __sharedAirState  = ar || __sharedAirState;
 
     for(const tk of SHARED_TABLE_KEYS){
       try{
@@ -1126,28 +1199,41 @@ async function syncSharedAllTables(){
   }catch(e){}
 }
 
+function __cssEscape__(s){
+  try{ if(window.CSS && CSS.escape) return CSS.escape(String(s)); }catch(e){}
+  return String(s).replace(/["\\]/g, "\\$&");
+}
+function updateBellButton(tableKey, rid){
+  const q = `button.bellBtn[data-table="${__cssEscape__(tableKey)}"][data-rid="${__cssEscape__(rid)}"]`;
+  const btn = document.querySelector(q);
+  if(!btn) return;
+  const on = __prioHas__(tableKey, rid);
+  btn.classList.toggle("on", !!on);
+}
+
 async function togglePrioShared(tableKey, id){
   const tk = String(tableKey||"").toLowerCase();
   const set = priosByTable[tk];
   if(set.has(id)) set.delete(id); else set.add(id);
   savePrios(tk);
   renderPrios(tk);
+  updateBellButton(tk, id);
 
   try{
-    const resp = await __jsonp__({ sharedPrioToggle:"1", tableKey: tk, rowId: id });
-    if(resp && resp.ok === true && resp.state){
-      __sharedPrioState = resp.state;
-      const pins = (__sharedPrioState && __sharedPrioState[tk] && Array.isArray(__sharedPrioState[tk].pins)) ? __sharedPrioState[tk].pins : [];
-      priosByTable[tk] = new Set(pins);
-      savePrios(tk);
-      renderPrios(tk);
-      markDirty(tk); renderTable(tk); clearDirty(tk);
-    }
+    const st = await jsonpToggleSharedPrio(tk, id);
+    __sharedPrioState = st || __sharedPrioState;
+    const pins = (__sharedPrioState && __sharedPrioState[tk] && Array.isArray(__sharedPrioState[tk].pins)) ? __sharedPrioState[tk].pins : [];
+    priosByTable[tk] = new Set(pins);
+    savePrios(tk);
+    renderPrios(tk);
+    updateBellButton(tk, id);
   }catch(e){
     try{ await syncSharedAllTables(); }catch(e2){}
     renderPrios(tk);
+    updateBellButton(tk, id);
   }
 }
+
 async function toggleAirShared(tableKey, aircraft){
   const tk = String(tableKey||"").toLowerCase();
   const a = cleanVal(aircraft);
@@ -1158,14 +1244,12 @@ async function toggleAirShared(tableKey, aircraft){
   renderAircraftBox(tk);
 
   try{
-    const resp = await __jsonp__({ sharedAirToggle:"1", tableKey: tk, aircraft: a });
-    if(resp && resp.ok === true && resp.state){
-      __sharedAirState = resp.state;
-      const pins = (__sharedAirState && __sharedAirState[tk] && Array.isArray(__sharedAirState[tk].pins)) ? __sharedAirState[tk].pins : [];
-      airPinnedByTable[tk] = new Set(pins);
-      saveAirPinned(tk);
-      renderAircraftBox(tk);
-    }
+    const st = await jsonpToggleSharedAir(tk, a);
+    __sharedAirState = st || __sharedAirState;
+    const pins = (__sharedAirState && __sharedAirState[tk] && Array.isArray(__sharedAirState[tk].pins)) ? __sharedAirState[tk].pins : [];
+    airPinnedByTable[tk] = new Set(pins);
+    saveAirPinned(tk);
+    renderAircraftBox(tk);
   }catch(e){
     try{ await syncSharedAllTables(); }catch(e2){}
     renderAircraftBox(tk);
@@ -1201,99 +1285,6 @@ function toggleAirPinned(tableKey, aircraft){
   renderAircraftBox(tk);
 }
 
-/* ======================================================================
-   Presence (conectados) via JSONP
-   ====================================================================== */
-function renderConnected(users){
-  const box = document.getElementById("connectedBox");
-  if(!box) return;
-  const list = Array.isArray(users) ? users : [];
-  if(list.length === 0){
-    box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">—</div>`;
-    return;
-  }
-  box.innerHTML =
-    [`<div class="title">👥 Conectados (${list.length})</div>`]
-      .concat(list.slice(0,12).map(u=>{
-        const em = (u && u.email) ? u.email : "desconhecido";
-        return `<div class="item">${escapeHtml(em)}</div>`;
-      })).join("");
-}
-async function presenceTick(){
-  const watchdog = setTimeout(()=>{
-    const box = document.getElementById("connectedBox");
-    if(box && box.innerText && box.innerText.includes("Carregando")){
-      box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`;
-    }
-  }, 8000);
-
-  try{
-    const resp = await __jsonp__({ presencePing:"1" });
-    renderConnected(resp && resp.ok ? (resp.users||[]) : []);
-  }catch(e){
-    const box = document.getElementById("connectedBox");
-    if(box) box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`;
-  } finally { clearTimeout(watchdog); }
-}
-
-/* ======================================================================
-   AIR BOX / PRIO BOX (igual seu HTML)
-   ====================================================================== */
-function countIdsForAircraft(tableKey, aircraft){
-  const tk = String(tableKey||"").toLowerCase();
-  const a = cleanVal(aircraft);
-  if(!a) return 0;
-  const mp = __airIdSetByTable[tk];
-  if(!mp) return 0;
-  const set = mp.get(a);
-  return set ? set.size : 0;
-}
-function renderAircraftBox(tableKey){
-  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", cargas:"air-cargas", tools:"air-tools" }[tableKey];
-  const wrap = document.getElementById(wrapId);
-  if(!wrap) return;
-  const set = airPinnedByTable[tableKey];
-  if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
-
-  const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
-  wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`;
-  const grid = document.getElementById(`airGrid-${tableKey}`);
-  if(!grid) return;
-  const focus = airFocusByTable[tableKey] ? String(airFocusByTable[tableKey]) : "";
-
-  items.slice(0, 60).forEach(a=>{
-    const count = countIdsForAircraft(tableKey, a);
-    const isFocused = focus && normalizeText(focus) === normalizeText(a);
-
-    let marked = "";
-    try{
-      if(isSharedTable(tableKey) && __sharedAirState && __sharedAirState[tableKey] && __sharedAirState[tableKey].meta){
-        const meta = __sharedAirState[tableKey].meta[a];
-        if(meta && meta.by && meta.t){
-          const dt = parseMaybeDate(meta.t);
-          marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`;
-        }
-      }
-    }catch(e){}
-
-    const card = document.createElement("div");
-    card.className = "airCard";
-    card.innerHTML = `
-      <button class="airCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}"
-        onclick="airCardXAction('${tableKey}','${escapeHtml(a)}')">×</button>
-      <div class="airCardTitle">✈️ ${escapeHtml(a)}</div>
-      <div class="airCardMeta">IDs pendentes: <b>${count}</b></div>
-      ${marked}
-      <div class="airCardActions">
-        <button class="airFilterPill ${isFocused ? "on" : ""}" type="button"
-          title="Filtrar esta aba por esta aeronave"
-          onclick="setAirFocus('${tableKey}','${escapeHtml(a)}')">
-          ${isFocused ? "Filtrando" : "Filtrar"}
-        </button>
-      </div>`;
-    grid.appendChild(card);
-  });
-}
 function setAirFocus(tableKey, aircraft){
   const tk = String(tableKey||"").toLowerCase();
   const a = cleanVal(aircraft);
@@ -1340,6 +1331,62 @@ function airCardXAction(tableKey, aircraft){
   if(set.has(a)) set.delete(a);
   saveAirPinned(tk);
   renderAircraftBox(tk);
+}
+function countIdsForAircraft(tableKey, aircraft){
+  const tk = String(tableKey||"").toLowerCase();
+  const a = cleanVal(aircraft);
+  if(!a) return 0;
+  const mp = __airIdSetByTable[tk];
+  if(!mp) return 0;
+  const set = mp.get(a);
+  return set ? set.size : 0;
+}
+
+function renderAircraftBox(tableKey){
+  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", cargas:"air-cargas", tools:"air-tools" }[tableKey];
+  const wrap = document.getElementById(wrapId);
+  if(!wrap) return;
+  const set = airPinnedByTable[tableKey];
+  if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+
+  const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`;
+  const grid = document.getElementById(`airGrid-${tableKey}`);
+  if(!grid) return;
+  const focus = airFocusByTable[tableKey] ? String(airFocusByTable[tableKey]) : "";
+
+  items.slice(0, 60).forEach(a=>{
+    const count = countIdsForAircraft(tableKey, a);
+    const isFocused = focus && normalizeText(focus) === normalizeText(a);
+
+    let marked = "";
+    try{
+      if(isSharedTable(tableKey) && __sharedAirState && __sharedAirState[tableKey] && __sharedAirState[tableKey].meta){
+        const meta = __sharedAirState[tableKey].meta[a];
+        if(meta && meta.by && meta.t){
+          const dt = parseMaybeDate(meta.t);
+          marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`;
+        }
+      }
+    }catch(e){}
+
+    const card = document.createElement("div");
+    card.className = "airCard";
+    card.innerHTML = `
+      <button class="airCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}"
+        onclick="airCardXAction('${tableKey}','${escapeHtml(a)}')">×</button>
+      <div class="airCardTitle">✈️ ${escapeHtml(a)}</div>
+      <div class="airCardMeta">IDs pendentes: <b>${count}</b></div>
+      ${marked}
+      <div class="airCardActions">
+        <button class="airFilterPill ${isFocused ? "on" : ""}" type="button"
+          title="Filtrar esta aba por esta aeronave"
+          onclick="setAirFocus('${tableKey}','${escapeHtml(a)}')">
+          ${isFocused ? "Filtrando" : "Filtrar"}
+        </button>
+      </div>`;
+    grid.appendChild(card);
+  });
 }
 
 function renderPrios(tableKey){
@@ -1395,9 +1442,7 @@ function renderPrios(tableKey){
   });
 }
 
-/* ======================================================================
-   Pagination (mantido)
-   ====================================================================== */
+/* ===== PAGINAÇÃO ===== */
 const PAGER_STORE_KEY = {
   aog:"AOG_PAGER_AOG_V1", war:"AOG_PAGER_WAR_V1", fast:"AOG_PAGER_FAST_V1",
   cargo:"AOG_PAGER_CARGO_V1", cargas:"AOG_PAGER_CARGAS_V1", tools:"AOG_PAGER_TOOLS_V1"
@@ -1505,9 +1550,6 @@ function clearFilters(tableKey){
   renderAircraftBox(tableKey);
 }
 
-/* ======================================================================
-   Column resize + Table render
-   ====================================================================== */
 let __resizeState = null;
 function enableColumnResize(tableEl){
   const ths = tableEl.querySelectorAll("th.th-resize");
@@ -1576,6 +1618,8 @@ function renderTable(tableKey){
     return `<tr data-rid="${escapeHtml(rid)}">
       <td>
         <button class="bellBtn status-${stCat} ${on ? 'on' : ''}"
+          data-table="${escapeHtml(tableKey)}"
+          data-rid="${escapeHtml(rid)}"
           type="button"
           title="${escapeHtml(sharedTitle)}"
           onclick="togglePrio('${tableKey}','${escapeHtml(rid)}')">🔔</button>
@@ -1591,6 +1635,8 @@ function renderTable(tableKey){
           return `<td><div class="airCell">
             <span>${escapeHtml(a)}</span>
             <button class="airWarnBtn" type="button"
+              data-table="${escapeHtml(tableKey)}"
+              data-air="${escapeHtml(a)}"
               title="${isSharedTable(tableKey) ? 'Marcar aeronave compartilhada' : 'Marcar aeronave (⚠️)'}"
               onclick="toggleAirPinned('${tableKey}','${escapeHtml(a)}')">⚠️</button>
           </div></td>`;
@@ -1627,9 +1673,7 @@ function renderTable(tableKey){
   try{ updateObsVisibleForTable(tableKey); }catch(e){}
 }
 
-/* ======================================================================
-   STATUS + REFRESH
-   ====================================================================== */
+/* ===== STATUS ===== */
 function makeStatusHtml(line1){
   return `
     <div>${line1}</div>
@@ -1659,11 +1703,18 @@ function paintUpdateInfo(){
   p1.innerText = `Atualizado = frescor do dado: ${fmtBR(__lastUpdateDate)}`;
 }
 
+// =====================================================
+// ✅ MUDANÇA 1: Delay de refresh aumentado para 2min30s
+// =====================================================
+const REFRESH_EVERY_MS = 150 * 1000; // 2 minutos e 30 segundos
+
 function getAutoRefreshMs(){ return REFRESH_EVERY_MS; }
 
 let __lastFetchAt = null;
 let __lastSuccessAt = null;
+let __lastRefreshSource = "—";
 let __lastRefreshError = "";
+let __lastRefreshMs = null;
 let __refreshInFlight = false;
 let __nextRefreshAt = null;
 let __refreshTimeout = null;
@@ -1677,10 +1728,16 @@ function scheduleNextRefresh(ms){
   const delay = Math.max(1000, Number(ms || getAutoRefreshMs()));
   __nextRefreshAt = Date.now() + delay;
   __refreshTimeout = setTimeout(async ()=>{
-    try{ await refreshData(); }catch(e){}
-    scheduleNextRefresh(getAutoRefreshMs());
+    try{ await refreshData(); }catch(e){ console.error("refreshData erro no timer:", e); }
+    scheduleNextRefresh(getAutoRefreshMs()); // sempre agenda o próximo, mesmo se der erro
   }, delay);
 }
+function stopAutoRefresh(){
+  if(__refreshTimeout) clearTimeout(__refreshTimeout);
+  __refreshTimeout = null;
+  __nextRefreshAt = null;
+}
+
 function paintRefreshInfo(){
   if(!__ADMIN_MODE) return;
   const pSuccess = document.getElementById("pillSuccess");
@@ -1719,7 +1776,32 @@ function rerenderAll(opts){
   }
   paintUpdateInfo();
   paintRefreshInfo();
+  try{ const n=document.getElementById('ghNotice'); if(n) n.style.display='block'; }catch(e){}
   updateStatusVisibility();
+}
+
+/*
+ * ─────────────────────────────────────────────────────────────
+ * DIAGNÓSTICO DEFINITIVO:
+ *   fetch() do GAS HtmlService é BLOQUEADO por CORS.
+ *   O HTML roda em script.googleusercontent.com e não pode
+ *   chamar script.google.com via fetch — bloqueio de navegador.
+ *
+ *   ÚNICA forma confiável = google.script.run
+ *
+ *   Estratégia:
+ *   1) getDadosBaseAOG  — 1 chamada, sempre existiu, mais simples
+ *   2) getDadosChunk    — loop de chunks (requer novo deploy)
+ * ─────────────────────────────────────────────────────────────
+ */
+
+async function __gasGetDadosFull__(){
+  return await fetchDadosViaJsonp();
+}
+
+async function __gasGetDadosChunked__(onProgress){
+  const out = await fetchDadosViaJsonpChunked("BASE_AOG", 250, (p)=>{ if(typeof onProgress === "function") onProgress(p); });
+  return { data: out.data, ms: out.ms };
 }
 
 async function refreshData(){
@@ -1727,14 +1809,65 @@ async function refreshData(){
   __refreshInFlight = true;
   __lastFetchAt = new Date();
   __lastRefreshError = "";
+  __lastRefreshSource = "—";
+  __lastRefreshMs = null;
   paintRefreshInfo();
   renderFrescorBanner();
 
+  let newData = null;
+  const erros = [];
+
   try{
-    const resp = await __jsonp__({ dados:"1" }, 30000);
-    if(!Array.isArray(resp)) throw new Error("Resposta inválida do GAS (esperado Array)");
-    dados = resp;
+    if(!hasGAS()){
+      __lastRefreshError = "google.script.run indisponível (fora do GAS?)";
+      return;
+    }
+
+    // ── Tentativa 1: getDadosBaseAOG (simples, confiável, sempre existiu) ──
+    try{
+      __lastRefreshSource = "gas-full";
+      const out = await __gasGetDadosFull__();
+      newData = out.data;
+      __lastRefreshMs = out.ms;
+    }catch(e1){
+      const msg = e1 && e1.message ? e1.message : String(e1);
+      erros.push("gas-full: " + msg);
+      console.warn("gas-full falhou:", msg);
+      newData = null;
+    }
+
+    // ── Tentativa 2: getDadosChunk em loop (requer novo deploy com getDadosChunk) ──
+    if(!newData){
+      try{
+        __lastRefreshSource = "gas-chunk";
+        const out = await __gasGetDadosChunked__((p)=>{
+          try{
+            const st = document.getElementById("status");
+            if(st && __ADMIN_MODE){
+              st.style.display = "block";
+              st.innerHTML = makeStatusHtml(`⏳ Carregando chunks... ${p.doneCount}/${p.total} (${p.pct}%)`);
+            }
+          }catch(e){}
+        });
+        newData = out.data;
+        __lastRefreshMs = out.ms;
+      }catch(e2){
+        const msg = e2 && e2.message ? e2.message : String(e2);
+        erros.push("gas-chunk: " + msg);
+        console.warn("gas-chunk falhou:", msg);
+        newData = null;
+      }
+    }
+
+    if(!Array.isArray(newData) || newData.length === 0){
+      // Ambas tentativas falharam — mostra erro visível no banner
+      __lastRefreshError = erros.length ? erros.join(" | ") : "Sem dados retornados";
+      return;
+    }
+
+    dados = newData;
     __lastSuccessAt = new Date();
+    __lastRefreshError = "";
 
     try{ await syncSharedAllTables(); }catch(e){}
     try{ await syncSharedObs(); }catch(e){}
@@ -1751,12 +1884,14 @@ async function refreshData(){
 
     if(__isUserTyping__()){
       __pendingRerender = true;
-      setTimeout(()=>{ if(__pendingRerender){ __pendingRerender = false; rerenderAll({ onlyActive:true }); } }, 2500);
+      setTimeout(()=>{ if(__pendingRerender){ __pendingRerender = false; rerenderAll({ onlyActive: true }); } }, 3000);
     }else{
-      rerenderAll({ onlyActive:true });
+      rerenderAll({ onlyActive: true });
     }
+
   }catch(err){
     __lastRefreshError = (err && err.message) ? err.message : String(err);
+    console.error("refreshData erro:", err);
   }finally{
     __refreshInFlight = false;
     paintUpdateInfo();
@@ -1765,15 +1900,18 @@ async function refreshData(){
   }
 }
 
+
+/* ===== MARCADOR DE FRESCOR DOS DADOS ===== */
 function renderFrescorBanner(){
   const texto = document.getElementById("frescorTexto");
   const banner = document.getElementById("frescorBanner");
   if(!texto || !banner) return;
 
+  // Se há erro de refresh — mostra em vermelho com o erro real
   if(__lastRefreshError){
     banner.style.borderColor = "#ef4444";
     banner.style.background = "#1a0000";
-    texto.innerHTML = `<span style="color:#ef4444">🔴</span> <b>Erro no refresh:</b> <span style="color:#f87171">${escapeHtml(__lastRefreshError)}</span>`;
+    texto.innerHTML = `<span style="color:#ef4444">🔴</span> <b>Erro no refresh automático:</b> <span style="color:#f87171">${escapeHtml(__lastRefreshError)}</span><br><span style="font-size:11px;color:#94a3b8">Clique em "Atualizar agora" ou aguarde o próximo ciclo</span>`;
     const ctr = document.getElementById("frescorContador");
     if(ctr && __nextRefreshAt){
       const s = Math.max(0, Math.floor((__nextRefreshAt - Date.now()) / 1000));
@@ -1809,16 +1947,21 @@ function renderFrescorBanner(){
     ctr.innerText = `Próx. refresh: ${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
   } else if(ctr){ ctr.innerText = ""; }
 }
+
+// Atualiza o banner a cada segundo para o contador ser ao vivo
 setInterval(()=>{ try{ renderFrescorBanner(); }catch(e){} }, 1000);
 
 async function refreshNowUrl(){ await refreshData(); }
+
 async function forceUpdateNow(){
   __lastFetchAt = new Date();
   __lastRefreshError = "";
+  __lastRefreshSource = "forceUpdate";
+  __lastRefreshMs = null;
   paintRefreshInfo();
   try{
-    const out = await __jsonp__({ forceUpdate:"1" }, 60000);
-    // depois de forçar, busca dados
+    const out = await fetchForceUpdateViaJsonp();
+    __lastRefreshMs = out.ms;
     await refreshData();
   }catch(e){
     __lastRefreshError = (e && e.message) ? e.message : String(e);
@@ -1826,10 +1969,9 @@ async function forceUpdateNow(){
   }
 }
 
-/* ======================================================================
-   LINKS / TURNO / AVISOS via JSONP
-   ====================================================================== */
+/* ===== LINKS ===== */
 const LINKS_UTEIS = [];
+let __sharedLinksState = null;
 
 function friendlySiteName(url){
   try{
@@ -1843,10 +1985,22 @@ function friendlySiteName(url){
   }catch(e){ return "Link"; }
 }
 async function syncSharedLinks(){
+  try{ const st = Promise.resolve(null); __sharedLinksState = st || __sharedLinksState; }catch(e){}
+}
+async function deleteSharedLinkById_(id, label, url){
+  const rid = String(id || "").trim();
+  if(!rid) return;
+  if(!confirm(`Excluir este link?\n\n${label || ""}\n${url || ""}`)) return;
   try{
-    const st = await __jsonp__({ sharedLinksGet:"1" }); // (vamos criar esse alias no GAS no próximo passo)
-    if(st && st.ok && st.state) __sharedLinksState = st.state;
-  }catch(e){}
+    let st = null;
+    try { st = Promise.resolve(null); }
+    catch(e1){ try { st = await gasCall("deleteSharedLinkItem", rid); } catch(e2){ try { st = await gasCall("deleteLink", rid); } catch(e3){ throw e1; } } }
+    __sharedLinksState = st || __sharedLinksState;
+    renderLinksUteis();
+  }catch(err){
+    console.error("Falha ao excluir link:", err);
+    alert("Não foi possível excluir o link.");
+  }
 }
 function renderLinksUteis(){
   const wrap = document.getElementById("linksPills");
@@ -1871,8 +2025,11 @@ function renderLinksUteis(){
     a.className = "linkPill";
     a.href = it.url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = it.url;
     a.innerHTML = `<span class="linkPillIcon"></span><span>${escapeHtml(nm)}</span>`;
+    const x = document.createElement("button");
+    x.className = "linkPillX"; x.type = "button"; x.title = "Excluir link"; x.innerText = "×";
+    x.addEventListener("click", (ev)=>{ ev.preventDefault(); ev.stopPropagation(); deleteSharedLinkById_(it.id, nm, it.url); });
+    pillWrap.appendChild(a); pillWrap.appendChild(x);
     wrap.appendChild(pillWrap);
-    pillWrap.appendChild(a);
   });
 }
 function toggleLinkAdd(){
@@ -1895,12 +2052,16 @@ async function addLinkFromInput(){
   const { name, url } = parseNameAndUrl(inp.value);
   if(!url) return;
   try{
-    const st = await __jsonp__({ addSharedLink:"1", name, url }); // (vamos criar alias no GAS no próximo passo)
-    if(st && st.ok && st.state) __sharedLinksState = st.state;
+    const st = Promise.resolve(null);
+    __sharedLinksState = st || __sharedLinksState;
     inp.value = ""; inp.style.display = "none";
     renderLinksUteis();
   }catch(e){}
 }
+
+/* ===== TURNO/AVISOS ===== */
+let __sharedTurnoState  = null;
+let __sharedAvisosState = null;
 
 function sanitizeHtmlLight(html){
   let s = String(html || "");
@@ -1928,20 +2089,12 @@ function sanitizeHtmlLight(html){
   });
   return s;
 }
-
 async function syncSharedTurno(){
-  try{
-    const st = await __jsonp__({ sharedTurnoGet:"1" }); // alias no GAS no próximo passo
-    if(st && st.ok && st.state) __sharedTurnoState = st.state;
-  }catch(e){}
+  try{ const st = Promise.resolve(null); __sharedTurnoState = st || __sharedTurnoState; }catch(e){}
 }
 async function syncSharedAvisos(){
-  try{
-    const st = await __jsonp__({ sharedAvisosGet:"1" }); // alias no GAS no próximo passo
-    if(st && st.ok && st.state) __sharedAvisosState = st.state;
-  }catch(e){}
+  try{ const st = Promise.resolve(null); __sharedAvisosState = st || __sharedAvisosState; }catch(e){}
 }
-
 function renderSharedList(kind){
   const wrap = document.getElementById(kind === "turno" ? "turnoList" : "avisosList");
   if(!wrap) return;
@@ -1963,11 +2116,11 @@ function renderSharedList(kind){
       const html = sanitizeHtmlLight(body.innerHTML);
       try{
         if(kind === "turno"){
-          const st = await __jsonp__({ updateSharedTurnoItem:"1", id: it.id, html });
-          if(st && st.ok && st.state) __sharedTurnoState = st.state;
+          const st = await gasCall("updateSharedTurnoItem", it.id, html);
+          __sharedTurnoState = st || __sharedTurnoState;
         }else{
-          const st = await __jsonp__({ updateSharedAvisoItem:"1", id: it.id, html });
-          if(st && st.ok && st.state) __sharedAvisosState = st.state;
+          const st = await gasCall("updateSharedAvisoItem", it.id, html);
+          __sharedAvisosState = st || __sharedAvisosState;
         }
       }catch(e){}
     });
@@ -1988,28 +2141,17 @@ function renderSharedList(kind){
     }
   });
 }
-
 async function toggleDone(kind, id){
   try{
-    if(kind === "turno"){
-      const st = await __jsonp__({ toggleSharedTurnoDone:"1", id });
-      if(st && st.ok && st.state) __sharedTurnoState = st.state;
-    }else{
-      const st = await __jsonp__({ toggleSharedAvisoDone:"1", id });
-      if(st && st.ok && st.state) __sharedAvisosState = st.state;
-    }
+    if(kind === "turno"){ const st = await gasCall("toggleSharedTurnoDone", id); __sharedTurnoState = st || __sharedTurnoState; }
+    else{ const st = await gasCall("toggleSharedAvisoDone", id); __sharedAvisosState = st || __sharedAvisosState; }
     renderSharedList(kind);
   }catch(e){}
 }
 async function deleteItem(kind, id){
   try{
-    if(kind === "turno"){
-      const st = await __jsonp__({ deleteSharedTurnoItem:"1", id });
-      if(st && st.ok && st.state) __sharedTurnoState = st.state;
-    }else{
-      const st = await __jsonp__({ deleteSharedAvisoItem:"1", id });
-      if(st && st.ok && st.state) __sharedAvisosState = st.state;
-    }
+    if(kind === "turno"){ const st = await gasCall("deleteSharedTurnoItem", id); __sharedTurnoState = st || __sharedTurnoState; }
+    else{ const st = await gasCall("deleteSharedAvisoItem", id); __sharedAvisosState = st || __sharedAvisosState; }
     renderSharedList(kind);
   }catch(e){}
 }
@@ -2026,8 +2168,8 @@ async function addTurno(){
   const html = getRichHtmlFromInput("turno");
   if(!html || !html.replace(/<br\s*\/?>/gi,"").trim()) return;
   try{
-    const st = await __jsonp__({ addSharedTurnoItem:"1", html });
-    if(st && st.ok && st.state) __sharedTurnoState = st.state;
+    const st = await gasCall("addSharedTurnoItem", html);
+    __sharedTurnoState = st || __sharedTurnoState;
     clearRichInput("turno");
     renderSharedList("turno");
   }catch(e){}
@@ -2036,16 +2178,14 @@ async function addAviso(){
   const html = getRichHtmlFromInput("avisos");
   if(!html || !html.replace(/<br\s*\/?>/gi,"").trim()) return;
   try{
-    const st = await __jsonp__({ addSharedAvisoItem:"1", html: `<div>📢 ${html}</div>` });
-    if(st && st.ok && st.state) __sharedAvisosState = st.state;
+    const st = await gasCall("addSharedAvisoItem", `<div>📢 ${html}</div>`);
+    __sharedAvisosState = st || __sharedAvisosState;
     clearRichInput("avisos");
     renderSharedList("avisos");
   }catch(e){}
 }
 
-/* ======================================================================
-   Context menu (mantido)
-   ====================================================================== */
+/* ===== Context menu ===== */
 function getSelectionRangeSafe(){
   const sel = window.getSelection();
   if(!sel || sel.rangeCount === 0) return null;
@@ -2148,53 +2288,167 @@ function initCtxMenuHandlers(){
   }, true);
 }
 
-/* ======================================================================
-   INIT
-   ====================================================================== */
+(function bindSafeClickHandlers(){
+  if(window.__SAFE_CLICK_BINDED__) return;
+  window.__SAFE_CLICK_BINDED__ = true;
+  document.addEventListener("click", (e)=>{
+    const bell = e.target && e.target.closest ? e.target.closest("button.bellBtn") : null;
+    if(bell){
+      e.preventDefault(); e.stopImmediatePropagation();
+      const tk = bell.getAttribute("data-table");
+      const rid = bell.getAttribute("data-rid");
+      if(tk && rid) togglePrio(tk, rid);
+      return;
+    }
+    const air = e.target && e.target.closest ? e.target.closest("button.airWarnBtn") : null;
+    if(air){
+      e.preventDefault(); e.stopImmediatePropagation();
+      const tk = air.getAttribute("data-table");
+      const a  = air.getAttribute("data-air");
+      if(tk && a) toggleAirPinned(tk, a);
+      return;
+    }
+  }, true);
+})();
+
+
 (async function init(){
-  await initPinGate();
-
-  // só inicia o sistema quando o PIN estiver OK
-  const ok = localStorage.getItem("LOGAOG_PIN_OK")==="1";
-  if(!ok) return;
-
-  window.addEventListener("unhandledrejection", ()=>{});
-  window.addEventListener("error", ()=>{});
-
-  if(__ADMIN_MODE){
-    const st = document.getElementById("status");
-    if(st) st.innerHTML = makeStatusHtml("✅ Inicializando...");
+  // ===== Login PIN =====
+  function showPinMsg(msg){
+    const el = document.getElementById("pinMsg");
+    if(!el) return;
+    el.style.display = msg ? "block" : "none";
+    el.textContent = msg || "";
+  }
+  async function tryLogin(pin){
+    const p = String(pin||"").trim();
+    if(!p) { showPinMsg("Digite o PIN."); return false; }
+    setPin(p);
+    try{
+      await fetchPresenceListViaJsonp();
+      return true;
+    }catch(e){
+      try{
+        await fetchDadosViaJsonp();
+        return true;
+      }catch(e2){
+        showPinMsg("PIN inválido ou WebApp indisponível. Verifique e tente novamente.");
+        return false;
+      }
+    }
+  }
+  async function unlock(){
+    const ov = document.getElementById("loginOverlay");
+    if(ov) ov.style.display = "none";
+  }
+  async function lock(){
+    const ov = document.getElementById("loginOverlay");
+    if(ov) ov.style.display = "flex";
+  }
+  const pinInput = document.getElementById("pinInput");
+  const pinBtn = document.getElementById("pinBtn");
+  const pinClear = document.getElementById("pinClear");
+  if(pinBtn) pinBtn.onclick = async ()=>{
+    showPinMsg("");
+    const ok = await tryLogin(pinInput ? pinInput.value : "");
+    if(ok) await unlock();
+  };
+  if(pinClear) pinClear.onclick = ()=>{
+    setPin("");
+    if(pinInput) pinInput.value = "";
+    showPinMsg("PIN limpo.");
+  };
+  if(pinInput){
+    pinInput.addEventListener("keydown", async (e)=>{
+      if(e.key === "Enter"){
+        showPinMsg("");
+        const ok = await tryLogin(pinInput.value);
+        if(ok) await unlock();
+      }
+    });
+  }
+  const savedPin = getPin();
+  if(savedPin){
+    if(pinInput) pinInput.value = savedPin;
+    const ok = await tryLogin(savedPin);
+    if(ok) await unlock();
+    else await lock();
+  }else{
+    await lock();
   }
 
+  window.addEventListener("unhandledrejection", ()=>{
+    const st = document.getElementById("status");
+    if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
+  });
+  window.addEventListener("error", ()=>{
+    const st = document.getElementById("status");
+    if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno no script.");
+  });
+
+  __lastUpdateDate = computeLastUpdateFromData();
+  __lastSuccessAt = new Date();
+  __lastFetchAt   = new Date();
+
+  if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("✅ Inicializando...");
+
   prepareDataCache();
+
+  try{ await presenceTick(); }catch(e){}
+
+  if(hasGAS()){
+    try{ await syncSharedAllTables(); }catch(e){}
+    try{ await syncSharedObs(); }catch(e){}
+    try{ await syncSharedTurno(); }catch(e){}
+    try{ await syncSharedAvisos(); }catch(e){}
+    try{ await syncSharedLinks(); }catch(e){}
+  }else{
+    renderConnected([]);
+  }
+
   renderLinksUteis();
   renderSharedList("turno");
   renderSharedList("avisos");
-  rerenderAll({ onlyActive:true });
+
+  rerenderAll({ onlyActive: true });
 
   setInterval(paintUpdateInfo, 1000);
   setInterval(paintRefreshInfo, 1000);
   setInterval(__tryRerenderPending__, 700);
   document.addEventListener("focusout", ()=>{ setTimeout(__tryRerenderPending__, 150); }, true);
 
-  // presença + estados colaborativos (30s)
+  scheduleNextRefresh(getAutoRefreshMs());
+  setTimeout(()=>{ refreshData(); }, 1500);
+
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshData(); });
+  window.addEventListener("focus", ()=>{ refreshData(); });
+
+  initCtxMenuHandlers();
+
+  // =====================================================
+  // ✅ MUDANÇA 3: Dois setIntervals separados:
+  //   - Colaborativo (presença, OBS, turno, avisos): 30s
+  //     → Dados que mudam rápido entre usuários
+  //   - Dados da planilha: controlado pelo scheduleNextRefresh (2min30s)
+  // =====================================================
+
+  // Sync colaborativo leve (30s) — não busca planilha, só estado compartilhado
   setInterval(async ()=>{
     try{ await presenceTick(); }catch(e){}
-    try{ await syncSharedAllTables(); }catch(e){}
-    try{ await syncSharedObs(); }catch(e){}
-    try{ await syncSharedTurno(); }catch(e){}
-    try{ await syncSharedAvisos(); }catch(e){}
-    try{ await syncSharedLinks(); }catch(e){}
+    if(hasGAS()){
+      try{ await syncSharedAllTables(); }catch(e){}
+      try{ await syncSharedObs(); }catch(e){}
+      try{ await syncSharedTurno(); }catch(e){}
+      try{ await syncSharedAvisos(); }catch(e){}
+      try{ await syncSharedLinks(); }catch(e){}
+    }
     renderSharedList("turno");
     renderSharedList("avisos");
     renderLinksUteis();
     try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){}
-  }, 30000);
+  }, 30000); // 30 segundos — só dados colaborativos leves
 
-  // dados planilha (2min30s)
-  scheduleNextRefresh(getAutoRefreshMs());
-  setTimeout(()=>{ refreshData(); }, 1200);
-
+  try{ const n=document.getElementById('ghNotice'); if(n) n.style.display='block'; }catch(e){}
   updateStatusVisibility();
 })();
 </script>
