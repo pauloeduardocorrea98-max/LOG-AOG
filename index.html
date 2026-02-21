@@ -177,6 +177,23 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 
 <body>
 
+<div id="authOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(2,6,23,.72);backdrop-filter:blur(2px);">
+  <div style="max-width:520px;margin:10vh auto 0;background:#0b1d33;color:#e5e7eb;border:1px solid #334155;border-radius:16px;padding:18px 18px 14px;box-shadow:0 18px 60px rgba(0,0,0,.35);">
+    <div style="font-weight:800;font-size:16px;margin-bottom:8px;">🔐 Acesso restrito</div>
+    <div id="authMsg" style="font-size:13px;line-height:1.45;color:#cbd5e1;">
+      Faça login no Google com sua conta <b>@latam.com</b> e depois recarregue a página.
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;">
+      <button type="button" id="btnAuthOpen" style="padding:10px 12px;border:none;border-radius:10px;background:#0ea5e9;color:#fff;cursor:pointer;">Abrir login Google</button>
+      <button type="button" id="btnAuthReload" style="padding:10px 12px;border:none;border-radius:10px;background:#334155;color:#fff;cursor:pointer;">Recarregar</button>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:#94a3b8;">
+      Dica: se você já estiver logado, abra o link acima uma vez, depois volte e clique em Recarregar.
+    </div>
+  </div>
+</div>
+
+
 <div class="sidebar">
   <h2>LOGÍSTICA AOG</h2>
 
@@ -321,32 +338,6 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
     <button id="ctxApply" class="ctxApply" type="button">Aplicar</button>
   </div>
   <div class="ctxHint">Dica: o texto só muda quando você clicar em <b>Aplicar</b>.</div>
-</div>
-
-
-<!-- AUTH MODAL (Email + PIN) -->
-<div id="authModal" style="display:none;position:fixed;inset:0;z-index:99999;align-items:center;justify-content:center;background:rgba(2,6,23,.72);backdrop-filter:blur(6px);">
-  <div style="width:min(720px,92vw);background:rgba(15,23,42,.92);border:1px solid rgba(148,163,184,.25);border-radius:18px;padding:18px 18px 14px;box-shadow:0 22px 60px rgba(0,0,0,.45);color:#e5e7eb;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-      <div style="font-size:18px">🔒</div>
-      <div style="font-weight:800;font-size:16px;color:#93c5fd;">Acesso ao LOG-AOG</div>
-      <button type="button" onclick="authLogout()" title="Limpar sessão" style="margin-left:auto;background:#334155;color:#fff;border:none;border-radius:10px;padding:8px 10px;cursor:pointer;">Limpar</button>
-    </div>
-    <div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">
-      Entre com seu email <b>LATAM</b> e seu <b>PIN</b> para abrir o dashboard. (Fica salvo só neste navegador.)
-    </div>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <input id="authEmail" type="email" placeholder="email@latam.com" autocomplete="username"
-             style="flex:1;min-width:240px;background:#0b1220;border:1px solid rgba(148,163,184,.25);border-radius:12px;padding:10px 12px;color:#e5e7eb;outline:none;">
-      <input id="authPin" type="password" placeholder="PIN" autocomplete="current-password"
-             style="flex:1;min-width:200px;background:#0b1220;border:1px solid rgba(148,163,184,.25);border-radius:12px;padding:10px 12px;color:#e5e7eb;outline:none;"
-             onkeydown="if(event.key==='Enter'){authLogin();}">
-      <button type="button" onclick="authLogin()"
-              style="background:#0ea5e9;color:#fff;border:none;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;">Entrar</button>
-    </div>
-    <div id="authErr" style="margin-top:10px;color:#f87171;font-size:12px;min-height:16px;"></div>
-  </div>
 </div>
 
 <script>
@@ -1037,6 +1028,36 @@ function jsonpCall(params, timeoutMs = 20000){
 
 // Mantém a interface "gasCall" do seu HTML antigo,
 // mas por baixo usa JSONP (sem google.script.run)
+
+function showAuthOverlay(msg){
+  const ov = document.getElementById("authOverlay");
+  const tx = document.getElementById("authMsg");
+  if(tx) tx.innerHTML = msg ? String(msg) : 'Faça login no Google com sua conta <b>@latam.com</b> e depois recarregue a página.';
+  if(ov) ov.style.display = "block";
+  const btnOpen = document.getElementById("btnAuthOpen");
+  const btnReload = document.getElementById("btnAuthReload");
+  if(btnOpen){
+    btnOpen.onclick = ()=>{ try{ window.open(String(GAS_WEBAPP_URL||""), "_blank", "noopener"); }catch(e){} };
+  }
+  if(btnReload){
+    btnReload.onclick = ()=>{ try{ location.reload(); }catch(e){} };
+  }
+}
+function hideAuthOverlay(){
+  const ov = document.getElementById("authOverlay");
+  if(ov) ov.style.display = "none";
+}
+function unwrapAuth(res){
+  // Quando o GAS bloqueia (não logado), ele retorna {ok:false,error:"login_required",msg:"..."}
+  if(res && typeof res === "object" && res.ok === false){
+    if(res.error === "login_required"){
+      showAuthOverlay(res.msg || "Faça login com sua conta Google LATAM.");
+    }
+    throw new Error(res.msg || res.error || "Acesso negado");
+  }
+  return res;
+}
+
 function gasCall(fnName, ...args){
   if(!hasGAS()) return Promise.reject(new Error("GAS_WEBAPP_URL não configurado"));
 
@@ -1044,57 +1065,57 @@ function gasCall(fnName, ...args){
 
   // Dados
   if(fn === "getDadosBaseAOG" || fn === "getDadosBase" || fn === "getDados") {
-    return jsonpCall({ dados: 1 });
+    return jsonpCall({ dados: 1 }).then(unwrapAuth);
   }
 
   // Force update (roda atualizarAOG)
   if(fn === "forceUpdate" || fn === "atualizarAOG" || fn === "runForceUpdate") {
-    return jsonpCall({ forceUpdate: 1 });
+    return jsonpCall({ forceUpdate: 1 }).then(unwrapAuth);
   }
 
   // Presença
-  if(fn === "pingPresence") return jsonpCall({ presencePing: 1 });
-  if(fn === "getConnectedUsers") return jsonpCall({ presenceList: 1 });
+  if(fn === "pingPresence") return jsonpCall({ presencePing: 1 }).then(unwrapAuth);
+  if(fn === "getConnectedUsers") return jsonpCall({ presenceList: 1 }).then(unwrapAuth);
 
   // Estados compartilhados
-  if(fn === "getSharedPrioState") return jsonpCall({ sharedPrioGet: 1 });
+  if(fn === "getSharedPrioState") return jsonpCall({ sharedPrioGet: 1 }).then(unwrapAuth);
   if(fn === "toggleSharedPrio") {
-    return jsonpCall({ sharedPrioToggle: 1, tableKey: args[0] || "", rowId: args[1] || "" });
+    return jsonpCall({ sharedPrioToggle: 1, tableKey: args[0] || "", rowId: args[1] || "" }).then(unwrapAuth);
   }
 
-  if(fn === "getSharedAirState") return jsonpCall({ sharedAirGet: 1 });
+  if(fn === "getSharedAirState") return jsonpCall({ sharedAirGet: 1 }).then(unwrapAuth);
   if(fn === "toggleSharedAirPin") {
-    return jsonpCall({ sharedAirToggle: 1, tableKey: args[0] || "", aircraft: args[1] || "" });
+    return jsonpCall({ sharedAirToggle: 1, tableKey: args[0] || "", aircraft: args[1] || "" }).then(unwrapAuth);
   }
 
-  if(fn === "getSharedObsState") return jsonpCall({ sharedObsGet: 1 });
+  if(fn === "getSharedObsState") return jsonpCall({ sharedObsGet: 1 }).then(unwrapAuth);
   if(fn === "setSharedObs") {
-    return jsonpCall({ sharedObsSet: 1, tableKey: args[0] || "", materialId: args[1] || "", text: args[2] || "" });
+    return jsonpCall({ sharedObsSet: 1, tableKey: args[0] || "", materialId: args[1] || "", text: args[2] || "" }).then(unwrapAuth);
   }
 
   // Turno
-  if(fn === "getSharedTurnoState") return jsonpCall({ sharedTurnoGet: 1 });
-  if(fn === "addSharedTurnoItem") return jsonpCall({ sharedTurnoAdd: 1, html: args[0] || "" });
-  if(fn === "updateSharedTurnoItem") return jsonpCall({ sharedTurnoUpdate: 1, id: args[0] || "", html: args[1] || "" });
-  if(fn === "toggleSharedTurnoDone") return jsonpCall({ sharedTurnoDone: 1, id: args[0] || "" });
-  if(fn === "deleteSharedTurnoItem") return jsonpCall({ sharedTurnoDelete: 1, id: args[0] || "" });
+  if(fn === "getSharedTurnoState") return jsonpCall({ sharedTurnoGet: 1 }).then(unwrapAuth);
+  if(fn === "addSharedTurnoItem") return jsonpCall({ sharedTurnoAdd: 1, html: args[0] || "" }).then(unwrapAuth);
+  if(fn === "updateSharedTurnoItem") return jsonpCall({ sharedTurnoUpdate: 1, id: args[0] || "", html: args[1] || "" }).then(unwrapAuth);
+  if(fn === "toggleSharedTurnoDone") return jsonpCall({ sharedTurnoDone: 1, id: args[0] || "" }).then(unwrapAuth);
+  if(fn === "deleteSharedTurnoItem") return jsonpCall({ sharedTurnoDelete: 1, id: args[0] || "" }).then(unwrapAuth);
 
   // Avisos
-  if(fn === "getSharedAvisosState") return jsonpCall({ sharedAvisosGet: 1 });
-  if(fn === "addSharedAvisoItem") return jsonpCall({ sharedAvisosAdd: 1, html: args[0] || "" });
-  if(fn === "updateSharedAvisoItem") return jsonpCall({ sharedAvisosUpdate: 1, id: args[0] || "", html: args[1] || "" });
-  if(fn === "toggleSharedAvisoDone") return jsonpCall({ sharedAvisosDone: 1, id: args[0] || "" });
-  if(fn === "deleteSharedAvisoItem") return jsonpCall({ sharedAvisosDelete: 1, id: args[0] || "" });
+  if(fn === "getSharedAvisosState") return jsonpCall({ sharedAvisosGet: 1 }).then(unwrapAuth);
+  if(fn === "addSharedAvisoItem") return jsonpCall({ sharedAvisosAdd: 1, html: args[0] || "" }).then(unwrapAuth);
+  if(fn === "updateSharedAvisoItem") return jsonpCall({ sharedAvisosUpdate: 1, id: args[0] || "", html: args[1] || "" }).then(unwrapAuth);
+  if(fn === "toggleSharedAvisoDone") return jsonpCall({ sharedAvisosDone: 1, id: args[0] || "" }).then(unwrapAuth);
+  if(fn === "deleteSharedAvisoItem") return jsonpCall({ sharedAvisosDelete: 1, id: args[0] || "" }).then(unwrapAuth);
 
   // Links
-  if(fn === "getSharedLinksState") return jsonpCall({ sharedLinksGet: 1 });
-  if(fn === "addSharedLink") return jsonpCall({ sharedLinksAdd: 1, name: args[0] || "", url: args[1] || "" });
+  if(fn === "getSharedLinksState") return jsonpCall({ sharedLinksGet: 1 }).then(unwrapAuth);
+  if(fn === "addSharedLink") return jsonpCall({ sharedLinksAdd: 1, name: args[0] || "", url: args[1] || "" }).then(unwrapAuth);
   if(fn === "deleteSharedLink" || fn === "deleteSharedLinkItem" || fn === "deleteLink") {
-    return jsonpCall({ sharedLinksDelete: 1, id: args[0] || "" });
+    return jsonpCall({ sharedLinksDelete: 1, id: args[0] || "" }).then(unwrapAuth);
   }
 
   // Progresso
-  if(fn === "getLastProgress") return jsonpCall({ progressGet: 1 });
+  if(fn === "getLastProgress") return jsonpCall({ progressGet: 1 }).then(unwrapAuth);
 
   return Promise.reject(new Error("Função não mapeada no GitHub: " + fn));
 }
@@ -2307,7 +2328,7 @@ function initCtxMenuHandlers(){
   }, true);
 })();
 
-async function startApp(){
+(async function init(){
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
     if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
@@ -2321,112 +2342,7 @@ async function startApp(){
   __lastSuccessAt = new Date();
   __lastFetchAt   = new Date();
 
-  if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("
-/* ================================
-   AUTH (Email + PIN) via JSONP
-   ================================ */
-const __AUTH_STORAGE_KEY = "LOGAOG_AUTH_V1";
-let __auth = { email:"", pin:"" };
-
-function __authLoad__(){
-  try{
-    const raw = localStorage.getItem(__AUTH_STORAGE_KEY);
-    if(!raw) return;
-    const o = JSON.parse(raw);
-    if(o && o.email && o.pin){ __auth.email = String(o.email); __auth.pin = String(o.pin); }
-  }catch(e){}
-}
-function __authSave__(){
-  try{
-    localStorage.setItem(__AUTH_STORAGE_KEY, JSON.stringify({ email: __auth.email, pin: __auth.pin }));
-  }catch(e){}
-}
-function __authClear__(){
-  try{ localStorage.removeItem(__AUTH_STORAGE_KEY); }catch(e){}
-  __auth = { email:"", pin:"" };
-}
-
-function showAuthModal(msg){
-  const m = document.getElementById("authModal");
-  if(!m) return;
-  m.style.display = "flex";
-  const em = document.getElementById("authEmail");
-  const pn = document.getElementById("authPin");
-  const er = document.getElementById("authErr");
-  if(em) em.value = __auth.email || "";
-  if(pn) pn.value = __auth.pin || "";
-  if(er) er.innerText = msg ? String(msg) : "";
-  try{ if(em && !em.value) em.focus(); else if(pn) pn.focus(); }catch(e){}
-}
-function hideAuthModal(){
-  const m = document.getElementById("authModal");
-  if(m) m.style.display = "none";
-}
-
-async function authCheck(){
-  // chama ?auth=1
-  const r = await jsonpCall({ auth:"1", email: __auth.email, pin: __auth.pin });
-  if(r && r.ok === true) return true;
-  return false;
-}
-async function authLogin(){
-  const em = document.getElementById("authEmail");
-  const pn = document.getElementById("authPin");
-  const er = document.getElementById("authErr");
-  if(er) er.innerText = "";
-  __auth.email = String(em ? em.value : "").trim().toLowerCase();
-  __auth.pin   = String(pn ? pn.value : "").trim();
-  if(!__auth.email || !__auth.pin){
-    if(er) er.innerText = "Informe email e PIN.";
-    return;
-  }
-  try{
-    const ok = await authCheck();
-    if(!ok){
-      if(er) er.innerText = "Email ou PIN inválido (ou usuário não cadastrado).";
-      return;
-    }
-    __authSave__();
-    hideAuthModal();
-    // inicia app
-    startApp();
-  }catch(e){
-    if(er) er.innerText = (e && e.message) ? e.message : String(e);
-  }
-}
-function authLogout(){
-  __authClear__();
-  showAuthModal("Sessão limpa. Entre novamente.");
-}
-
-// Patch: adiciona email/pin automaticamente em TODAS as chamadas JSONP (exceto auth)
-const __jsonpCallOrig = jsonpCall;
-jsonpCall = function(params){
-  const p = Object.assign({}, params || {});
-  // se for auth, deixa passar
-  if(!("auth" in p)){
-    if(__auth && __auth.email) p.email = __auth.email;
-    if(__auth && __auth.pin)   p.pin   = __auth.pin;
-  }
-  return __jsonpCallOrig(p);
-};
-
-// Boot
-(function bootAuth(){
-  __authLoad__();
-  // mostra modal e aguarda login; se já tiver credencial, valida e entra
-  setTimeout(async ()=>{
-    try{
-      if(__auth.email && __auth.pin){
-        const ok = await authCheck();
-        if(ok){ hideAuthModal(); startApp(); return; }
-      }
-    }catch(e){}
-    showAuthModal("");
-  }, 0);
-})();
-
-✅ Inicializando...");
+  if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("✅ Inicializando...");
 
   prepareDataCache();
 
@@ -2485,8 +2401,7 @@ jsonpCall = function(params){
   }, 30000); // 30 segundos — só dados colaborativos leves
 
   updateStatusVisibility();
-}
-;
+})();
 </script>
 
 </body>
