@@ -1130,96 +1130,120 @@ function displayCell(colKey, rawValue, tableKey, row){
 }
 
 /* ===== GAS/URL ===== */
-function hasGAS(){
-  return (typeof google !== "undefined" && google.script && google.script.run);
-}
 
-// ✅ gasCall com timeout explícito para evitar travamento silencioso
+/* ===== API (GitHub Pages) =====
+   Neste front (GitHub Pages) NÃO existe google.script.run.
+   Então usamos JSONP contra o WebApp do Apps Script (bypass de CORS).
+*/
+function hasGAS(){ return true; } // aqui significa: "temos acesso ao WebApp via JSONP"
 
 function gasCall(fnName, ...args){
-  // Compat: mantém chamadas antigas (google.script.run), mas aqui vira JSONP
-  // Retorna o mesmo "shape" que as funções do GAS retornavam.
-  const name = String(fnName||"").trim();
+  const f = String(fnName || "").trim();
 
-  // Map simples -> params
-  let params = null;
+  // helper: chama o WebApp via JSONP
+  const call = (params)=> __api__(params);
 
-  if(name === "getDadosBaseAOG"){
-    params = { dados: "1" };
-  }else if(name === "pingPresence"){
-    params = { presencePing: "1" };
-  }else if(name === "getConnectedUsers"){
-    params = { presenceList: "1" };
-  }else if(name === "getSharedPrioState"){
-    params = { sharedPrioGet: "1" };
-  }else if(name === "toggleSharedPrio"){
-    params = { sharedPrioToggle: "1", tableKey: args[0]||"", rowId: args[1]||"" };
-  }else if(name === "getSharedAirState"){
-    params = { sharedAirGet: "1" };
-  }else if(name === "toggleSharedAirPin"){
-    params = { sharedAirToggle: "1", tableKey: args[0]||"", aircraft: args[1]||"" };
-  }else if(name === "getSharedObsState"){
-    params = { sharedObsGet: "1" };
-  }else if(name === "setSharedObs"){
-    params = { sharedObsSet: "1", tableKey: args[0]||"", materialId: args[1]||"", text: args[2]||"" };
-  }else if(name === "getSharedTurnoState"){
-    params = { turnoGet: "1" };
-  }else if(name === "addSharedTurnoItem"){
-    params = { turnoAdd: "1", html: args[0]||"" };
-  }else if(name === "toggleSharedTurnoDone"){
-    params = { turnoToggleDone: "1", id: args[0]||"" };
-  }else if(name === "deleteSharedTurnoItem"){
-    params = { turnoDelete: "1", id: args[0]||"" };
-  }else if(name === "updateSharedTurnoItem"){
-    params = { turnoUpdate: "1", id: args[0]||"", html: args[1]||"" };
-  }else if(name === "getSharedAvisosState"){
-    params = { avisosGet: "1" };
-  }else if(name === "addSharedAvisoItem"){
-    params = { avisosAdd: "1", html: args[0]||"" };
-  }else if(name === "toggleSharedAvisoDone"){
-    params = { avisosToggleDone: "1", id: args[0]||"" };
-  }else if(name === "deleteSharedAvisoItem"){
-    params = { avisosDelete: "1", id: args[0]||"" };
-  }else if(name === "updateSharedAvisoItem"){
-    params = { avisosUpdate: "1", id: args[0]||"", html: args[1]||"" };
-  }else if(name === "getSharedLinksState"){
-    params = { linksGet: "1" };
-  }else if(name === "addSharedLink"){
-    params = { linksAdd: "1", name: args[0]||"", url: args[1]||"" };
-  }else if(name === "deleteSharedLink"){
-    params = { linksDelete: "1", id: args[0]||"" };
-  }else if(name === "deleteSharedLinkItem"){
-    params = { linksDelete: "1", id: args[0]||"" };
-  }else if(name === "deleteLink"){
-    params = { linksDelete: "1", id: args[0]||"" };
-  }else{
-    return Promise.reject(new Error("Função não mapeada para JSONP: " + name));
+  // === AUTH ===
+  if(f === "auth"){
+    const [email, pin] = args;
+    return call({ auth:"1", email, pin });
   }
 
-  return __api__(params).then((resp)=>{
-    // Endpoints retornam o objeto direto
-    return resp;
-  });
+  // === DADOS ===
+  if(f === "getDadosBaseAOG"){
+    return call({ dados:"1" }); // retorna Array
+  }
+  if(f === "getDadosChunk"){
+    const [sheetName, offset, limit] = args;
+    return call({ dadosChunk:"1", sheetName, offset, limit });
+  }
+
+  // === FORCE UPDATE (Sheets) ===
+  if(f === "forceUpdate"){
+    return call({ forceUpdate:"1" });
+  }
+
+  // === PRESENÇA ===
+  if(f === "pingPresence")      return call({ presencePing:"1" }).then(r=> (r && r.users) ? r.users : r);
+  if(f === "getConnectedUsers") return call({ presenceList:"1" }).then(r=> (r && r.users) ? r.users : r);
+
+  // === PRIORIDADE / AERONAVE ===
+  if(f === "getSharedPrioState") return call({ sharedPrioGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(f === "toggleSharedPrio"){
+    const [tableKey, rowId] = args;
+    return call({ sharedPrioToggle:"1", tableKey, rowId }).then(r=> (r && r.state) ? r.state : r);
+  }
+  if(f === "getSharedAirState") return call({ sharedAirGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(f === "toggleSharedAirPin"){
+    const [tableKey, aircraft] = args;
+    return call({ sharedAirToggle:"1", tableKey, aircraft }).then(r=> (r && r.state) ? r.state : r);
+  }
+
+  // === OBS ===
+  if(f === "getSharedObsState") return call({ sharedObsGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(f === "setSharedObs"){
+    const [tableKey, materialId, text] = args;
+    return call({ sharedObsSet:"1", tableKey, materialId, text }).then(r=> (r && r.state) ? r.state : r);
+  }
+
+  // === TURNO / AVISOS ===
+  if(f === "getSharedTurnoState") return call({ turnoGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(f === "addSharedTurnoItem"){
+    const [html] = args;
+    return call({ turnoAdd:"1", html }).then(r=> (r && r.state) ? r.state : r);
+  }
+  if(f === "toggleSharedTurnoDone"){
+    const [id] = args;
+    return call({ turnoDone:"1", id }).then(r=> (r && r.state) ? r.state : r);
+  }
+  if(f === "deleteSharedTurnoItem"){
+    const [id] = args;
+    return call({ turnoDel:"1", id }).then(r=> (r && r.state) ? r.state : r);
+  }
+  if(f === "updateSharedTurnoItem"){
+    const [id, html] = args;
+    return call({ turnoUpd:"1", id, html }).then(r=> (r && r.state) ? r.state : r);
+  }
+
+  if(f === "getSharedAvisosState") return call({ avisosGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(f === "addSharedAvisoItem"){
+    const [html] = args;
+    return call({ avisosAdd:"1", html }).then(r=> (r && r.state) ? r.state : r);
+  }
+  if(f === "toggleSharedAvisoDone"){
+    const [id] = args;
+    return call({ avisosDone:"1", id }).then(r=> (r && r.state) ? r.state : r);
+  }
+  if(f === "deleteSharedAvisoItem"){
+    const [id] = args;
+    return call({ avisosDel:"1", id }).then(r=> (r && r.state) ? r.state : r);
+  }
+  if(f === "updateSharedAvisoItem"){
+    const [id, html] = args;
+    return call({ avisosUpd:"1", id, html }).then(r=> (r && r.state) ? r.state : r);
+  }
+
+  // === LINKS ===
+  if(f === "getSharedLinksState") return call({ linksGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(f === "addSharedLink"){
+    const [name, url] = args;
+    return call({ linksAdd:"1", name, url }).then(r=> (r && r.state) ? r.state : r);
+  }
+  if(f === "deleteSharedLinkItem" || f === "deleteSharedLink" || f === "deleteLink"){
+    const [id] = args;
+    return call({ linksDel:"1", id }).then(r=> (r && r.state) ? r.state : r);
+  }
+
+  return Promise.reject(new Error("Função não mapeada no GitHub: " + f));
 }
 
-// ✅ gasCall com timeout — evita travar indefinidamente
-function gasCallWithTimeout(fnName, timeoutMs, ...args){
-  return new Promise((resolve, reject)=>{
-    let settled = false;
-    const timer = setTimeout(()=>{
-      if(settled) return;
-      settled = true;
-      reject(new Error(`Timeout (${timeoutMs}ms) ao chamar ${fnName}`));
-    }, timeoutMs);
-
-    gasCall(fnName, ...args)
-      .then(r=>{ if(!settled){ settled=true; clearTimeout(timer); resolve(r); } })
-      .catch(e=>{ if(!settled){ settled=true; clearTimeout(timer); reject(e); } });
-  });
+// No GitHub Pages a URL do WebApp é fixa; mantemos buildWebAppUrl para compatibilidade (não usado).
+function buildWebAppUrl(params){
+  const u = new URL(__WEBAPP_URL);
+  Object.keys(params || {}).forEach(k => u.searchParams.set(k, String(params[k])));
+  u.searchParams.set("ts", String(Date.now()));
+  return u.toString();
 }
-
-// ✅ buildWebAppUrl usa __WEBAPP_URL injetada pelo GAS — URL real do WebApp público
-// window.location.href dentro do GAS é uma URL de iframe interno, nunca serve para fetch!
 function buildWebAppUrl(params){
   // __WEBAPP_URL é injetada pelo doGet() via scriplet https://script.google.com/macros/s/AKfycbxVbXQvKbODA2WY6oHMFogB1o_Nigt1QoPfoGgsRjVq/dev
   const base = (__WEBAPP_URL && __WEBAPP_URL.startsWith("http"))
@@ -1237,46 +1261,55 @@ function buildWebAppUrl(params){
   return u.toString();
 }
 
-async function fetchJsonStrict(url){
-  const resp = await fetch(url, { method:"GET", cache:"no-store", credentials:"same-origin" });
-  const text = await resp.text();
-  const t = String(text || "").trim();
-  if(t.startsWith("<!doctype") || t.startsWith("<html") || t.startsWith("<")){
-    throw new Error("Resposta não-JSON (HTML).");
-  }
-  try{ return JSON.parse(text); }
-  catch(e){ throw new Error("JSON inválido: " + (e && e.message ? e.message : e)); }
+
+// (GitHub) Sem fetch por CORS. Mantemos funções com os mesmos nomes, mas usando JSONP.
+async function fetchDadosViaUrl(){
+  const t0 = performance.now();
+  const data = await __api__({ dados:"1" });
+  if(!Array.isArray(data)) throw new Error("Resposta inválida (esperado Array)");
+  return { data, ms: Math.round(performance.now() - t0) };
 }
 
-// ✅ NOVO: usa gasCall como PRIMÁRIO (mais confiável dentro do GAS iframe)
-// fetch via URL só como fallback se não tiver GAS disponível
-async function fetchDadosViaUrl(){
-  // Dentro do GAS, google.script.run é sempre mais confiável que fetch
-  if(hasGAS()){
-    const t0 = performance.now();
-    // ✅ timeout de 25s para não travar
-    const data = await gasCallWithTimeout("getDadosBaseAOG", 25000);
-    const ms = Math.round(performance.now() - t0);
-    if(!Array.isArray(data)) throw new Error("GAS não retornou Array");
-    return { data, ms };
-  }
-  // Fallback: fetch via URL (para ambientes fora do GAS)
-  const url = buildWebAppUrl({ dados: "1" });
+async function fetchDadosViaUrlChunked(limitRows = 250, onProgress){
   const t0 = performance.now();
-  const data = await fetchJsonStrict(url);
-  const t1 = performance.now();
-  if(!Array.isArray(data)) throw new Error("JSON inválido (esperado Array)");
-  return { data, ms: Math.round(t1 - t0) };
+  const all = [];
+  let offset = 0;
+  let total = null;
+  let safety = 0;
+
+  while(true){
+    safety++;
+    if(safety > 500) throw new Error("Chunk loop excedeu limite de segurança");
+
+    const j = await __api__({ dadosChunk:"1", sheetName:"BASE_AOG", offset:String(offset), limit:String(limitRows) });
+
+    if(!j || j.ok !== true) throw new Error((j && j.error) ? j.error : "Chunk inválido");
+    const rows = Array.isArray(j.rows) ? j.rows : [];
+
+    if(total == null) total = Number(j.total || 0) || 0;
+    for(let i=0;i<rows.length;i++) all.push(rows[i]);
+
+    if(typeof onProgress === "function"){
+      const doneCount = all.length;
+      const pct = total ? Math.min(100, Math.round((doneCount/total)*100)) : 0;
+      onProgress({ doneCount, total, pct, offset, received: rows.length });
+    }
+
+    if(j.done === true) break;
+
+    const next = (j.nextOffset != null) ? Number(j.nextOffset) : (offset + rows.length);
+    if(!isFinite(next) || next <= offset) throw new Error("Chunk nextOffset inválido");
+    offset = next;
+  }
+
+  return { data: all, ms: Math.round(performance.now() - t0), total: total || all.length };
 }
 
 async function fetchForceUpdateViaUrl(){
-  const url = buildWebAppUrl({ forceUpdate: "1" });
   const t0 = performance.now();
-  const data = await fetchJsonStrict(url);
-  const t1 = performance.now();
-  return { data, ms: Math.round(t1 - t0) };
+  const data = await __api__({ forceUpdate:"1" });
+  return { data, ms: Math.round(performance.now() - t0) };
 }
-
 /* ===== Conectados ===== */
 async function fetchPresencePingViaUrl(){
   try{
@@ -2426,6 +2459,10 @@ function initCtxMenuHandlers(){
 })();
 
 (async function init(){
+  // ✅ GitHub Pages: só inicia após login (email+PIN) para não disparar chamadas sem token
+  const __a = __readAuth__();
+  if(!__a || !__a.token){ authShow(); return; }
+
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
     if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
