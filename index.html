@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Logística AOG | LATAM</title>
 <style>
 *{box-sizing:border-box;font-family:Segoe UI,Arial}
@@ -21,7 +21,6 @@ body{ margin:0; display:flex; background:#0b2440; color:#e5e7eb; }
 .connectedBox{ margin-top:10px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1d33; font-size:12px; color:#e5e7eb; }
 .connectedBox .title{ font-weight:700; color:#38bdf8; margin-bottom:6px; }
 .connectedBox .item{ margin-top:4px; opacity:.95; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
 .content{flex:1;padding:16px}
 h1{ margin:8px 0 10px; font-size:20px; color:#f8fafc; }
 .section{display:none}
@@ -38,19 +37,15 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .noteBtn:hover{filter:brightness(.95)}
 .noteBtn.gray{ background:#334155; }
 .noteBtn.orange{ background:#c2410c; }
+.box{ background:#fff; padding:12px; border-radius:10px; margin-top:12px; border:1px solid #e5e7eb; color:#0f172a; }
 
-.statusTag{ display:inline-flex; align-items:center; gap:6px; padding:3px 8px; border-radius:999px; border:1px solid #e5e7eb; font-size:12px; line-height:1.2; white-space:nowrap; }
-.statusDot{ width:8px;height:8px;border-radius:999px; display:inline-block; flex:none; }
-.status-green{ background:#ecfdf5; border-color:#a7f3d0; color:#065f46; } .status-green .statusDot{ background:#10b981; }
-.status-yellow{ background:#fffbeb; border-color:#fde68a; color:#92400e; } .status-yellow .statusDot{ background:#f59e0b; }
-.status-red{ background:#fef2f2; border-color:#fecaca; color:#991b1b; } .status-red .statusDot{ background:#ef4444; }
-.status-orange{ background:#fff7ed; border-color:#fdba74; color:#9a3412; } .status-orange .statusDot{ background:#c2410c; }
-.status-default{ background:#f8fafc; border-color:#e5e7eb; color:#334155; } .status-default .statusDot{ background:#64748b; }
-
-.pagerBar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px;margin-bottom:10px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;color:#0f172a}
-.small{font-size:12px;color:#94a3b8}
+#statusBar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:10px 0;}
+.badge{display:inline-flex;gap:8px;align-items:center;border:1px solid #334155;background:#0f172a;color:#e5e7eb;padding:6px 10px;border-radius:999px;font-size:12px}
+.badge b{color:#38bdf8}
+.badge.err{border-color:#ef4444;background:#1a0000}
 </style>
 </head>
+
 <body>
 <div class="sidebar">
   <h2>LOGÍSTICA AOG</h2>
@@ -62,302 +57,181 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   </div>
 
   <div class="menu">
-    <button class="active" onclick="openTab('aog',this)">✈️ AOG</button>
+    <button class="active" onclick="openTab('turno',this)">📓 Passagem de Turno</button>
+    <button onclick="openTab('aog',this)">✈️ AOG</button>
     <button onclick="openTab('war',this)">⚔️ War Room</button>
     <button onclick="openTab('fast',this)">⚡ Fast Pass</button>
     <button onclick="openTab('cargo',this)">📦 Cargo Heroes</button>
     <button onclick="openTab('cargas',this)">🚚 Cargas</button>
     <button onclick="openTab('tools',this)">🛠️ Ferramentas</button>
+    <button onclick="openTab('links',this)">🔗 Links Úteis</button>
+    <button onclick="openTab('avisos',this)">📢 Avisos da Gestão</button>
   </div>
 </div>
 
 <div class="content">
-  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
-    <button class="noteBtn gray" onclick="refreshNowUrl()">Atualizar agora (URL)</button>
-    <button class="noteBtn orange" onclick="forceUpdateNow()">Forçar atualização (Sheets)</button>
-    <span class="small" id="lastInfo">—</span>
+  <div id="statusBar">
+    <span class="badge"><span>GAS:</span> <b id="gasUrl"></b></span>
+    <span class="badge"><span>Dados:</span> <b id="rowsCount">0</b></span>
+    <span class="badge"><span>Último refresh:</span> <b id="lastRefresh">—</b></span>
+    <span class="badge err" id="errBadge" style="display:none"><span>Erro:</span> <b id="errText"></b></span>
+    <span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="noteBtn gray" onclick="refreshNowUrl()">Atualizar agora (URL)</button>
+      <button class="noteBtn orange" onclick="forceUpdateNow()">Forçar atualização (Sheets)</button>
+    </span>
   </div>
 
-  <div id="aog" class="section active">
+  <div id="turno" class="section active">
+    <h1>Passagem de Turno</h1>
+    <div class="box">Nesta etapa, vamos focar em carregar os dados do Sheets via JSONP. Assim que estiver 100%, voltamos com colaborativo (turno/avisos/OBS).</div>
+  </div>
+
+  <div id="aog" class="section">
     <h1>AOG</h1>
-    <div class="tableWrap">
-      <div id="pager-aog" class="pagerBar"></div>
-      <table id="tbl-aog"></table>
-    </div>
+    <div class="tableWrap"><table id="tbl-aog"></table></div>
   </div>
 
-  <div id="war" class="section">
-    <h1>War Room</h1>
-    <div class="tableWrap">
-      <div id="pager-war" class="pagerBar"></div>
-      <table id="tbl-war"></table>
-    </div>
-  </div>
-
-  <div id="fast" class="section">
-    <h1>Fast Pass</h1>
-    <div class="tableWrap">
-      <div id="pager-fast" class="pagerBar"></div>
-      <table id="tbl-fast"></table>
-    </div>
-  </div>
-
-  <div id="cargo" class="section">
-    <h1>Cargo Heroes</h1>
-    <div class="tableWrap">
-      <div id="pager-cargo" class="pagerBar"></div>
-      <table id="tbl-cargo"></table>
-    </div>
-  </div>
-
-  <div id="cargas" class="section">
-    <h1>Cargas</h1>
-    <div class="tableWrap">
-      <div id="pager-cargas" class="pagerBar"></div>
-      <table id="tbl-cargas"></table>
-    </div>
-  </div>
-
-  <div id="tools" class="section">
-    <h1>Ferramentas</h1>
-    <div class="tableWrap">
-      <div id="pager-tools" class="pagerBar"></div>
-      <table id="tbl-tools"></table>
-    </div>
-  </div>
+  <div id="war" class="section"><h1>War Room</h1><div class="box">Em breve</div></div>
+  <div id="fast" class="section"><h1>Fast Pass</h1><div class="box">Em breve</div></div>
+  <div id="cargo" class="section"><h1>Cargo Heroes</h1><div class="box">Em breve</div></div>
+  <div id="cargas" class="section"><h1>Cargas</h1><div class="box">Em breve</div></div>
+  <div id="tools" class="section"><h1>Ferramentas</h1><div class="box">Em breve</div></div>
+  <div id="links" class="section"><h1>Links Úteis</h1><div class="box">Em breve</div></div>
+  <div id="avisos" class="section"><h1>Avisos da Gestão</h1><div class="box">Em breve</div></div>
 </div>
 
 <script>
-/**
- * ✅ IMPORTANTE:
- * - GitHub Pages não pode usar fetch() direto no GAS por CORS.
- * - Aqui usamos JSONP: cria um <script src="...&callback=...">
- */
 const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1wU2tiPZC1_iW1SYiIOJe9WYnm93QpumnQlUd4UJKFiBh28T3wFfd3RGYoi_iUtQKng/exec";
+document.getElementById("gasUrl").innerText = GAS_WEBAPP_URL;
 
-const REFRESH_EVERY_MS = 150 * 1000; // 2m30s
-
-const cols = [
-  "Material_ID","Status_material_ferramenta","Numero_de_solicitacao","Data_da_solicitacao",
-  "Barcode","Aeronave","PN","QTDE","Origem","Destino","Descricao_logistica","Nota_fiscal","AWB","OBS"
-];
-
-const tableKeysBySection = { aog:"aog", war:"war", fast:"fast", cargo:"cargo", cargas:"cargas", tools:"tools" };
-const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
-const pagerByTable = { aog:{page:1,pageSize:50}, war:{page:1,pageSize:50}, fast:{page:1,pageSize:50}, cargo:{page:1,pageSize:50}, cargas:{page:1,pageSize:50}, tools:{page:1,pageSize:50} };
-
-let dados = [];
-let cacheByTable = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
-
-function escapeHtml(v){
-  return String(v ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+function esc(v){ return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+function setErr(msg){
+  const b=document.getElementById("errBadge");
+  const t=document.getElementById("errText");
+  if(!msg){ b.style.display="none"; t.innerText=""; return; }
+  b.style.display="inline-flex"; t.innerText=msg;
 }
-function normalizeText(v){
-  try{
-    return String(v ?? "").toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-      .replace(/[\s\-_.\/\\(){}\[\],;:|]+/g,"");
-  }catch(e){ return String(v ?? "").toLowerCase().trim(); }
-}
-function statusCategory(statusRaw){
-  const s = normalizeText(statusRaw || "");
-  if(s.includes("outras") || s.includes("mtldivergente")) return "orange";
-  if(s.includes("emfiladeatendimento") || s.includes("aguardandoseparacao") || s.includes("mtlzero")) return "red";
-  if(s.includes("prontoparaenvio") || s.includes("log1transito")) return "yellow";
-  if(s.includes("base") || s.includes("recebidonodestino")) return "green";
-  return "default";
-}
-function statusTagHtml(txt){
-  const cat = statusCategory(txt);
-  return `<span class="statusTag status-${cat}" title="${escapeHtml(txt)}"><span class="statusDot"></span><span>${escapeHtml(txt)}</span></span>`;
-}
+function setLastRefresh(){ document.getElementById("lastRefresh").innerText = new Date().toLocaleString("pt-BR"); }
 
-function jsonp(params, timeoutMs=20000){
-  return new Promise((resolve,reject)=>{
-    const cbName = "__cb_" + Math.random().toString(36).slice(2);
-    const t = setTimeout(()=>{ cleanup(); reject(new Error("timeout JSONP")); }, timeoutMs);
+function jsonp(params){
+  return new Promise((resolve, reject)=>{
+    const cb = "__cb_" + Math.random().toString(36).slice(2);
+    const qs = new URLSearchParams();
+    Object.keys(params||{}).forEach(k=>qs.set(k, String(params[k])));
+    qs.set("callback", cb);
+    qs.set("ts", String(Date.now()));
+    const src = GAS_WEBAPP_URL + "?" + qs.toString();
 
-    function cleanup(){
-      clearTimeout(t);
-      try{ delete window[cbName]; }catch(e){}
-      if(script && script.parentNode) script.parentNode.removeChild(script);
-    }
+    let done=false;
+    const timeout = setTimeout(()=>{
+      if(done) return;
+      done=true;
+      try{ delete window[cb]; }catch(e){}
+      reject(new Error("timeout carregando JSONP"));
+    }, 20000);
 
-    window[cbName] = (data)=>{ cleanup(); resolve(data); };
-
-    const url = new URL(GAS_WEBAPP_URL);
-    Object.keys(params||{}).forEach(k=> url.searchParams.set(k, String(params[k])));
-    url.searchParams.set("callback", cbName);
-    url.searchParams.set("ts", Date.now());
+    window[cb] = (payload)=>{
+      if(done) return;
+      done=true;
+      clearTimeout(timeout);
+      try{ delete window[cb]; }catch(e){}
+      try{ script.remove(); }catch(e){}
+      resolve(payload);
+    };
 
     const script = document.createElement("script");
-    script.src = url.toString();
-    script.onerror = ()=>{ cleanup(); reject(new Error("erro ao carregar script JSONP")); };
+    script.src = src;
+    script.async = true;
+    script.onerror = ()=>{
+      if(done) return;
+      done=true;
+      clearTimeout(timeout);
+      try{ delete window[cb]; }catch(e){}
+      try{ script.remove(); }catch(e){}
+      reject(new Error("erro ao carregar script JSONP"));
+    };
     document.head.appendChild(script);
   });
 }
 
-/* UI */
-function openTab(id,btn){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if(el) el.classList.add('active');
-  document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  renderActive();
+function openTab(id, btn){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  const el=document.getElementById(id); if(el) el.classList.add("active");
+  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+  if(id==="aog") renderTable();
 }
-setInterval(()=>{ const el = document.getElementById("clock"); if(el) el.innerText = new Date().toLocaleTimeString("pt-BR"); }, 1000);
 
-function buildCaches(){
-  const out = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
-  for(const r of (Array.isArray(dados)?dados:[])){
-    out.cargo.push(r);
-    const crit = String(r && r.Criticidade || "").toUpperCase();
-    if(crit.includes("AOG")) out.aog.push(r);
-    if(crit.includes("WAR")) out.war.push(r);
-    if(crit.includes("LIMOPS")) out.fast.push(r);
-    // cargas/tools: heurística simples
-    if(normalizeText(r && r.Descricao_logistica).includes("carga")) out.cargas.push(r);
-    const tipo = String(r && (r.Tipo ?? "")).trim();
-    if(tipo==="2" || normalizeText(tipo).includes("ferramenta")) out.tools.push(r);
+let dados = [];
+const cols = ["Material_ID","Status_material_ferramenta","Numero_de_solicitacao","Data_da_solicitacao","Barcode","Aeronave","PN","QTDE","Origem","Destino","Descricao_logistica","Nota_fiscal","AWB","OBS"];
+let filters = {};
+
+function applyFilter(col, val){
+  filters[col] = String(val||"").trim().toLowerCase();
+  renderTable();
+}
+function rowMatch(r){
+  for(const k in filters){
+    const v = filters[k];
+    if(!v) continue;
+    const cell = String((r && r[k]) ?? "").toLowerCase();
+    if(!cell.includes(v)) return false;
   }
-  cacheByTable = out;
+  return true;
 }
 
-function getFilteredRows(tk){
-  let rows = (cacheByTable[tk]||[]);
-  const f = filtersByTable[tk]||{};
-  const active = Object.keys(f).filter(k=>String(f[k]||"").trim()!=="");
-  if(active.length){
-    rows = rows.filter(r=>{
-      for(const k of active){
-        const v = String(f[k]||"").trim().toLowerCase();
-        const cell = String((r && r[k]) ?? "").toLowerCase();
-        if(!cell.includes(v)) return false;
-      }
-      return true;
-    });
-  }
-  return rows;
-}
+function renderTable(){
+  const tbl=document.getElementById("tbl-aog"); if(!tbl) return;
+  const rows = (Array.isArray(dados)?dados:[]).filter(rowMatch);
+  document.getElementById("rowsCount").innerText = String(rows.length);
 
-function renderPager(tk, totalRows){
-  const bar = document.getElementById("pager-"+tk);
-  if(!bar) return;
-  const pg = pagerByTable[tk];
-  const totalPages = Math.max(1, Math.ceil((totalRows||0) / (pg.pageSize||50)));
-  if(pg.page>totalPages) pg.page=totalPages;
-  const from = totalRows ? ((pg.page-1)*pg.pageSize+1) : 0;
-  const to = Math.min(totalRows, pg.page*pg.pageSize);
-
-  const canPrev = pg.page>1, canNext = pg.page<totalPages;
-  bar.innerHTML = `
-    <button class="noteBtn" style="padding:6px 10px; ${canPrev?"":"opacity:.45;cursor:not-allowed"}" ${canPrev?`onclick="setPage('${tk}',${pg.page-1})"`:""}>◀ Prev</button>
-    <button class="noteBtn" style="padding:6px 10px; ${canNext?"":"opacity:.45;cursor:not-allowed"}" ${canNext?`onclick="setPage('${tk}',${pg.page+1})"`:""}>Próx ▶</button>
-    <span>Página <b>${pg.page}</b> / ${totalPages}</span>
-    <span>Mostrando <b>${from}</b>–<b>${to}</b> de <b>${totalRows}</b></span>
-    <span style="margin-left:auto;display:flex;align-items:center;gap:8px">
-      <span>Linhas/página</span>
-      <select onchange="setPageSize('${tk}', this.value)" style="padding:6px;border:1px solid #e5e7eb;border-radius:8px">
-        ${[50,75,100].map(n=>`<option value="${n}" ${n===pg.pageSize?"selected":""}>${n}</option>`).join("")}
-      </select>
-    </span>
-  `;
-}
-function setPage(tk, p){ pagerByTable[tk].page = Number(p||1); renderTable(tk); }
-function setPageSize(tk, s){ pagerByTable[tk].pageSize = Math.max(50, Math.min(200, Number(s||50))); pagerByTable[tk].page=1; renderTable(tk); }
-
-function renderTable(tk){
-  const tbl = document.getElementById("tbl-"+tk);
-  if(!tbl) return;
-
-  const allRows = getFilteredRows(tk);
-  const pg = pagerByTable[tk];
-  renderPager(tk, allRows.length);
-
-  const start = (pg.page-1)*pg.pageSize;
-  const pageRows = allRows.slice(start, start+pg.pageSize);
-
-  let html = `<thead><tr>`;
-  html += cols.map(c=>`<th>${c}</th>`).join("");
-  html += `</tr></thead>`;
-
-  html += `<thead class="filterRow"><tr>`;
-  html += cols.map(c=>`
-    <th><input class="filter" placeholder="filtrar... (ENTER aplica)"
-      value="${escapeHtml(filtersByTable[tk][c]||"")}"
-      onkeydown="if(event.key==='Enter'){applyFilter('${tk}','${c}',this.value)}"></th>`).join("");
-  html += `</tr></thead>`;
-
-  html += `<tbody>`;
-  html += pageRows.map(r=>{
-    return `<tr>` + cols.map(c=>{
-      if(c==="Status_material_ferramenta") return `<td>${statusTagHtml(r[c]??"")}</td>`;
-      return `<td>${escapeHtml(r[c]??"")}</td>`;
-    }).join("") + `</tr>`;
+  let html = "<thead><tr><th>Pri</th>" + cols.map(c=>"<th>"+esc(c)+"</th>").join("") + "</tr></thead>";
+  html += "<thead class='filterRow'><tr><th></th>" + cols.map(c=>(
+    "<th><input class='filter' placeholder='filtrar... (ENTER aplica)' onkeydown=\"if(event.key==='Enter'){applyFilter('"+esc(c)+"',this.value)}\"></th>"
+  )).join("") + "</tr></thead>";
+  html += "<tbody>";
+  html += rows.slice(0, 500).map(r=>{
+    return "<tr><td>—</td>" + cols.map(c=>"<td>"+esc(r && r[c])+"</td>").join("") + "</tr>";
   }).join("");
-  html += `</tbody>`;
+  html += "</tbody>";
   tbl.innerHTML = html;
 }
-function applyFilter(tk, col, value){
-  filtersByTable[tk][col] = String(value||"").trim().toLowerCase();
-  pagerByTable[tk].page=1;
-  renderTable(tk);
-}
 
-function renderActive(){
-  const active = document.querySelector(".section.active");
-  const tk = active ? tableKeysBySection[active.id] : null;
-  if(tk) renderTable(tk);
+async function refreshData(){
+  setErr("");
+  try{
+    const payload = await jsonp({ dados: "1" });
+    if(!Array.isArray(payload)) throw new Error("retorno inválido (esperado Array)");
+    dados = payload;
+    setLastRefresh();
+    renderTable();
+  }catch(e){
+    setErr((e && e.message) ? e.message : String(e));
+    console.error("refreshData:", e);
+  }
 }
+async function refreshNowUrl(){ await refreshData(); }
 
-function setLastInfo(msg){
-  const el = document.getElementById("lastInfo");
-  if(el) el.innerText = msg;
-}
-
-/* DATA */
-async function loadDados(){
-  setLastInfo("Carregando dados...");
-  const res = await jsonp({ dados: "1" }, 30000);
-  if(!Array.isArray(res)) throw new Error("Resposta inválida (esperado Array)");
-  dados = res;
-  buildCaches();
-  setLastInfo(`OK: ${dados.length} linhas • ${new Date().toLocaleTimeString("pt-BR")}`);
-  renderActive();
-}
-
-async function refreshNowUrl(){
-  try{ await loadDados(); }catch(e){ setLastInfo("ERRO: " + (e && e.message ? e.message : e)); }
-}
 async function forceUpdateNow(){
+  setErr("");
   try{
-    setLastInfo("Forçando atualização no Sheets...");
-    await jsonp({ forceUpdate: "1" }, 60000);
-    await loadDados();
+    await jsonp({ forceUpdate: "1" });
   }catch(e){
-    setLastInfo("ERRO forceUpdate: " + (e && e.message ? e.message : e));
+    setErr("forceUpdate falhou: " + ((e && e.message) ? e.message : String(e)));
   }
+  await refreshData();
 }
 
-let __timer = null;
-function schedule(){
-  if(__timer) clearInterval(__timer);
-  __timer = setInterval(()=>{ refreshNowUrl(); }, REFRESH_EVERY_MS);
-}
+setInterval(()=>{
+  const el=document.getElementById("clock");
+  if(el) el.innerText = new Date().toLocaleTimeString("pt-BR");
+}, 1000);
 
-(async function init(){
-  try{
-    await loadDados();
-  }catch(e){
-    setLastInfo("ERRO inicial: " + (e && e.message ? e.message : e));
-  }
-  schedule();
-})();
+// refresh automático (2min30)
+setInterval(()=>{ refreshData(); }, 150000);
+
+// boot
+refreshData();
 </script>
 </body>
 </html>
