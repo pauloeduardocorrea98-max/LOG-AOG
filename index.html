@@ -323,6 +323,32 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   <div class="ctxHint">Dica: o texto só muda quando você clicar em <b>Aplicar</b>.</div>
 </div>
 
+
+<!-- AUTH MODAL (Email + PIN) -->
+<div id="authModal" style="display:none;position:fixed;inset:0;z-index:99999;align-items:center;justify-content:center;background:rgba(2,6,23,.72);backdrop-filter:blur(6px);">
+  <div style="width:min(720px,92vw);background:rgba(15,23,42,.92);border:1px solid rgba(148,163,184,.25);border-radius:18px;padding:18px 18px 14px;box-shadow:0 22px 60px rgba(0,0,0,.45);color:#e5e7eb;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="font-size:18px">🔒</div>
+      <div style="font-weight:800;font-size:16px;color:#93c5fd;">Acesso ao LOG-AOG</div>
+      <button type="button" onclick="authLogout()" title="Limpar sessão" style="margin-left:auto;background:#334155;color:#fff;border:none;border-radius:10px;padding:8px 10px;cursor:pointer;">Limpar</button>
+    </div>
+    <div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">
+      Entre com seu email <b>LATAM</b> e seu <b>PIN</b> para abrir o dashboard. (Fica salvo só neste navegador.)
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <input id="authEmail" type="email" placeholder="email@latam.com" autocomplete="username"
+             style="flex:1;min-width:240px;background:#0b1220;border:1px solid rgba(148,163,184,.25);border-radius:12px;padding:10px 12px;color:#e5e7eb;outline:none;">
+      <input id="authPin" type="password" placeholder="PIN" autocomplete="current-password"
+             style="flex:1;min-width:200px;background:#0b1220;border:1px solid rgba(148,163,184,.25);border-radius:12px;padding:10px 12px;color:#e5e7eb;outline:none;"
+             onkeydown="if(event.key==='Enter'){authLogin();}">
+      <button type="button" onclick="authLogin()"
+              style="background:#0ea5e9;color:#fff;border:none;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;">Entrar</button>
+    </div>
+    <div id="authErr" style="margin-top:10px;color:#f87171;font-size:12px;min-height:16px;"></div>
+  </div>
+</div>
+
 <script>
 // GitHub Pages: dados vem do GAS via JSONP
 let dados = [];
@@ -2281,7 +2307,7 @@ function initCtxMenuHandlers(){
   }, true);
 })();
 
-(async function init(){
+async function startApp(){
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
     if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
@@ -2295,7 +2321,112 @@ function initCtxMenuHandlers(){
   __lastSuccessAt = new Date();
   __lastFetchAt   = new Date();
 
-  if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("✅ Inicializando...");
+  if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("
+/* ================================
+   AUTH (Email + PIN) via JSONP
+   ================================ */
+const __AUTH_STORAGE_KEY = "LOGAOG_AUTH_V1";
+let __auth = { email:"", pin:"" };
+
+function __authLoad__(){
+  try{
+    const raw = localStorage.getItem(__AUTH_STORAGE_KEY);
+    if(!raw) return;
+    const o = JSON.parse(raw);
+    if(o && o.email && o.pin){ __auth.email = String(o.email); __auth.pin = String(o.pin); }
+  }catch(e){}
+}
+function __authSave__(){
+  try{
+    localStorage.setItem(__AUTH_STORAGE_KEY, JSON.stringify({ email: __auth.email, pin: __auth.pin }));
+  }catch(e){}
+}
+function __authClear__(){
+  try{ localStorage.removeItem(__AUTH_STORAGE_KEY); }catch(e){}
+  __auth = { email:"", pin:"" };
+}
+
+function showAuthModal(msg){
+  const m = document.getElementById("authModal");
+  if(!m) return;
+  m.style.display = "flex";
+  const em = document.getElementById("authEmail");
+  const pn = document.getElementById("authPin");
+  const er = document.getElementById("authErr");
+  if(em) em.value = __auth.email || "";
+  if(pn) pn.value = __auth.pin || "";
+  if(er) er.innerText = msg ? String(msg) : "";
+  try{ if(em && !em.value) em.focus(); else if(pn) pn.focus(); }catch(e){}
+}
+function hideAuthModal(){
+  const m = document.getElementById("authModal");
+  if(m) m.style.display = "none";
+}
+
+async function authCheck(){
+  // chama ?auth=1
+  const r = await jsonpCall({ auth:"1", email: __auth.email, pin: __auth.pin });
+  if(r && r.ok === true) return true;
+  return false;
+}
+async function authLogin(){
+  const em = document.getElementById("authEmail");
+  const pn = document.getElementById("authPin");
+  const er = document.getElementById("authErr");
+  if(er) er.innerText = "";
+  __auth.email = String(em ? em.value : "").trim().toLowerCase();
+  __auth.pin   = String(pn ? pn.value : "").trim();
+  if(!__auth.email || !__auth.pin){
+    if(er) er.innerText = "Informe email e PIN.";
+    return;
+  }
+  try{
+    const ok = await authCheck();
+    if(!ok){
+      if(er) er.innerText = "Email ou PIN inválido (ou usuário não cadastrado).";
+      return;
+    }
+    __authSave__();
+    hideAuthModal();
+    // inicia app
+    startApp();
+  }catch(e){
+    if(er) er.innerText = (e && e.message) ? e.message : String(e);
+  }
+}
+function authLogout(){
+  __authClear__();
+  showAuthModal("Sessão limpa. Entre novamente.");
+}
+
+// Patch: adiciona email/pin automaticamente em TODAS as chamadas JSONP (exceto auth)
+const __jsonpCallOrig = jsonpCall;
+jsonpCall = function(params){
+  const p = Object.assign({}, params || {});
+  // se for auth, deixa passar
+  if(!("auth" in p)){
+    if(__auth && __auth.email) p.email = __auth.email;
+    if(__auth && __auth.pin)   p.pin   = __auth.pin;
+  }
+  return __jsonpCallOrig(p);
+};
+
+// Boot
+(function bootAuth(){
+  __authLoad__();
+  // mostra modal e aguarda login; se já tiver credencial, valida e entra
+  setTimeout(async ()=>{
+    try{
+      if(__auth.email && __auth.pin){
+        const ok = await authCheck();
+        if(ok){ hideAuthModal(); startApp(); return; }
+      }
+    }catch(e){}
+    showAuthModal("");
+  }, 0);
+})();
+
+✅ Inicializando...");
 
   prepareDataCache();
 
@@ -2354,7 +2485,8 @@ function initCtxMenuHandlers(){
   }, 30000); // 30 segundos — só dados colaborativos leves
 
   updateStatusVisibility();
-})();
+}
+;
 </script>
 
 </body>
