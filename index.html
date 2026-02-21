@@ -1,9 +1,10 @@
+<!-- index.html (COMPLETO) - cole no Apps Script (HTML) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Logística AOG | LATAM</title>
+
 <style>
 *{box-sizing:border-box;font-family:Segoe UI,Arial}
 body{ margin:0; display:flex; background:#0b2440; color:#e5e7eb; }
@@ -25,6 +26,17 @@ body{ margin:0; display:flex; background:#0b2440; color:#e5e7eb; }
 h1{ margin:8px 0 10px; font-size:20px; color:#f8fafc; }
 .section{display:none}
 .section.active{display:block}
+
+#status{
+  background:#ffffff; border:1px solid #e5e7eb; padding:10px;border-radius:10px;margin-bottom:10px;
+  font-size:13px; color:#0f172a;
+  display:none;
+}
+#status .statusLine{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:6px; color:#334155; }
+#status .pill{ display:inline-block; padding:4px 8px; border:1px solid #e5e7eb; border-radius:999px; background:#f8fafc; font-size:12px; }
+#status .warn{ background:#fff7ed; border-color:#fed7aa; color:#9a3412; }
+#pillAttempt,#pillAuto,#pillNext,#pillUpdatedAgo{ display:none !important; }
+
 .noteRow{ display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap; margin-top:6px; }
 .noteInput{
   width:80%; min-width:280px; min-height:74px; padding:10px;
@@ -39,10 +51,54 @@ h1{ margin:8px 0 10px; font-size:20px; color:#f8fafc; }
 .noteBtn.gray{ background:#334155; }
 .noteBtn.orange{ background:#c2410c; }
 
+.linkPills{ display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+.linkPill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 12px; border-radius:999px;
+  border:1px solid #e5e7eb; background:#f8fafc; color:#0f172a;
+  text-decoration:none; cursor:pointer; font-size:13px; max-width:520px;
+}
+.linkPill:hover{ filter:brightness(.97); box-shadow:0 0 0 3px rgba(56,189,248,.18); border-color:#38bdf8; }
+.linkPillIcon{ width:10px;height:10px;border-radius:999px;background:#0ea5e9;flex:none; }
+.linkAddRow{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; align-items:center; }
+.linkAddInput{
+  min-width:320px; width:520px; max-width:100%;
+  padding:10px; border:1px solid #e5e7eb; border-radius:10px; outline:none;
+}
+.linkAddInput:focus{ border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.18); }
+
+.linkPillWrap{ position:relative; display:inline-flex; align-items:center; }
+.linkPillX{
+  position:absolute; top:-6px; right:-6px;
+  width:20px; height:20px; border:none; border-radius:999px;
+  background:#111827; color:#fff; cursor:pointer;
+  font-size:12px; line-height:20px;
+  display:flex; align-items:center; justify-content:center;
+}
+.linkPillX:hover{ filter:brightness(.95); }
+
 .tableWrap{overflow:auto;border-radius:10px}
 table{ width:100%; border-collapse:collapse; background:#fff; font-size:13px; min-width:1500px; color:#0f172a; }
 th,td{ border:1px solid #e5e7eb; padding:6px; vertical-align:top; }
 th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
+.filterRow th{ background:#ffffff; position:sticky; top:34px; z-index:1; }
+.filter{ width:100%; padding:6px; border:1px solid #e5e7eb; border-radius:6px; font-size:12px; }
+
+.th-pn,.td-pn{
+  max-width:140px; min-width:120px; white-space:normal;
+  word-break:normal; overflow-wrap:break-word;
+}
+.th-resize{position:relative}
+.th-resize::after{ content:""; position:absolute; right:0;top:0; width:6px;height:100%; cursor:col-resize; }
+
+.prioBox{ background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px; margin:10px 0 12px; color:#0f172a; }
+.prioBox h3{ margin:0 0 8px; font-size:13px; color:#0f172a; }
+.prioGrid{ display:flex; flex-wrap:wrap; gap:8px; }
+.prioCard{ background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px; padding:8px 10px; min-width:220px; max-width:520px; }
+.prioLine1{ font-weight:700; font-size:12px; color:#0f172a; }
+.prioLine{ margin-top:4px; font-size:12px; color:#475569; }
+.prioNoWrap{ white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; display:block; }
+.prioRemove{ margin-top:8px; border:none; background:#ef4444; color:#fff; border-radius:8px; padding:6px 8px; cursor:pointer; font-size:12px; }
 
 .statusTag{ display:inline-flex; align-items:center; gap:6px; padding:3px 8px; border-radius:999px; border:1px solid #e5e7eb; font-size:12px; line-height:1.2; white-space:nowrap; }
 .statusDot{ width:8px;height:8px;border-radius:999px; display:inline-block; flex:none; }
@@ -52,45 +108,78 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .status-orange{ background:#fff7ed; border-color:#fdba74; color:#9a3412; } .status-orange .statusDot{ background:#c2410c; }
 .status-default{ background:#f8fafc; border-color:#e5e7eb; color:#334155; } .status-default .statusDot{ background:#64748b; }
 
+.airCell{ display:flex; align-items:center; gap:8px; }
+.airWarnBtn{ border:none; background:#f59e0b; color:#111827; border-radius:8px; padding:4px 8px; cursor:pointer; font-size:12px; line-height:1; }
+.airWarnBtn:hover{ filter:brightness(.95); }
+
+.airBox{ background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px; margin:10px 0 12px; color:#0f172a; }
+.airBox h3{ margin:0 0 8px; font-size:13px; color:#0f172a; }
+.airGrid{ display:flex; flex-wrap:wrap; gap:8px; }
+.airCard{ position:relative; background:#fff7ed; border:1px solid #fdba74; border-radius:12px; padding:10px; min-width:220px; max-width:520px; }
+.airCardTitle{ font-weight:800; font-size:12px; color:#9a3412; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.airCardMeta{ margin-top:6px; font-size:12px; color:#7c2d12; }
+.airCardX{
+  position:absolute; top:6px; left:6px; border:none; background:#111827; color:#fff; border-radius:999px;
+  width:18px; height:18px; cursor:pointer; font-size:12px; line-height:18px; padding:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.airCardActions{ margin-top:8px; display:flex; gap:8px; align-items:center; }
+.airFilterPill{ border:none; cursor:pointer; padding:6px 10px; border-radius:999px; font-size:12px; background:#0ea5e9; color:#fff; }
+.airFilterPill.on{ background:#10b981; }
+
+.bellBtn{
+  border:none; color:#fff; border-radius:8px; padding:6px 8px; cursor:pointer; font-size:12px;
+  transition:filter .12s ease, box-shadow .12s ease, transform .12s ease;
+}
+.bellBtn.status-green{ background:#10b981; }
+.bellBtn.status-yellow{ background:#f59e0b; color:#111827; }
+.bellBtn.status-red{ background:#ef4444; }
+.bellBtn.status-orange{ background:#c2410c; }
+.bellBtn.status-default{ background:#0ea5e9; }
+.bellBtn.on{ box-shadow:0 0 0 3px rgba(15,23,42,.12); transform:translateY(-1px); }
+.bellBtn:hover{ filter:brightness(.95); }
+
+.box{ background:#fff; padding:12px; border-radius:10px; margin-top:12px; border:1px solid #e5e7eb; color:#0f172a; }
+
+.sharedList .itemRow{ display:flex; align-items:flex-start; gap:8px; margin-top:8px; }
+.sharedList .itemRow.done .itemBody{ text-decoration:line-through; color:#6b7280; }
+.itemBody{ flex:1; min-height:22px; padding:2px 0; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
+.itemBody[contenteditable="true"]{ outline:2px solid rgba(56,189,248,.45); border-radius:8px; padding:6px; background:#f8fafc; }
+.iconBtn{ border:none;background:none;cursor:pointer; font-size:14px; line-height:1; }
+.markedBy{ margin-top:6px; font-size:12px; color:#64748b; }
+
 .obsArea{
   width:100%; min-width:220px; min-height:54px; padding:8px;
   border:1px solid #e5e7eb; border-radius:10px; outline:none; resize:vertical; font-size:12px;
   white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; overflow-x:hidden;
 }
 .obsArea:focus{ border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.18); }
+.obsSaving{ border-color:#f59e0b !important; box-shadow:0 0 0 3px rgba(245,158,11,.16) !important; }
+.obsSaved{ border-color:#10b981 !important; box-shadow:0 0 0 3px rgba(16,185,129,.14) !important; }
 
-.loginOverlay{
-  position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-  background: rgba(0,0,0,.35); z-index:99999;
+.ctxMenu{
+  position:fixed; z-index:9999; display:none; background:#ffffff;
+  border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 18px 40px rgba(15, 23, 42, .18);
+  padding:10px; min-width:300px; color:#0f172a;
 }
-.loginBox{
-  width:min(720px, calc(100vw - 32px));
-  border:1px solid rgba(148,163,184,.35);
-  background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(2,6,23,.92));
-  border-radius:18px;
-  padding:18px 18px 16px;
-  box-shadow:0 30px 90px rgba(0,0,0,.35);
-}
-.loginTitle{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:16px; }
-.loginSub{ margin-top:6px; font-size:12px; color:#94a3b8; line-height:1.4; }
-.loginRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-.loginRow input{
-  flex:1; min-width:220px;
-  padding:12px 12px; border-radius:12px; border:1px solid rgba(148,163,184,.25);
-  background: rgba(2,6,23,.35); color:#e5e7eb; outline:none;
-}
-.loginRow input:focus{ border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.18); }
-.loginActions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
-.loginMsg{ margin-top:10px; font-size:12px; color:#fca5a5; min-height:16px; }
-.btn{ padding:10px 14px; border:none; border-radius:12px; cursor:pointer; font-weight:700; }
-.btnPrimary{ background:#0ea5e9; color:#fff; }
-.btnGray{ background:#334155; color:#fff; }
+.ctxRow{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.ctxTitle{ font-size:12px; color:#64748b; margin-bottom:8px; }
+.ctxBtn{ height:34px; padding:0 10px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; cursor:pointer; font-size:13px; }
+.ctxBtn:hover{ filter:brightness(.98); }
+.ctxBtn.on{ border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.18); }
+.ctxSel{ height:34px; padding:0 10px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
+.ctxColor{ height:34px; width:44px; border:none; padding:0; cursor:pointer; background:transparent; }
+.ctxApply{ height:34px; padding:0 12px; border:none; border-radius:10px; background:#0ea5e9; color:#fff; cursor:pointer; font-size:13px; }
+.ctxApply:hover{ filter:brightness(.95); }
+.ctxHint{ margin-top:8px; font-size:12px; color:#64748b; }
 </style>
 </head>
+
 <body>
 
 <div class="sidebar">
   <h2>LOGÍSTICA AOG</h2>
+
   <div class="clock" id="clock"></div>
 
   <div class="connectedBox" id="connectedBox">
@@ -101,206 +190,1026 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   <div class="menu">
     <button class="active" onclick="openTab('turno',this)">📓 Passagem de Turno</button>
     <button onclick="openTab('aog',this)">✈️ AOG</button>
+    <button onclick="openTab('war',this)">⚔️ War Room</button>
+    <button onclick="openTab('fast',this)">⚡ Fast Pass</button>
+    <button onclick="openTab('cargo',this)">📦 Cargo Heroes</button>
+    <button onclick="openTab('cargas',this)">🚚 Cargas</button>
+    <button onclick="openTab('tools',this)">🛠️ Ferramentas</button>
+    <button onclick="openTab('links',this)">🔗 Links Úteis</button>
+    <button onclick="openTab('avisos',this)">📢 Avisos da Gestão</button>
   </div>
+
+  <div style="display:none" id="clockBottom"></div>
 </div>
 
 <div class="content">
+  <div id="status">Carregando…</div>
+
   <div id="turno" class="section active">
     <h1>Passagem de Turno</h1>
+
     <div class="noteRow">
-      <div id="turnoInput" class="noteInput" contenteditable="true"></div>
+      <div id="turnoInput" class="noteInput" contenteditable="true" data-placeholder="Digite a passagem..."></div>
+
       <div class="noteTools">
         <button class="noteBtn" type="button" onclick="addTurno()">Adicionar</button>
-        <button class="noteBtn gray" type="button" onclick="refreshData()">Atualizar agora</button>
+        <button class="noteBtn gray" type="button" onclick="refreshNowUrl()">Atualizar agora (URL)</button>
+        <button class="noteBtn orange" type="button" onclick="forceUpdateNow()">Forçar atualização (Sheets)</button>
       </div>
     </div>
-    <div id="turnoList" class="noteInput" style="background:#fff;color:#0f172a;min-height:100px"></div>
+
+    <div class="box sharedList" id="turnoList"></div>
   </div>
 
   <div id="aog" class="section">
     <h1>AOG</h1>
+    <div id="air-aog"></div>
+    <div id="prio-aog"></div>
     <div class="tableWrap"><table id="tbl-aog"></table></div>
   </div>
-</div>
 
-<div id="loginOverlay" class="loginOverlay" style="display:none">
-  <div class="loginBox">
-    <div class="loginTitle">🔒 Acesso ao LOG-AOG</div>
-    <div class="loginSub">
-      Entre com seu <b>email LATAM</b> e seu <b>PIN</b> para abrir o dashboard.
-      (O PIN fica salvo somente neste navegador.)
+  <div id="war" class="section">
+    <h1>War Room</h1>
+    <div id="air-war"></div>
+    <div id="prio-war"></div>
+    <div class="tableWrap"><table id="tbl-war"></table></div>
+  </div>
+
+  <div id="fast" class="section">
+    <h1>Fast Pass</h1>
+    <div id="air-fast"></div>
+    <div id="prio-fast"></div>
+    <div class="tableWrap"><table id="tbl-fast"></table></div>
+  </div>
+
+  <div id="cargo" class="section">
+    <h1>Cargo Heroes</h1>
+    <div id="air-cargo"></div>
+    <div id="prio-cargo"></div>
+    <div class="tableWrap"><table id="tbl-cargo"></table></div>
+  </div>
+
+  <div id="cargas" class="section">
+    <h1>Cargas</h1>
+    <div id="air-cargas"></div>
+    <div id="prio-cargas"></div>
+    <div class="tableWrap"><table id="tbl-cargas"></table></div>
+  </div>
+
+  <div id="tools" class="section">
+    <h1>Ferramentas</h1>
+    <div id="air-tools"></div>
+    <div id="prio-tools"></div>
+    <div class="tableWrap"><table id="tbl-tools"></table></div>
+  </div>
+
+  <div id="links" class="section">
+    <h1>Links Úteis</h1>
+    <div class="box">
+      Links compartilhados pelo time:
+      <div class="linkPills" id="linksPills"></div>
+
+      <div class="linkAddRow">
+        <button class="noteBtn" type="button" title="Adicionar link" onclick="toggleLinkAdd()">＋</button>
+        <input id="linkAddInput" class="linkAddInput" style="display:none"
+          placeholder="Ex: SHEETS CASA NOVA https://docs.google.com/..."
+          onkeydown="if(event.key==='Enter'){addLinkFromInput();}">
+      </div>
     </div>
-    <div class="loginRow">
-      <input id="loginEmail" type="email" placeholder="email@latam.com" autocomplete="username">
-      <input id="loginPin" type="password" placeholder="PIN" autocomplete="current-password">
+  </div>
+
+  <div id="avisos" class="section">
+    <h1>Avisos da Gestão</h1>
+
+    <div class="noteRow">
+      <div id="avisoInput" class="noteInput" contenteditable="true" data-placeholder="Digite o aviso..."></div>
+      <div class="noteTools">
+        <button class="noteBtn" type="button" onclick="addAviso()">Adicionar</button>
+      </div>
     </div>
-    <div class="loginActions">
-      <button class="btn btnGray" type="button" onclick="logout(true)">Limpar</button>
-      <button class="btn btnPrimary" type="button" onclick="doLogin()">Entrar</button>
-    </div>
-    <div id="loginMsg" class="loginMsg"></div>
+
+    <div class="box sharedList" id="avisosList"></div>
   </div>
 </div>
 
+
+<!-- LOGIN MODAL (GitHub Pages) -->
+<div id="loginOverlay" style="
+  position:fixed; inset:0; z-index:99999;
+  background:rgba(0,0,0,.55);
+  display:flex; align-items:center; justify-content:center;
+">
+  <div style="
+    width:min(680px, calc(100vw - 32px));
+    background:#0b1d33; border:1px solid #334155; border-radius:16px;
+    box-shadow:0 30px 80px rgba(0,0,0,.35);
+    padding:18px 18px 16px;
+    color:#e5e7eb;
+  ">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="font-size:18px">🔒</div>
+      <div style="font-weight:800;font-size:16px;color:#38bdf8">Acesso ao LOG-AOG</div>
+    </div>
+    <div style="font-size:13px;opacity:.92;margin-bottom:14px">
+      Entre com seu <b>email LATAM</b> e seu <b>PIN</b> para abrir o dashboard.
+      <span style="opacity:.8">(O PIN fica salvo somente neste navegador.)</span>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="loginEmail" type="email" placeholder="email@latam.com"
+        style="flex:1;min-width:220px;padding:10px 12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#e5e7eb;outline:none">
+      <input id="loginPin" type="password" placeholder="PIN"
+        style="flex:1;min-width:220px;padding:10px 12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#e5e7eb;outline:none">
+      <button id="loginClear" type="button"
+        style="padding:10px 14px;border-radius:12px;border:none;background:#334155;color:#fff;cursor:pointer">Limpar</button>
+      <button id="loginBtn" type="button"
+        style="padding:10px 16px;border-radius:12px;border:none;background:#0ea5e9;color:#fff;cursor:pointer;font-weight:700">Entrar</button>
+    </div>
+
+    <div id="loginMsg" style="margin-top:12px;font-size:12px;color:#fca5a5;min-height:16px"></div>
+  </div>
+</div>
+
+<div id="ctxMenu" class="ctxMenu">
+  <div class="ctxTitle">Formatação (selecione o texto → botão direito → ajustar → Aplicar)</div>
+  <div class="ctxRow">
+    <button id="ctxBold" class="ctxBtn" type="button" title="Negrito">B</button>
+
+    <select id="ctxFont" class="ctxSel" title="Tamanho da fonte">
+      <option value="10">10</option>
+      <option value="12" selected>12</option>
+      <option value="14">14</option>
+      <option value="16">16</option>
+      <option value="18">18</option>
+      <option value="20">20</option>
+    </select>
+
+    <input id="ctxColor" class="ctxColor" type="color" value="#0f172a" title="Cor">
+    <button id="ctxApply" class="ctxApply" type="button">Aplicar</button>
+  </div>
+  <div class="ctxHint">Dica: o texto só muda quando você clicar em <b>Aplicar</b>.</div>
+</div>
+
+
 <script>
-/**
- * IMPORTANTE:
- * - Use SEMPRE o /exec no GitHub Pages
- * - O Web App do Apps Script precisa estar: "Quem tem acesso: Qualquer pessoa com o link" (ou "Qualquer pessoa")
- */
+/*** =========================================================
+ *  GITHUB PAGES + GAS (JSONP) — CONFIG
+ *  Troque a URL abaixo pela URL /exec do seu WebApp:
+ *  Deploy > Manage deployments > Web app > Copy "Web app URL"
+ * ========================================================= */
 const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1wU2tiPZC1_iW1SYiIOJe9WYnm93QpumnQlUd4UJKFiBh28T3wFfd3RGYoi_iUtQKng/exec";
-const REFRESH_MS = 150000;
 
-let __session = { email:"", pin:"" };
-let dados = [];
+/*** LOGIN (Email + PIN) ***/
+const AUTH_STORE_KEY = "LOGAOG_AUTH_V1";
+let __AUTH = { email:"", pin:"" };
 
-/* ===== util ===== */
-function escapeHtml(v){
-  return String(v ?? "")
-    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
-}
-function setLoginMsg(s){ document.getElementById("loginMsg").innerText = s || ""; }
+const INITIAL_DATA = [];
+let dados = Array.isArray(INITIAL_DATA) ? INITIAL_DATA : [];
 
-/* ===== JSONP (sem CORS) ===== */
-function jsonp(params){
-  return new Promise((resolve, reject)=>{
-    const cbName = "__cb_" + Math.random().toString(36).slice(2);
-    const url = new URL(GAS_WEBAPP_URL);
-    Object.keys(params||{}).forEach(k => url.searchParams.set(k, String(params[k])));
-    url.searchParams.set("callback", cbName);
-    url.searchParams.set("ts", String(Date.now()));
+// ✅ URL pública real do WebApp — injetada pelo GAS. NUNCA use window.location.href para fetch!
+const __WEBAPP_URL = "<?!= WEBAPP_URL || '' ?>";
 
-    const script = document.createElement("script");
-    script.src = url.toString();
+// ✅ Versão dos dados — o HTML compara com o servidor para saber se precisa rebuscar
+let __knownDataVersion = "<?!= INITIAL_DATA_VERSION || '0' ?>";
 
-    const timer = setTimeout(()=>cleanup(false, "timeout"), 15000);
+const __ADMIN_MODE = (/\badmin=1\b/i.test(window.location.search) || localStorage.getItem("ADMIN_MODE")==="1");
 
-    function cleanup(ok, err){
-      clearTimeout(timer);
-      try{ delete window[cbName]; }catch(e){}
-      if(script && script.parentNode) script.parentNode.removeChild(script);
-      if(ok) return;
-      reject(new Error(err || "jsonp failed"));
-    }
-
-    window[cbName] = (data)=>{
-      cleanup(true);
-      resolve(data);
-    };
-    script.onerror = ()=>cleanup(false, "script error (provável permissão/URL)");
-    document.body.appendChild(script);
-  });
+const SHARED_TABLE_KEYS = ["aog","war","fast","cargo","cargas","tools"];
+function isSharedTable(tableKey){
+  return SHARED_TABLE_KEYS.includes(String(tableKey||"").toLowerCase());
 }
 
-/* ===== Login ===== */
-function loadSession(){
+let __pendingRerender = false;
+function __isUserTyping__(){
   try{
-    const raw = localStorage.getItem("LOGAOG_SESSION_V1");
-    if(raw){
-      const s = JSON.parse(raw);
-      if(s && s.email && s.pin) __session = { email:String(s.email), pin:String(s.pin) };
-    }
-  }catch(e){}
+    const ae = document.activeElement;
+    if(!ae) return false;
+    const cls = String(ae.className || "");
+    if(cls.includes("filter")) return true;
+    if(cls.includes("obsArea")) return true;
+    if(ae.isContentEditable) return true;
+    const tag = String(ae.tagName || "").toUpperCase();
+    if(tag === "INPUT" || tag === "TEXTAREA") return true;
+    return false;
+  }catch(e){ return false; }
 }
-function saveSession(){
-  try{ localStorage.setItem("LOGAOG_SESSION_V1", JSON.stringify(__session)); }catch(e){}
-}
-function logout(clearForm){
-  __session = { email:"", pin:"" };
-  try{ localStorage.removeItem("LOGAOG_SESSION_V1"); }catch(e){}
-  if(clearForm){
-    const e = document.getElementById("loginEmail"); const p = document.getElementById("loginPin");
-    if(e) e.value = ""; if(p) p.value = "";
-  }
-  showLogin();
-}
-function showLogin(){
-  document.getElementById("loginOverlay").style.display = "flex";
-}
-function hideLogin(){
-  document.getElementById("loginOverlay").style.display = "none";
-}
-async function doLogin(){
-  const email = String(document.getElementById("loginEmail").value||"").trim().toLowerCase();
-  const pin = String(document.getElementById("loginPin").value||"").trim();
-  if(!email || !pin){ setLoginMsg("Email e PIN obrigatórios"); return; }
-
-  setLoginMsg("Validando...");
-  try{
-    const r = await jsonp({ auth:"1", email, pin });
-    if(!r || r.ok !== true){
-      setLoginMsg((r && r.error) ? r.error : "Falha no login");
-      return;
-    }
-    __session = { email, pin };
-    saveSession();
-    hideLogin();
-    await bootAfterLogin();
-  }catch(err){
-    setLoginMsg("Erro ao chamar o GAS. Verifique se o Web App está em /exec e com acesso público.");
-    console.error(err);
-  }
+function __tryRerenderPending__(){
+  if(!__pendingRerender) return;
+  if(__isUserTyping__()) return;
+  __pendingRerender = false;
+  rerenderAll({ onlyActive: true });
 }
 
-/* ===== App ===== */
+setInterval(()=>{
+  const el = document.getElementById("clock");
+  if(el) el.innerText = new Date().toLocaleTimeString("pt-BR");
+},1000);
+
+function updateStatusVisibility(){
+  const st = document.getElementById("status");
+  if(!st) return;
+  if(!__ADMIN_MODE){ st.style.display = "none"; return; }
+  const active = document.querySelector(".section.active");
+  const show = active && active.id === "turno";
+  st.style.display = show ? "block" : "none";
+}
+
+const __dirty = { aog:true, war:true, fast:true, cargo:true, cargas:true, tools:true, links:true, turno:true, avisos:true };
+function markDirty(key){ if(Object.prototype.hasOwnProperty.call(__dirty, key)) __dirty[key] = true; }
+function clearDirty(key){ if(Object.prototype.hasOwnProperty.call(__dirty, key)) __dirty[key] = false; }
+function markAllTablesDirty(){
+  markDirty("aog"); markDirty("war"); markDirty("fast"); markDirty("cargo"); markDirty("cargas"); markDirty("tools");
+}
+
 function openTab(id,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  updateStatusVisibility();
+
+  // ✅ NÃO reseta o timer aqui — só renderiza a aba se estiver suja
+  try{
+    const tk = tableKeysBySection[id];
+    if(tk){
+      if(__dirty[tk]){
+        renderPrios(tk);
+        renderAircraftBox(tk);
+        renderTable(tk);
+        clearDirty(tk);
+      }else{
+        try{ updateObsVisibleForTable(tk); }catch(e){}
+      }
+    }else{
+      if(id === "links"){
+        markDirty("links");
+        renderLinksUteis();
+        clearDirty("links");
+      }
+      if(id === "turno") renderSharedList("turno");
+      if(id === "avisos") renderSharedList("avisos");
+    }
+  }catch(e){}
+}
+
+function escapeHtml(v){
+  return String(v ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+function cleanVal(v){ return String(v ?? "").trim(); }
+
+function parseMaybeDate(v){
+  if(!v) return null;
+  const s = String(v).trim();
+  let d = new Date(s);
+  if(!isNaN(d.getTime())) return d;
+
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if(m){
+    const dt = new Date(Number(m[3]), Number(m[2])-1, Number(m[1]), Number(m[4]||0), Number(m[5]||0), Number(m[6]||0));
+    if(!isNaN(dt.getTime())) return dt;
+  }
+
+  const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if(m2){
+    const dt = new Date(Number(m2[1]), Number(m2[2])-1, Number(m2[3]), Number(m2[4]||0), Number(m2[5]||0), Number(m2[6]||0));
+    if(!isNaN(dt.getTime())) return dt;
+  }
+
+  return null;
+}
+
+function fmtBR(dt){
+  if(!dt) return "";
+  const pad = n => String(n).padStart(2,"0");
+  return `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`;
+}
+function fmtDateOnlyBR(dt){
+  if(!dt) return "";
+  const pad = n => String(n).padStart(2,"0");
+  return `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()}`;
+}
+function fmtTimeOnly(dt){
+  if(!dt) return "";
+  const pad = n => String(n).padStart(2,"0");
+  return `${pad(dt.getHours())}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`;
+}
+function getDatePartsForDisplay(rawValue){
+  const dt = parseMaybeDate(rawValue);
+  if(!dt) return { date:"", time:"" };
+  const date = fmtDateOnlyBR(dt);
+  const time = fmtTimeOnly(dt);
+  const s = String(rawValue ?? "").trim();
+  const hasTimeInText = /\b\d{2}:\d{2}(:\d{2})?\b/.test(s);
+  return { date, time: hasTimeInText ? time : "" };
+}
+
+function normalizeText(v){
+  try{
+    return String(v ?? "")
+      .toLowerCase().trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[\s\-_.\/\\(){}\[\],;:|]+/g, "");
+  }catch(e){ return String(v ?? "").toLowerCase().trim(); }
+}
+function digitsOnly(v){ return String(v ?? "").replace(/\D/g, ""); }
+function buildFilterToken(input){
+  const raw = String(input || "").trim().toLowerCase();
+  const norm = normalizeText(raw);
+  const digits = digitsOnly(raw);
+  const parts = raw.split(/\s+/).map(p=>p.trim()).filter(Boolean).map(p=>({raw:p.toLowerCase(), norm:normalizeText(p), digits:digitsOnly(p)}));
+  return { raw, norm, digits, parts };
+}
+
+const DATE_COL = "Data_da_solicitacao";
+const STATUS_COL = "Status_material_ferramenta";
+const AIR_COL = "Aeronave";
+const TYPE_COL = "Tipo";
+
+function hasCargasKeyword(text){
+  return normalizeText(text || "").includes("carga");
+}
+function isCargasRow(r){
+  if(!r) return false;
+  return hasCargasKeyword(r["Descricao_logistica"]);
+}
+function isFerramentaType(typeRaw){
+  const raw = String(typeRaw ?? "").trim();
+  if(!raw) return false;
+  const n = Number(raw);
+  if(!isNaN(n) && n === 2) return true;
+  const s = normalizeText(raw);
+  if(s.includes("ferramenta")) return true;
+  if(s.includes("tool")) return true;
+  return false;
+}
+function isFerramentaStatus(statusRaw){
+  const s = normalizeText(statusRaw || "");
+  if(!s) return false;
+  return s.includes("ferramenta");
+}
+function isFerramentaRow(r){
+  const tipo = r ? (r[TYPE_COL] ?? r.Tipo ?? "") : "";
+  if(isFerramentaType(tipo)) return true;
+  return isFerramentaStatus(r ? r[STATUS_COL] : "");
 }
 
 function statusCategory(statusRaw){
-  const s = String(statusRaw||"").toLowerCase();
-  if(s.includes("outras") || s.includes("mtl divergente") || s.includes("mtldivergente")) return "orange";
-  if(s.includes("em fila") || s.includes("aguardando") || s.includes("mtl zero") || s.includes("mtlzero")) return "red";
-  if(s.includes("pronto para envio") || s.includes("log 1") || s.includes("transito") || s.includes("log1")) return "yellow";
-  if(s.includes("base") || s.includes("recebido")) return "green";
+  const s = normalizeText(statusRaw || "");
+  if(s.includes("outras") || s.includes("mtldivergente")) return "orange";
+  if(s.includes("emfiladeatendimento") || s.includes("aguardandoseparacao") || s.includes("mtlzero")) return "red";
+  if(s.includes("prontoparaenvio") || s.includes("log1transito")) return "yellow";
+  if(s.includes("base") || s.includes("recebidonodestino")) return "green";
   return "default";
+}
+function statusPriorityRank(statusRaw){
+  const cat = statusCategory(statusRaw);
+  if(cat === "red") return 0;
+  if(cat === "yellow") return 1;
+  if(cat === "green") return 2;
+  if(cat === "default") return 2;
+  if(cat === "orange") return 3;
+  return 2;
 }
 function statusTagHtml(statusRaw){
   const txt = String(statusRaw ?? "");
   const cat = statusCategory(txt);
-  return `<span class="statusTag status-${cat}"><span class="statusDot"></span><span>${escapeHtml(txt)}</span></span>`;
+  return `<span class="statusTag status-${cat}" title="${escapeHtml(txt)}">
+    <span class="statusDot"></span>
+    <span>${escapeHtml(txt)}</span>
+  </span>`;
 }
 
-function renderTable(){
-  const el = document.getElementById("tbl-aog");
-  if(!el) return;
-  const cols = ["Material_ID","Status_material_ferramenta","Numero_de_solicitacao","Data_da_solicitacao","Barcode","Aeronave","PN","QTDE","Origem","Destino","Descricao_logistica","Nota_fiscal","AWB","OBS"];
-  let html = "<thead><tr>";
-  for(const c of cols) html += `<th>${escapeHtml(c)}</th>`;
-  html += "</tr></thead><tbody>";
-  for(const r of (Array.isArray(dados)?dados:[]).slice(0,200)){
-    html += "<tr>";
-    for(const c of cols){
-      if(c === "Status_material_ferramenta") html += `<td>${statusTagHtml(r[c])}</td>`;
-      else html += `<td>${escapeHtml(r[c])}</td>`;
+const cols = [
+  "Material_ID",
+  "Status_material_ferramenta",
+  "Numero_de_solicitacao",
+  "Data_da_solicitacao",
+  "Barcode",
+  "Aeronave",
+  "PN",
+  "QTDE",
+  "Origem",
+  "Destino",
+  "Descricao_logistica",
+  "Nota_fiscal",
+  "AWB",
+  "OBS"
+];
+
+const tableKeysBySection = { aog:"aog", war:"war", fast:"fast", cargo:"cargo", cargas:"cargas", tools:"tools" };
+const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
+
+const __filterDraftByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
+function setFilterDraft(tableKey, col, value){
+  const v = String(value || "");
+  if(!__filterDraftByTable[tableKey]) __filterDraftByTable[tableKey] = {};
+  __filterDraftByTable[tableKey][col] = v;
+  markDirty(tableKey);
+}
+function clearFilterDraft(tableKey, col){
+  if(__filterDraftByTable[tableKey] && Object.prototype.hasOwnProperty.call(__filterDraftByTable[tableKey], col)){
+    delete __filterDraftByTable[tableKey][col];
+  }
+}
+function clearAllFilterDraft(tableKey){ __filterDraftByTable[tableKey] = {}; }
+function getFilterInputValue(tableKey, col){
+  const d = (__filterDraftByTable[tableKey] && __filterDraftByTable[tableKey][col] != null)
+    ? String(__filterDraftByTable[tableKey][col]) : null;
+  if(d != null) return d;
+  const applied = (filtersByTable[tableKey] && filtersByTable[tableKey][col]) ? filtersByTable[tableKey][col] : "";
+  return String(applied);
+}
+
+document.addEventListener("keydown", (ev)=>{
+  if(ev.key !== "Escape") return;
+  const activeSection = document.querySelector(".section.active");
+  if(!activeSection) return;
+  const secId = activeSection.id;
+  const tableKey = tableKeysBySection[secId];
+  if(!tableKey) return;
+  clearFilters(tableKey);
+  const st = document.getElementById("status");
+  if(st && __ADMIN_MODE){
+    st.innerHTML = makeStatusHtml(`✅ Filtros limpos (ESC) na aba atual`);
+    paintUpdateInfo();
+    paintRefreshInfo();
+  }
+});
+
+const prioStoreKey = {
+  aog:  "AOG_PRIOS_AOG_V1",  war:  "AOG_PRIOS_WAR_V1",
+  fast: "AOG_PRIOS_FAST_V1", cargo:"AOG_PRIOS_CARGO_V1",
+  cargas:"AOG_PRIOS_CARGAS_V1", tools:"AOG_PRIOS_TOOLS_V1"
+};
+let priosByTable = {
+  aog:  new Set(JSON.parse(localStorage.getItem(prioStoreKey.aog)  || "[]")),
+  war:  new Set(JSON.parse(localStorage.getItem(prioStoreKey.war)  || "[]")),
+  fast: new Set(JSON.parse(localStorage.getItem(prioStoreKey.fast) || "[]")),
+  cargo:new Set(JSON.parse(localStorage.getItem(prioStoreKey.cargo)|| "[]")),
+  cargas:new Set(JSON.parse(localStorage.getItem(prioStoreKey.cargas)|| "[]")),
+  tools:new Set(JSON.parse(localStorage.getItem(prioStoreKey.tools)|| "[]"))
+};
+function rowId(r){
+  if(r && r.__rid) return r.__rid;
+  const id = `${(r && r.Material_ID)||""}__${(r && r.Numero_de_solicitacao)||""}__${(r && r.Aeronave)||""}__${(r && r.PN)||""}`;
+  if(r) r.__rid = id;
+  return id;
+}
+function savePrios(tableKey){
+  try{ localStorage.setItem(prioStoreKey[tableKey], JSON.stringify(Array.from(priosByTable[tableKey]))); }catch(e){}
+}
+function __prioHas__(tableKey, rid){
+  const set = priosByTable[tableKey] || new Set();
+  const raw = String(rid || "");
+  const t = raw.trim();
+  return set.has(raw) || (t && set.has(t));
+}
+
+const AIR_STORE_KEY = {
+  aog:"AOG_AIR_AOG_V1", war:"AOG_AIR_WAR_V1", fast:"AOG_AIR_FAST_V1",
+  cargo:"AOG_AIR_CARGO_V1", cargas:"AOG_AIR_CARGAS_V1", tools:"AOG_AIR_TOOLS_V1"
+};
+let airPinnedByTable = {
+  aog:   new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.aog)   || "[]")),
+  war:   new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.war)   || "[]")),
+  fast:  new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.fast)  || "[]")),
+  cargo: new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.cargo) || "[]")),
+  cargas:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.cargas)|| "[]")),
+  tools: new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.tools) || "[]"))
+};
+const airFocusByTable = { aog:null, war:null, fast:null, cargo:null, cargas:null, tools:null };
+function saveAirPinned(tableKey){
+  try{ localStorage.setItem(AIR_STORE_KEY[tableKey], JSON.stringify(Array.from(airPinnedByTable[tableKey]))); }catch(e){}
+}
+
+let __cacheByTable = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
+let __cacheLastUpdate = null;
+let __dataVersion = 0;
+
+let __sortedBaseByTable = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
+let __sortedBaseVersion = -1;
+
+let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
+
+function __compareBaseOrder__(a,b){
+  const ra = (a && a.__stRank != null) ? a.__stRank : statusPriorityRank(a ? a[STATUS_COL] : "");
+  const rb = (b && b.__stRank != null) ? b.__stRank : statusPriorityRank(b ? b[STATUS_COL] : "");
+  if(ra !== rb) return ra - rb;
+  const ida = (a && a.__midStr != null) ? a.__midStr : String((a && a.Material_ID) ?? "");
+  const idb = (b && b.__midStr != null) ? b.__midStr : String((b && b.Material_ID) ?? "");
+  if(ida !== idb) return ida.localeCompare(idb);
+  const sa = (a && a.__solStr != null) ? a.__solStr : String((a && a.Numero_de_solicitacao) ?? "");
+  const sb = (b && b.__solStr != null) ? b.__solStr : String((b && b.Numero_de_solicitacao) ?? "");
+  return sa.localeCompare(sb);
+}
+
+function buildSortedBaseCache(){
+  if(__sortedBaseVersion === __dataVersion) return;
+  __sortedBaseByTable = {
+    aog:   (__cacheByTable.aog||[]).slice().sort(__compareBaseOrder__),
+    war:   (__cacheByTable.war||[]).slice().sort(__compareBaseOrder__),
+    fast:  (__cacheByTable.fast||[]).slice().sort(__compareBaseOrder__),
+    cargo: (__cacheByTable.cargo||[]).slice().sort(__compareBaseOrder__),
+    cargas:(__cacheByTable.cargas||[]).slice().sort(__compareBaseOrder__),
+    tools: (__cacheByTable.tools||[]).slice().sort(__compareBaseOrder__)
+  };
+  __sortedBaseVersion = __dataVersion;
+}
+
+function prepareDataCache(){
+  const out = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
+  let maxDt = null;
+
+  __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
+
+  const arr = Array.isArray(dados) ? dados : [];
+  for(let i=0;i<arr.length;i++){
+    const r = arr[i];
+    rowId(r);
+    if(r) r.__search = null;
+    if(r){
+      if(r.__stRank == null) r.__stRank = statusPriorityRank(r[STATUS_COL]);
+      if(r.__midStr == null) r.__midStr = String(r.Material_ID ?? "");
+      if(r.__solStr == null) r.__solStr = String(r.Numero_de_solicitacao ?? "");
     }
-    html += "</tr>";
+    if(r && r.__dispDateLower == null){
+      const shown = displayCell(DATE_COL, r[DATE_COL], "aog", r);
+      r.__dispDateLower = String(shown || "").toLowerCase();
+    }
+
+    out.cargo.push(r);
+    __pushAirId__("cargo", r);
+
+    if(isCargasRow(r)){ out.cargas.push(r); __pushAirId__("cargas", r); }
+    if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r); }
+
+    const c = String((r && r.Criticidade) || "").toUpperCase();
+    if(c.includes("WAR"))    { out.war.push(r);  __pushAirId__("war", r); }
+    if(c.includes("LIMOPS")) { out.fast.push(r); __pushAirId__("fast", r); }
+    if(c.includes("AOG"))    { out.aog.push(r);  __pushAirId__("aog", r); }
+
+    const dt = parseMaybeDate(r && r.Data_Ultima_Atualizacao);
+    if(dt && (!maxDt || dt.getTime() > maxDt.getTime())) maxDt = dt;
   }
-  html += "</tbody>";
-  el.innerHTML = html;
+
+  __cacheByTable = out;
+  __cacheLastUpdate = maxDt || new Date();
+  buildSortedBaseCache();
+}
+function __pushAirId__(tableKey, r){
+  const a = cleanVal(r && r[AIR_COL]);
+  if(!a) return;
+  const mid = cleanVal(r && r.Material_ID);
+  const mp = __airIdSetByTable[tableKey];
+  if(!mp) return;
+  let set = mp.get(a);
+  if(!set){ set = new Set(); mp.set(a,set); }
+  if(mid) set.add(mid);
 }
 
-async function refreshData(){
-  if(!__session.email || !__session.pin){ showLogin(); return; }
-  // 1) pega dados
-  const r = await jsonp({ dados:"1", email:__session.email, pin:__session.pin });
-  if(!r || r.ok !== true){
-    throw new Error((r && r.error) ? r.error : "Falha ao buscar dados");
-  }
-  dados = Array.isArray(r.data) ? r.data : [];
-  renderTable();
+function getBaseRows(tableKey){ return (__cacheByTable[tableKey]||[]); }
+function getBaseRowsSorted(tableKey){ return (__sortedBaseByTable[tableKey]||getBaseRows(tableKey)); }
 
-  // 2) presença (opcional)
+function getRowSearchBundle(r, col, tableKey){
+  if(!r) return { lower:"", norm:"", digits:"" };
+  if(!r.__search) r.__search = {};
+  const key = `${col}__${tableKey||""}`;
+  if(r.__search[key]) return r.__search[key];
+
+  let lower;
+  if(col === DATE_COL){
+    lower = (r.__dispDateLower != null)
+      ? String(r.__dispDateLower)
+      : String(displayCell(DATE_COL, r[DATE_COL], tableKey, r) || "").toLowerCase();
+  } else if(col === "OBS"){
+    lower = String(displayCell("OBS", "", tableKey, r) || "").toLowerCase();
+  } else {
+    lower = String((r[col] ?? "")).toLowerCase();
+  }
+
+  const bundle = { lower, norm: normalizeText(lower), digits: digitsOnly(lower) };
+  r.__search[key] = bundle;
+  return bundle;
+}
+function matchApprox(rowBundle, token){
+  const parts = (token.parts && token.parts.length)
+    ? token.parts
+    : [{raw: token.raw, norm: token.norm, digits: token.digits}];
+  for(const t of parts){
+    const hasRaw    = t.raw    ? rowBundle.lower.includes(t.raw) : false;
+    const hasNorm   = t.norm   ? rowBundle.norm.includes(t.norm) : false;
+    const hasDigits = t.digits ? rowBundle.digits.includes(t.digits) : false;
+    if(!(hasRaw || hasNorm || hasDigits)) return false;
+  }
+  return true;
+}
+function getActiveFilters(tableKey){
+  const f = filtersByTable[tableKey] || {};
+  const active = [];
+  for(const k in f){
+    if(!Object.prototype.hasOwnProperty.call(f,k)) continue;
+    const v = String(f[k]||"").trim();
+    if(v) active.push([k, buildFilterToken(v)]);
+  }
+  return active;
+}
+
+const __filterCompiledCache = { aog:null, war:null, fast:null, cargo:null, cargas:null, tools:null };
+const __filterRowsCache = { aog:null, war:null, fast:null, cargo:null, cargas:null, tools:null };
+
+function buildFiltersSignatureCore(tableKey){
+  const f = filtersByTable[tableKey] || {};
+  const keys = Object.keys(f).filter(k => String(f[k] || "").trim() !== "").sort();
+  return keys.map(k => k + "=" + String(f[k]).trim().toLowerCase()).join("&");
+}
+function buildCombinedFilterSignature(tableKey){
+  return buildFiltersSignatureCore(tableKey) + "|AF=" + (airFocusByTable[tableKey] ? normalizeText(airFocusByTable[tableKey]) : "");
+}
+function invalidateFilterCache(tableKey){
+  __filterCompiledCache[tableKey] = null;
+  __filterRowsCache[tableKey] = null;
+}
+function getCompiledFilters(tableKey){
+  const sig = buildFiltersSignatureCore(tableKey);
+  const c = __filterCompiledCache[tableKey];
+  if(c && c.signature === sig && c.dataVersion === __dataVersion) return c.compiled;
+  const compiled = getActiveFilters(tableKey);
+  __filterCompiledCache[tableKey] = { signature: sig, dataVersion: __dataVersion, compiled };
+  return compiled;
+}
+function getFilteredBaseRows(tableKey){
+  const sig = buildCombinedFilterSignature(tableKey);
+  const c = __filterRowsCache[tableKey];
+  if(c && c.signature === sig && c.dataVersion === __dataVersion) return c.rows;
+
+  const base = getBaseRowsSorted(tableKey);
+  const compiled = getCompiledFilters(tableKey);
+
+  let rows = base;
+  if(compiled && compiled.length){
+    rows = base.filter(r=>{
+      for(let i=0;i<compiled.length;i++){
+        const col = compiled[i][0];
+        const token = compiled[i][1];
+        const bundle = getRowSearchBundle(r, col, tableKey);
+        if(!matchApprox(bundle, token)) return false;
+      }
+      return true;
+    });
+  }
+
+  const focus = airFocusByTable[tableKey];
+  if(focus){
+    const nf = normalizeText(focus);
+    rows = rows.filter(r => normalizeText(cleanVal(r[AIR_COL])) === nf);
+  }
+
+  __filterRowsCache[tableKey] = { signature: sig, dataVersion: __dataVersion, rows };
+  return rows;
+}
+
+/* =========================================================
+   ✅ OBS COMPARTILHADO CORRIGIDO
+   - Global por Material_ID
+   - Salva no ENTER com os 3 parâmetros corretos pro GAS
+   ========================================================= */
+let __sharedObsState = null;
+const __obsDraftGlobal = {};
+
+function __obsNormId__(materialId){
+  return String(materialId || "").trim();
+}
+
+function getObsFromState(_tableKeyIgnored, materialId){
+  const id = __obsNormId__(materialId);
+  if(!id) return "";
+  const st = __sharedObsState;
+  if(!st || !st.items) return "";
+  const it = st.items[id];
+  return it && it.text ? String(it.text) : "";
+}
+
+function getObsDraft(_tableKeyIgnored, materialId){
+  const id = __obsNormId__(materialId);
+  if(!id) return "";
+  return (__obsDraftGlobal[id] != null) ? String(__obsDraftGlobal[id]) : "";
+}
+
+function getObsTextForCell(tableKey, materialId){
+  const d = getObsDraft(tableKey, materialId);
+  if(d !== "") return d;
+  return getObsFromState(tableKey, materialId);
+}
+
+function obsInput(ev, tableKey, materialId){
+  const id = __obsNormId__(materialId);
+  if(!id) return;
+  __obsDraftGlobal[id] = (ev && ev.target) ? ev.target.value : "";
+}
+
+/* ✅ CORRIGIDO: passa (tableKey, id, text) corretamente para o GAS */
+async function obsKeyDown(ev, tableKey, materialId){
+  if(!ev) return;
+  if(ev.key !== "Enter") return;
+  if(ev.shiftKey) return;
+
+  ev.preventDefault();
+
+  const el = ev.target;
+  if(!el) return;
+
+  el.classList.remove("obsSaved");
+  el.classList.add("obsSaving");
+
+  const id = __obsNormId__(materialId);
+  const text = String(el.value || "");
+
   try{
-    const pr = await jsonp({ presencePing:"1", email:__session.email, pin:__session.pin });
-    renderConnected(pr && pr.users ? pr.users : []);
+    // ✅ CORRIGIDO: GAS espera (tableKey, materialId, text) — 3 parâmetros
+    const st = await gasCall("setSharedObs", tableKey, id, text);
+    __sharedObsState = st || __sharedObsState;
+
+    // Limpa o rascunho local pois foi salvo com sucesso
+    if(__obsDraftGlobal[id] != null) delete __obsDraftGlobal[id];
+
+    el.classList.remove("obsSaving");
+    el.classList.add("obsSaved");
+
+    // Atualiza a tabela para refletir o novo valor
+    const tk = String(tableKey || "").toLowerCase();
+    markDirty(tk);
+    renderTable(tk);
+    clearDirty(tk);
+  }catch(e){
+    // Se falhou, mantém o rascunho para não perder o que o usuário digitou
+    el.classList.remove("obsSaving");
+    __obsDraftGlobal[id] = String(el.value || "");
+    console.error("Erro ao salvar OBS:", e);
+  }
+}
+
+function updateObsVisibleForTable(tableKey){
+  const tk = String(tableKey||"").toLowerCase();
+  const tbl = document.getElementById(`tbl-${tk}`);
+  if(!tbl) return;
+  const areas = tbl.querySelectorAll("textarea.obsArea");
+  if(!areas || !areas.length) return;
+
+  for(const a of areas){
+    try{
+      if(document.activeElement === a) continue;
+      const mid = __obsNormId__(a.getAttribute("data-mid") || "");
+      if(!mid) continue;
+      const draft = getObsDraft(tk, mid);
+      if(draft !== "") continue;
+      const st = getObsFromState(tk, mid);
+      if(String(a.value || "") !== String(st || "")) a.value = String(st || "");
+    }catch(e){}
+  }
+}
+
+function updateObsVisibleActiveTable(){
+  const active = document.querySelector(".section.active");
+  const tk = active ? tableKeysBySection[active.id] : null;
+  if(!tk) return;
+  updateObsVisibleForTable(tk);
+}
+
+async function syncSharedObs(){
+  try{
+    const st = await gasCall("getSharedObsState");
+    __sharedObsState = st || __sharedObsState;
+    try{
+      if(!__isUserTyping__()) updateObsVisibleActiveTable();
+    }catch(e){}
   }catch(e){}
 }
 
+function displayCell(colKey, rawValue, tableKey, row){
+  if(colKey === DATE_COL){
+    const parts = getDatePartsForDisplay(rawValue);
+    if(!parts.date) return "";
+    if(parts.time) return `${parts.date} ${parts.time}`;
+    return parts.date;
+  }
+  if(colKey === "OBS"){
+    const id = row ? cleanVal(row.Material_ID) : "";
+    return getObsTextForCell(tableKey, id);
+  }
+  return String(rawValue ?? "");
+}
+
+
+/* ===== GITHUB PAGES: JSONP (sem CORS) ===== */
+function __loadAuthFromStorage__(){
+  try{
+    const raw = localStorage.getItem(AUTH_STORE_KEY);
+    if(!raw) return;
+    const obj = JSON.parse(raw);
+    if(obj && obj.email && obj.pin){
+      __AUTH.email = String(obj.email).trim().toLowerCase();
+      __AUTH.pin   = String(obj.pin);
+    }
+  }catch(e){}
+}
+function __saveAuthToStorage__(email, pin){
+  try{
+    localStorage.setItem(AUTH_STORE_KEY, JSON.stringify({ email:String(email||"").trim().toLowerCase(), pin:String(pin||"") }));
+  }catch(e){}
+}
+function __clearAuthStorage__(){
+  try{ localStorage.removeItem(AUTH_STORE_KEY); }catch(e){}
+  __AUTH = { email:"", pin:"" };
+}
+
+function __qs__(obj){
+  const sp = new URLSearchParams();
+  Object.keys(obj||{}).forEach(k=>{
+    const v = obj[k];
+    if(v === undefined || v === null) return;
+    sp.set(k, String(v));
+  });
+  return sp.toString();
+}
+function __jsonp__(params, opts){
+  return new Promise((resolve, reject)=>{
+    const useAuth = !(opts && opts.skipAuth);
+    const p = Object.assign({}, params || {});
+    if(useAuth){
+      if(!__AUTH.email || !__AUTH.pin){
+        reject(new Error("auth_required"));
+        return;
+      }
+      p.email = __AUTH.email;
+      p.pin   = __AUTH.pin;
+    }
+    const cb = "__cb_" + Math.random().toString(16).slice(2);
+    p.callback = cb;
+
+    const cleanup = ()=>{
+      try{ delete window[cb]; }catch(e){}
+      if(s && s.parentNode) s.parentNode.removeChild(s);
+    };
+
+    window[cb] = (data)=>{
+      cleanup();
+      resolve(data);
+    };
+
+    const url = GAS_WEBAPP_URL + (GAS_WEBAPP_URL.includes("?") ? "&" : "?") + __qs__(p);
+    const s = document.createElement("script");
+    s.src = url;
+    s.async = true;
+    s.onerror = ()=>{
+      cleanup();
+      reject(new Error("jsonp_load_error"));
+    };
+    document.body.appendChild(s);
+  });
+}
+
+/* Compat: "gasCall" vira um roteador JSONP para o seu doGet() */
+function gasCall(fnName, ...args){
+  const fn = String(fnName || "");
+  // Auth explícito
+  if(fn === "auth") return __jsonp__({ auth:"1", email: args[0], pin: args[1] }, { skipAuth:true });
+
+  // Dados
+  if(fn === "getDadosBaseAOG") return __jsonp__({ dados:"1" });
+  if(fn === "getDadosChunk"){
+    const sheetName = args[0] || "BASE_AOG";
+    const offset = args[1] || 0;
+    const limit = args[2] || 250;
+    return __jsonp__({ dadosChunk:"1", sheetName, offset, limit });
+  }
+
+  // Presença
+  if(fn === "pingPresence") return __jsonp__({ presencePing:"1" }).then(r=> (r && r.users) ? r.users : []);
+  if(fn === "getConnectedUsers") return __jsonp__({ presenceList:"1" }).then(r=> (r && r.users) ? r.users : []);
+
+  // Shared: Prio / Air / Obs
+  if(fn === "getSharedPrioState") return __jsonp__({ sharedPrioGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "toggleSharedPrio") return __jsonp__({ sharedPrioToggle:"1", tableKey: args[0], rowId: args[1] }).then(r=> (r && r.state) ? r.state : r);
+
+  if(fn === "getSharedAirState") return __jsonp__({ sharedAirGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "toggleSharedAirPin") return __jsonp__({ sharedAirToggle:"1", tableKey: args[0], aircraft: args[1] }).then(r=> (r && r.state) ? r.state : r);
+
+  if(fn === "getSharedObsState") return __jsonp__({ sharedObsGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "setSharedObs") return __jsonp__({ sharedObsSet:"1", tableKey: args[0], materialId: args[1], text: args[2] }).then(r=> (r && r.state) ? r.state : r);
+
+  // Turno
+  if(fn === "getSharedTurnoState") return __jsonp__({ turnoGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "addSharedTurnoItem")  return __jsonp__({ turnoAdd:"1", html: args[0] }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "toggleSharedTurnoDone") return __jsonp__({ turnoToggleDone:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "deleteSharedTurnoItem") return __jsonp__({ turnoDelete:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "updateSharedTurnoItem") return __jsonp__({ turnoUpdate:"1", id: args[0], html: args[1] }).then(r=> (r && r.state) ? r.state : r);
+
+  // Avisos
+  if(fn === "getSharedAvisosState") return __jsonp__({ avisosGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "addSharedAvisoItem")  return __jsonp__({ avisosAdd:"1", html: args[0] }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "toggleSharedAvisoDone") return __jsonp__({ avisosToggleDone:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "deleteSharedAvisoItem") return __jsonp__({ avisosDelete:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "updateSharedAvisoItem") return __jsonp__({ avisosUpdate:"1", id: args[0], html: args[1] }).then(r=> (r && r.state) ? r.state : r);
+
+  // Links
+  if(fn === "getSharedLinksState") return __jsonp__({ linksGet:"1" }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "addSharedLink") return __jsonp__({ linksAdd:"1", name: args[0], url: args[1] }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "deleteSharedLink") return __jsonp__({ linksDelete:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "deleteSharedLinkItem") return __jsonp__({ linksDelete:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
+  if(fn === "deleteLink") return __jsonp__({ linksDelete:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
+
+  // Force update / progress
+  if(fn === "forceUpdate") return __jsonp__({ forceUpdate:"1" });
+  if(fn === "getLastProgress") return __jsonp__({ progressGet:"1" }).then(r=> (r && r.progress) ? r.progress : r);
+
+  return Promise.reject(new Error("Função não mapeada: " + fn));
+}
+function hasGAS(){ return true; } // compat para o resto do código
+
+function buildWebAppUrl(params){
+  // __WEBAPP_URL é injetada pelo doGet() via scriplet <?!= WEBAPP_URL ?>
+  const base = (__WEBAPP_URL && __WEBAPP_URL.startsWith("http"))
+    ? __WEBAPP_URL
+    : window.location.href.split("?")[0]; // fallback de emergência
+  const u = new URL(base);
+  // Limpa params antigos que possam conflitar
+  ["dados","forceUpdate","versionCheck","presencePing","presenceList",
+   "connectedPing","connectedList","pingPresence","listPresence","presence",
+   "sharedAirGet","sharedAirToggle","sharedPrioGet","sharedPrioToggle",
+   "sharedObsGet","sharedObsSet","progressGet","ferramentasIds","ts"
+  ].forEach(k => u.searchParams.delete(k));
+  Object.keys(params || {}).forEach(k => u.searchParams.set(k, String(params[k])));
+  u.searchParams.set("ts", String(Date.now()));
+  return u.toString();
+}
+
+async function fetchJsonStrict(url){
+  const resp = await fetch(url, { method:"GET", cache:"no-store", credentials:"same-origin" });
+  const text = await resp.text();
+  const t = String(text || "").trim();
+  if(t.startsWith("<!doctype") || t.startsWith("<html") || t.startsWith("<")){
+    throw new Error("Resposta não-JSON (HTML).");
+  }
+  try{ return JSON.parse(text); }
+  catch(e){ throw new Error("JSON inválido: " + (e && e.message ? e.message : e)); }
+}
+
+// ✅ NOVO: usa gasCall como PRIMÁRIO (mais confiável dentro do GAS iframe)
+// fetch via URL só como fallback se não tiver GAS disponível
+async function fetchDadosViaUrl(){
+  // Dentro do GAS, google.script.run é sempre mais confiável que fetch
+  if(hasGAS()){
+    const t0 = performance.now();
+    // ✅ timeout de 25s para não travar
+    const data = await gasCallWithTimeout("getDadosBaseAOG", 25000);
+    const ms = Math.round(performance.now() - t0);
+    if(!Array.isArray(data)) throw new Error("GAS não retornou Array");
+    return { data, ms };
+  }
+  // Fallback: fetch via URL (para ambientes fora do GAS)
+  const url = buildWebAppUrl({ dados: "1" });
+  const t0 = performance.now();
+  const data = await fetchJsonStrict(url);
+  const t1 = performance.now();
+  if(!Array.isArray(data)) throw new Error("JSON inválido (esperado Array)");
+  return { data, ms: Math.round(t1 - t0) };
+}
+
+async function fetchForceUpdateViaUrl(){
+  const url = buildWebAppUrl({ forceUpdate: "1" });
+  const t0 = performance.now();
+  const data = await fetchJsonStrict(url);
+  const t1 = performance.now();
+  return { data, ms: Math.round(t1 - t0) };
+}
+
+/* ===== Conectados ===== */
+async function fetchPresencePingViaUrl(){
+  try{
+    const url = buildWebAppUrl({ presencePing: "1" });
+    const j = await fetchJsonStrict(url);
+    if(j && j.users) return j.users;
+  }catch(e){}
+  const url2 = buildWebAppUrl({ connectedPing: "1" });
+  const j2 = await fetchJsonStrict(url2);
+  return (j2 && j2.users) ? j2.users : [];
+}
+async function fetchPresenceListViaUrl(){
+  try{
+    const url = buildWebAppUrl({ presenceList: "1" });
+    const j = await fetchJsonStrict(url);
+    if(j && j.users) return j.users;
+  }catch(e){}
+  const url2 = buildWebAppUrl({ connectedList: "1" });
+  const j2 = await fetchJsonStrict(url2);
+  return (j2 && j2.users) ? j2.users : [];
+}
 function renderConnected(users){
   const box = document.getElementById("connectedBox");
   if(!box) return;
@@ -309,34 +1218,1241 @@ function renderConnected(users){
     box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">—</div>`;
     return;
   }
-  box.innerHTML = [`<div class="title">👥 Conectados (${list.length})</div>`]
-    .concat(list.slice(0,12).map(u=>`<div class="item">${escapeHtml(u.email || "desconhecido")}</div>`)).join("");
+  box.innerHTML =
+    [`<div class="title">👥 Conectados (${list.length})</div>`]
+      .concat(list.slice(0,12).map(u=>{
+        const em = (u && u.email) ? u.email : "desconhecido";
+        return `<div class="item">${escapeHtml(em)}</div>`;
+      })).join("");
 }
+async function presenceTick(){
+  const watchdog = setTimeout(()=>{
+    const box = document.getElementById("connectedBox");
+    if(box && box.innerText && box.innerText.includes("Carregando")){
+      box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`;
+    }
+  }, 8000);
 
-async function bootAfterLogin(){
   try{
-    await refreshData();
-    setInterval(()=>{ refreshData().catch(()=>{}); }, REFRESH_MS);
+    const users = await gasCall("pingPresence");
+    renderConnected(users || []);
+  }catch(err){
+    const box = document.getElementById("connectedBox");
+    if(box) box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`;
+  } finally { clearTimeout(watchdog); }
+}
+
+/* ===== Shared PRIORIDADE / AERONAVE ===== */
+let __sharedPrioState = null;
+let __sharedAirState  = null;
+
+async function syncSharedAllTables(){
+  try{
+    const pr = await gasCall("getSharedPrioState");
+    const ar = await gasCall("getSharedAirState");
+    __sharedPrioState = pr || __sharedPrioState;
+    __sharedAirState  = ar || __sharedAirState;
+
+    for(const tk of SHARED_TABLE_KEYS){
+      try{
+        const prPins = (__sharedPrioState && __sharedPrioState[tk] && Array.isArray(__sharedPrioState[tk].pins)) ? __sharedPrioState[tk].pins : null;
+        if(prPins){ priosByTable[tk] = new Set(prPins); savePrios(tk); markDirty(tk); }
+      }catch(e){}
+      try{
+        const arPins = (__sharedAirState && __sharedAirState[tk] && Array.isArray(__sharedAirState[tk].pins)) ? __sharedAirState[tk].pins : null;
+        if(arPins){ airPinnedByTable[tk] = new Set(arPins); saveAirPinned(tk); markDirty(tk); }
+      }catch(e){}
+    }
+  }catch(e){}
+}
+
+function __cssEscape__(s){
+  try{ if(window.CSS && CSS.escape) return CSS.escape(String(s)); }catch(e){}
+  return String(s).replace(/["\\]/g, "\\$&");
+}
+function updateBellButton(tableKey, rid){
+  const q = `button.bellBtn[data-table="${__cssEscape__(tableKey)}"][data-rid="${__cssEscape__(rid)}"]`;
+  const btn = document.querySelector(q);
+  if(!btn) return;
+  const on = __prioHas__(tableKey, rid);
+  btn.classList.toggle("on", !!on);
+}
+
+async function togglePrioShared(tableKey, id){
+  const tk = String(tableKey||"").toLowerCase();
+  const set = priosByTable[tk];
+  if(set.has(id)) set.delete(id); else set.add(id);
+  savePrios(tk);
+  renderPrios(tk);
+  updateBellButton(tk, id);
+
+  try{
+    const st = await gasCall("toggleSharedPrio", tk, id);
+    __sharedPrioState = st || __sharedPrioState;
+    const pins = (__sharedPrioState && __sharedPrioState[tk] && Array.isArray(__sharedPrioState[tk].pins)) ? __sharedPrioState[tk].pins : [];
+    priosByTable[tk] = new Set(pins);
+    savePrios(tk);
+    renderPrios(tk);
+    updateBellButton(tk, id);
   }catch(e){
-    console.error(e);
-    alert("Login OK, mas falhou carregar dados. Abra o console (F12) para ver o erro.");
+    try{ await syncSharedAllTables(); }catch(e2){}
+    renderPrios(tk);
+    updateBellButton(tk, id);
   }
 }
 
-/* ===== init ===== */
-setInterval(()=>{ const el=document.getElementById("clock"); if(el) el.innerText = new Date().toLocaleTimeString("pt-BR"); }, 1000);
+async function toggleAirShared(tableKey, aircraft){
+  const tk = String(tableKey||"").toLowerCase();
+  const a = cleanVal(aircraft);
+  if(!a) return;
+  const set = airPinnedByTable[tk];
+  if(set.has(a)) set.delete(a); else set.add(a);
+  saveAirPinned(tk);
+  renderAircraftBox(tk);
 
-(function init(){
-  loadSession();
-  if(__session.email && __session.pin){
-    document.getElementById("loginEmail").value = __session.email;
-    document.getElementById("loginPin").value = __session.pin;
-    hideLogin();
-    bootAfterLogin();
-  }else{
-    showLogin();
+  try{
+    const st = await gasCall("toggleSharedAirPin", tk, a);
+    __sharedAirState = st || __sharedAirState;
+    const pins = (__sharedAirState && __sharedAirState[tk] && Array.isArray(__sharedAirState[tk].pins)) ? __sharedAirState[tk].pins : [];
+    airPinnedByTable[tk] = new Set(pins);
+    saveAirPinned(tk);
+    renderAircraftBox(tk);
+  }catch(e){
+    try{ await syncSharedAllTables(); }catch(e2){}
+    renderAircraftBox(tk);
   }
+}
+
+function togglePrio(tableKey, id){
+  const tk = String(tableKey||"").toLowerCase();
+  if(isSharedTable(tk)){ togglePrioShared(tk, id); return; }
+  const set = priosByTable[tk];
+  if(set.has(id)) set.delete(id); else set.add(id);
+  savePrios(tk);
+  markDirty(tk); renderTable(tk); clearDirty(tk);
+  renderPrios(tk);
+}
+function removePrio(tableKey, id){
+  const tk = String(tableKey||"").toLowerCase();
+  if(isSharedTable(tk)){ togglePrioShared(tk, id); return; }
+  const set = priosByTable[tk];
+  if(set.has(id)) set.delete(id);
+  savePrios(tk);
+  markDirty(tk); renderTable(tk); clearDirty(tk);
+  renderPrios(tk);
+}
+function toggleAirPinned(tableKey, aircraft){
+  const tk = String(tableKey||"").toLowerCase();
+  const a = cleanVal(aircraft);
+  if(!a) return;
+  if(isSharedTable(tk)){ toggleAirShared(tk, a); return; }
+  const set = airPinnedByTable[tk];
+  if(set.has(a)) set.delete(a); else set.add(a);
+  saveAirPinned(tk);
+  renderAircraftBox(tk);
+}
+
+function setAirFocus(tableKey, aircraft){
+  const tk = String(tableKey||"").toLowerCase();
+  const a = cleanVal(aircraft);
+  if(!a) return;
+  clearFilters(tk);
+  airFocusByTable[tk] = a;
+  const tbl = document.getElementById(`tbl-${tk}`);
+  if(tbl){
+    const inputs = tbl.querySelectorAll("input.filter");
+    const idx = cols.indexOf(AIR_COL);
+    if(idx >= 0 && inputs && inputs.length){
+      const inp = inputs[idx];
+      if(inp){ inp.value = a; filtersByTable[tk][AIR_COL] = a.toLowerCase(); }
+    }
+  }
+  invalidateFilterCache(tk);
+  markDirty(tk); renderTable(tk); clearDirty(tk);
+  renderAircraftBox(tk);
+}
+function clearAirFocus(tableKey){
+  const tk = String(tableKey||"").toLowerCase();
+  const current = airFocusByTable[tk];
+  airFocusByTable[tk] = null;
+  const f = filtersByTable[tk] || {};
+  const v = String(f[AIR_COL] || "").trim().toLowerCase();
+  if(current && v && normalizeText(v) === normalizeText(current)) delete filtersByTable[tk][AIR_COL];
+  const tbl = document.getElementById(`tbl-${tk}`);
+  if(tbl){
+    const inputs = tbl.querySelectorAll("input.filter");
+    const idx = cols.indexOf(AIR_COL);
+    if(idx >= 0 && inputs && inputs.length){ const inp = inputs[idx]; if(inp) inp.value = ""; }
+  }
+  invalidateFilterCache(tk);
+  markDirty(tk); renderTable(tk); clearDirty(tk);
+  renderAircraftBox(tk);
+}
+function airCardXAction(tableKey, aircraft){
+  const tk = String(tableKey||"").toLowerCase();
+  const a = cleanVal(aircraft);
+  if(!a) return;
+  if(airFocusByTable[tk] && normalizeText(airFocusByTable[tk]) === normalizeText(a)){ clearAirFocus(tk); return; }
+  if(isSharedTable(tk)){ toggleAirShared(tk, a); return; }
+  const set = airPinnedByTable[tk];
+  if(set.has(a)) set.delete(a);
+  saveAirPinned(tk);
+  renderAircraftBox(tk);
+}
+function countIdsForAircraft(tableKey, aircraft){
+  const tk = String(tableKey||"").toLowerCase();
+  const a = cleanVal(aircraft);
+  if(!a) return 0;
+  const mp = __airIdSetByTable[tk];
+  if(!mp) return 0;
+  const set = mp.get(a);
+  return set ? set.size : 0;
+}
+
+function renderAircraftBox(tableKey){
+  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", cargas:"air-cargas", tools:"air-tools" }[tableKey];
+  const wrap = document.getElementById(wrapId);
+  if(!wrap) return;
+  const set = airPinnedByTable[tableKey];
+  if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+
+  const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`;
+  const grid = document.getElementById(`airGrid-${tableKey}`);
+  if(!grid) return;
+  const focus = airFocusByTable[tableKey] ? String(airFocusByTable[tableKey]) : "";
+
+  items.slice(0, 60).forEach(a=>{
+    const count = countIdsForAircraft(tableKey, a);
+    const isFocused = focus && normalizeText(focus) === normalizeText(a);
+
+    let marked = "";
+    try{
+      if(isSharedTable(tableKey) && __sharedAirState && __sharedAirState[tableKey] && __sharedAirState[tableKey].meta){
+        const meta = __sharedAirState[tableKey].meta[a];
+        if(meta && meta.by && meta.t){
+          const dt = parseMaybeDate(meta.t);
+          marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`;
+        }
+      }
+    }catch(e){}
+
+    const card = document.createElement("div");
+    card.className = "airCard";
+    card.innerHTML = `
+      <button class="airCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}"
+        onclick="airCardXAction('${tableKey}','${escapeHtml(a)}')">×</button>
+      <div class="airCardTitle">✈️ ${escapeHtml(a)}</div>
+      <div class="airCardMeta">IDs pendentes: <b>${count}</b></div>
+      ${marked}
+      <div class="airCardActions">
+        <button class="airFilterPill ${isFocused ? "on" : ""}" type="button"
+          title="Filtrar esta aba por esta aeronave"
+          onclick="setAirFocus('${tableKey}','${escapeHtml(a)}')">
+          ${isFocused ? "Filtrando" : "Filtrar"}
+        </button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function renderPrios(tableKey){
+  const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", cargas:"prio-cargas", tools:"prio-tools" }[tableKey];
+  const wrap = document.getElementById(wrapId);
+  if(!wrap) return;
+  const set = priosByTable[tableKey];
+  if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+
+  const baseRows = getBaseRows(tableKey);
+  const prioRows = baseRows.filter(r => __prioHas__(tableKey, rowId(r)));
+  if(prioRows.length === 0){ wrap.innerHTML = ""; return; }
+
+  wrap.innerHTML = `<div class="prioBox"><h3>🔔 Detalhes ID</h3><div class="prioGrid" id="grid-${tableKey}"></div></div>`;
+  const grid = document.getElementById(`grid-${tableKey}`);
+
+  prioRows.slice(0, 60).forEach(r=>{
+    const id = rowId(r);
+    const vID   = cleanVal(r.Material_ID);
+    const vSOL  = cleanVal(r.Numero_de_solicitacao);
+    const vNF   = cleanVal(r.Nota_fiscal);
+    const vAWB  = cleanVal(r.AWB);
+    const vPN   = cleanVal(r.PN);
+    const vORG  = cleanVal(r.Origem);
+    const vDST  = cleanVal(r.Destino);
+    const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : "";
+    const vLOG   = cleanVal(r.Descricao_logistica);
+    const vSTATUS = cleanVal(r[STATUS_COL]);
+
+    let marked = "";
+    try{
+      if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){
+        const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()];
+        if(meta && meta.by && meta.t){
+          const dt = parseMaybeDate(meta.t);
+          marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`;
+        }
+      }
+    }catch(e){}
+
+    const card = document.createElement("div");
+    card.className = "prioCard";
+    card.innerHTML = `
+      <div class="prioLine1 prioNoWrap">ID: ${escapeHtml(vID)} / ${escapeHtml(vSOL)}</div>
+      ${vROUTE ? `<div class="prioLine prioNoWrap">${escapeHtml(vROUTE)}</div>` : ""}
+      <div class="prioLine prioNoWrap">PN: ${escapeHtml(vPN)}</div>
+      <div class="prioLine prioNoWrap">NF:${escapeHtml(vNF)} / AWB:${escapeHtml(vAWB)}</div>
+      <div class="prioLine prioNoWrap">LOG:${escapeHtml(vLOG)}</div>
+      <div class="prioLine">${statusTagHtml(vSTATUS)}</div>
+      ${marked}
+      <button class="prioRemove" type="button" onclick="removePrio('${tableKey}','${escapeHtml(id)}')">Remover</button>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ===== PAGINAÇÃO ===== */
+const PAGER_STORE_KEY = {
+  aog:"AOG_PAGER_AOG_V1", war:"AOG_PAGER_WAR_V1", fast:"AOG_PAGER_FAST_V1",
+  cargo:"AOG_PAGER_CARGO_V1", cargas:"AOG_PAGER_CARGAS_V1", tools:"AOG_PAGER_TOOLS_V1"
+};
+function loadPager(tableKey){
+  try{
+    const raw = localStorage.getItem(PAGER_STORE_KEY[tableKey]);
+    if(raw){ const obj = JSON.parse(raw); return { page: Number(obj.page || 1), pageSize: Number(obj.pageSize || 150) }; }
+  }catch(e){}
+  return { page: 1, pageSize: 150 };
+}
+function savePager(tableKey){
+  try{ localStorage.setItem(PAGER_STORE_KEY[tableKey], JSON.stringify(pagerByTable[tableKey])); }catch(e){}
+}
+const pagerByTable = {
+  aog:loadPager("aog"), war:loadPager("war"), fast:loadPager("fast"),
+  cargo:loadPager("cargo"), cargas:loadPager("cargas"), tools:loadPager("tools")
+};
+function clampPage(tableKey, totalRows){
+  const pg = pagerByTable[tableKey];
+  const totalPages = Math.max(1, Math.ceil((totalRows || 0) / (pg.pageSize || 150)));
+  if(pg.page < 1) pg.page = 1;
+  if(pg.page > totalPages) pg.page = totalPages;
+  return totalPages;
+}
+function setPage(tableKey, nextPage, totalRows){
+  const pg = pagerByTable[tableKey];
+  pg.page = Number(nextPage || 1);
+  clampPage(tableKey, totalRows);
+  savePager(tableKey);
+  markDirty(tableKey); renderTable(tableKey); clearDirty(tableKey);
+}
+function setPageSize(tableKey, size, totalRows){
+  const pg = pagerByTable[tableKey];
+  const s = Number(size || 150);
+  pg.pageSize = isNaN(s) ? 150 : Math.max(50, Math.min(100, s));
+  pg.page = 1;
+  clampPage(tableKey, totalRows);
+  savePager(tableKey);
+  markDirty(tableKey); renderTable(tableKey); clearDirty(tableKey);
+}
+function ensurePagerDom(tableKey){
+  const tbl = document.getElementById(`tbl-${tableKey}`);
+  if(!tbl) return null;
+  const wrap = tbl.closest(".tableWrap");
+  if(!wrap) return null;
+  const id = `pager-${tableKey}`;
+  let bar = document.getElementById(id);
+  if(bar) return bar;
+  bar = document.createElement("div");
+  bar.id = id;
+  bar.style.cssText = "display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px;margin-bottom:10px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;color:#0f172a";
+  wrap.insertBefore(bar, tbl);
+  return bar;
+}
+function renderPager(tableKey, totalRows){
+  const bar = ensurePagerDom(tableKey);
+  if(!bar) return;
+  const pg = pagerByTable[tableKey];
+  const totalPages = clampPage(tableKey, totalRows);
+  const from = totalRows ? ((pg.page - 1) * pg.pageSize + 1) : 0;
+  const to = Math.min(totalRows, pg.page * pg.pageSize);
+  const canPrev = pg.page > 1;
+  const canNext = pg.page < totalPages;
+
+  bar.innerHTML = `
+    <button class="noteBtn" type="button" style="padding:6px 10px; ${canPrev ? "" : "opacity:.45;cursor:not-allowed"}"
+      ${canPrev ? `onclick="setPage('${tableKey}', ${pg.page-1}, ${totalRows})"` : ""}>◀ Prev</button>
+    <button class="noteBtn" type="button" style="padding:6px 10px; ${canNext ? "" : "opacity:.45;cursor:not-allowed"}"
+      ${canNext ? `onclick="setPage('${tableKey}', ${pg.page+1}, ${totalRows})"` : ""}>Próx ▶</button>
+    <span style="font-size:13px">Página <b>${pg.page}</b> / ${totalPages}</span>
+    <span style="font-size:13px">Mostrando <b>${from}</b>–<b>${to}</b> de <b>${totalRows}</b></span>
+    <span style="margin-left:auto;display:flex;align-items:center;gap:8px">
+      <span style="font-size:13px">Linhas/página</span>
+      <select onchange="setPageSize('${tableKey}', this.value, ${totalRows})" style="padding:6px;border:1px solid #e5e7eb;border-radius:8px">
+        ${[50,75,100].map(n => `<option value="${n}" ${n===pg.pageSize ? "selected" : ""}>${n}</option>`).join("")}
+      </select>
+    </span>`;
+}
+function paginateRows(rows, tableKey){
+  const pg = pagerByTable[tableKey];
+  const total = rows.length;
+  clampPage(tableKey, total);
+  renderPager(tableKey, total);
+  const start = (pg.page - 1) * pg.pageSize;
+  return rows.slice(start, start + pg.pageSize);
+}
+
+function applyFilter(tableKey, col, value){
+  filtersByTable[tableKey][col] = String(value||"").trim().toLowerCase();
+  if(pagerByTable[tableKey]) pagerByTable[tableKey].page = 1;
+  clearFilterDraft(tableKey, col);
+  invalidateFilterCache(tableKey);
+  markDirty(tableKey); renderTable(tableKey); clearDirty(tableKey);
+  renderAircraftBox(tableKey);
+}
+function clearFilters(tableKey){
+  filtersByTable[tableKey] = {};
+  const tbl = document.getElementById(`tbl-${tableKey}`);
+  if(tbl) tbl.querySelectorAll("input.filter").forEach(inp => inp.value = "");
+  if(pagerByTable[tableKey]) pagerByTable[tableKey].page = 1;
+  clearAllFilterDraft(tableKey);
+  invalidateFilterCache(tableKey);
+  markDirty(tableKey); renderTable(tableKey); clearDirty(tableKey);
+  renderAircraftBox(tableKey);
+}
+
+let __resizeState = null;
+function enableColumnResize(tableEl){
+  const ths = tableEl.querySelectorAll("th.th-resize");
+  ths.forEach(th=>{
+    if(th.__resizeBound) return;
+    th.__resizeBound = true;
+    th.addEventListener("mousedown", (e)=>{
+      const rect = th.getBoundingClientRect();
+      if((rect.right - e.clientX) >= 10) return;
+      e.preventDefault();
+      __resizeState = { th, startX: e.clientX, startW: rect.width };
+      document.body.style.cursor = "col-resize";
+    });
+  });
+}
+document.addEventListener("mousemove", (e)=>{
+  if(!__resizeState) return;
+  __resizeState.th.style.width = Math.max(80, __resizeState.startW + (e.clientX - __resizeState.startX)) + "px";
+});
+document.addEventListener("mouseup", ()=>{
+  if(!__resizeState) return;
+  __resizeState = null;
+  document.body.style.cursor = "";
+});
+
+function renderTable(tableKey){
+  const el = document.getElementById(`tbl-${tableKey}`);
+  if(!el) return;
+
+  const filteredSorted = getFilteredBaseRows(tableKey);
+  const prioRows = [], restRows = [];
+  for(let i=0;i<filteredSorted.length;i++){
+    const r = filteredSorted[i];
+    if(__prioHas__(tableKey, rowId(r))) prioRows.push(r);
+    else restRows.push(r);
+  }
+  const rowsOrdered = prioRows.concat(restRows);
+  const pageRows = paginateRows(rowsOrdered, tableKey);
+
+  let html = `<thead><tr><th style="min-width:60px">Pri</th>`;
+  html += cols.map(c=>{
+    const cls = (c==="PN") ? `class="th-pn th-resize"` : "";
+    return `<th ${cls}>${c}</th>`;
+  }).join("");
+  html += `</tr></thead>`;
+
+  html += `<thead class="filterRow"><tr><th></th>`;
+  html += cols.map(c=>`
+    <th><input class="filter"
+      placeholder="filtrar... (ENTER aplica)"
+      value="${escapeHtml(getFilterInputValue(tableKey, c))}"
+      oninput="setFilterDraft('${tableKey}','${c}',this.value)"
+      onkeydown="if(event.key==='Enter'){applyFilter('${tableKey}','${c}',this.value)}">
+    </th>`).join("");
+  html += `</tr></thead>`;
+
+  html += `<tbody>`;
+  html += pageRows.map(r=>{
+    const rid = rowId(r);
+    const on = __prioHas__(tableKey, rid);
+    const stCat = statusCategory(r[STATUS_COL]);
+    const sharedTitle = isSharedTable(tableKey)
+      ? "Prioridade compartilhada (todas as abas)"
+      : "Prioridade (somente nesta aba)";
+
+    return `<tr data-rid="${escapeHtml(rid)}">
+      <td>
+        <button class="bellBtn status-${stCat} ${on ? 'on' : ''}"
+          data-table="${escapeHtml(tableKey)}"
+          data-rid="${escapeHtml(rid)}"
+          type="button"
+          title="${escapeHtml(sharedTitle)}"
+          onclick="togglePrio('${tableKey}','${escapeHtml(rid)}')">🔔</button>
+      </td>
+      ${cols.map(c=>{
+        const displayed = displayCell(c, r[c], tableKey, r);
+
+        if(c === STATUS_COL) return `<td>${statusTagHtml(displayed)}</td>`;
+
+        if(c === AIR_COL){
+          const a = cleanVal(displayed);
+          if(!a) return `<td>${escapeHtml(displayed)}</td>`;
+          return `<td><div class="airCell">
+            <span>${escapeHtml(a)}</span>
+            <button class="airWarnBtn" type="button"
+              data-table="${escapeHtml(tableKey)}"
+              data-air="${escapeHtml(a)}"
+              title="${isSharedTable(tableKey) ? 'Marcar aeronave compartilhada' : 'Marcar aeronave (⚠️)'}"
+              onclick="toggleAirPinned('${tableKey}','${escapeHtml(a)}')">⚠️</button>
+          </div></td>`;
+        }
+
+        if(c === DATE_COL){
+          const parts = getDatePartsForDisplay(r[c]);
+          if(!parts.date) return `<td></td>`;
+          const timeHtml = parts.time ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(parts.time)}</div>` : "";
+          return `<td><div>${escapeHtml(parts.date)}</div>${timeHtml}</td>`;
+        }
+
+        if(c === "OBS"){
+          const mid = cleanVal(r.Material_ID);
+          const txt = getObsTextForCell(tableKey, mid);
+          return `<td>
+            <textarea class="obsArea"
+              data-mid="${escapeHtml(mid)}"
+              placeholder="OBS (ENTER salva • Shift+Enter = nova linha)"
+              oninput="obsInput(event,'${tableKey}','${escapeHtml(mid)}')"
+              onkeydown="obsKeyDown(event,'${tableKey}','${escapeHtml(mid)}')"
+            >${escapeHtml(txt)}</textarea>
+          </td>`;
+        }
+
+        return `<td>${escapeHtml(displayed)}</td>`;
+      }).join("")}
+    </tr>`;
+  }).join("");
+  html += `</tbody>`;
+
+  el.innerHTML = html;
+  enableColumnResize(el);
+  try{ updateObsVisibleForTable(tableKey); }catch(e){}
+}
+
+/* ===== STATUS ===== */
+function makeStatusHtml(line1){
+  return `
+    <div>${line1}</div>
+    <div class="statusLine">
+      <span class="pill" id="pillLastFetch">Refresh = tentativa: —</span>
+      <span class="pill" id="pillSuccess">Sucesso = atualização concluída: —</span>
+      <span class="pill" id="pillNext">Próx refresh em: —</span>
+      <span class="pill" id="pillUpdatedAt">Atualizado = frescor do dado: —</span>
+      <span class="pill warn" id="pillState">Estado: OK</span>
+    </div>`;
+}
+
+let __lastUpdateDate = null;
+function computeLastUpdateFromData(){
+  if(__cacheLastUpdate) return __cacheLastUpdate;
+  let maxDt = null;
+  for(const r of (Array.isArray(dados) ? dados : [])){
+    const dt = parseMaybeDate(r.Data_Ultima_Atualizacao);
+    if(dt && (!maxDt || dt.getTime() > maxDt.getTime())) maxDt = dt;
+  }
+  return maxDt || new Date();
+}
+function paintUpdateInfo(){
+  const p1 = document.getElementById("pillUpdatedAt");
+  if(!p1) return;
+  if(!__lastUpdateDate) __lastUpdateDate = computeLastUpdateFromData();
+  p1.innerText = `Atualizado = frescor do dado: ${fmtBR(__lastUpdateDate)}`;
+}
+
+// ✅ 45s — suficiente para dados grandes (4500 linhas), evita sobrecarga do GAS
+const REFRESH_EVERY_MS = 45 * 1000;
+function getAutoRefreshMs(){ return REFRESH_EVERY_MS; }
+
+let __lastFetchAt = null;
+let __lastSuccessAt = null;
+let __lastRefreshSource = "—";
+let __lastRefreshError = "";
+let __lastRefreshMs = null;
+let __refreshInFlight = false;
+let __nextRefreshAt = null;
+let __refreshTimeout = null;
+
+function __fmtCountdown__(ms){
+  const s = Math.max(0, Math.floor(ms/1000));
+  return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+}
+function scheduleNextRefresh(ms){
+  if(__refreshTimeout) clearTimeout(__refreshTimeout);
+  const delay = Math.max(1000, Number(ms || getAutoRefreshMs()));
+  __nextRefreshAt = Date.now() + delay;
+  __refreshTimeout = setTimeout(async ()=>{
+    await refreshData();
+    scheduleNextRefresh(getAutoRefreshMs());
+  }, delay);
+}
+function stopAutoRefresh(){
+  if(__refreshTimeout) clearTimeout(__refreshTimeout);
+  __refreshTimeout = null;
+  __nextRefreshAt = null;
+}
+
+function paintRefreshInfo(){
+  if(!__ADMIN_MODE) return;
+  const pSuccess = document.getElementById("pillSuccess");
+  const pLast    = document.getElementById("pillLastFetch");
+  const pNext    = document.getElementById("pillNext");
+  const pState   = document.getElementById("pillState");
+  if(pLast) pLast.innerText = __lastFetchAt ? `Refresh = tentativa: ${fmtBR(__lastFetchAt)}` : "Refresh = tentativa: —";
+  if(pSuccess) pSuccess.innerText = __lastSuccessAt ? `Sucesso = atualização concluída: ${fmtBR(__lastSuccessAt)}` : "Sucesso = atualização concluída: —";
+  if(pNext) pNext.innerText = __nextRefreshAt ? `Próx refresh em: ${__fmtCountdown__(__nextRefreshAt - Date.now())}` : "Próx refresh em: —";
+  if(pState){
+    if(__lastRefreshError){ pState.classList.add("warn"); pState.innerText = `Estado: ERRO • ${__lastRefreshError}`; }
+    else{ pState.classList.remove("warn"); pState.innerText = "Estado: OK"; }
+  }
+}
+
+function rerenderAll(opts){
+  const onlyActive = !!(opts && opts.onlyActive);
+  prepareDataCache();
+  __lastUpdateDate = computeLastUpdateFromData();
+
+  if(onlyActive){
+    const active = document.querySelector(".section.active");
+    const tk = active ? tableKeysBySection[active.id] : null;
+    if(tk){ renderAircraftBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); }
+    renderLinksUteis();
+  }else{
+    for(const tk of SHARED_TABLE_KEYS){
+      renderAircraftBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk);
+    }
+    renderLinksUteis();
+  }
+
+  const st = document.getElementById("status");
+  if(st && __ADMIN_MODE){
+    st.innerHTML = makeStatusHtml(`✅ Dados carregados. Total: ${dados.length} | ESC limpa filtros | 📝 OBS salva no ENTER`);
+  }
+  paintUpdateInfo();
+  paintRefreshInfo();
+  updateStatusVisibility();
+}
+
+// ✅ ESTRATÉGIA DEFINITIVA DE REFRESH:
+// 1. Tenta fetch via URL pública (?dados=1) — suporta payloads grandes (4500 linhas)
+// 2. Fallback: gasCall com timeout (para casos sem URL válida)
+// 3. Watchdog de 40s — garante que __refreshInFlight nunca trava forever
+
+let __refreshStartedAt = null;
+const __REFRESH_WATCHDOG_MS = 40000;
+
+async function fetchDadosViaUrl_(){
+  const url = buildWebAppUrl({ dados:"1" });
+  const t0 = performance.now();
+  const resp = await fetch(url, { method:"GET", cache:"no-store", credentials:"include" });
+  const text = await resp.text();
+  const t = String(text||"").trim();
+  if(t.startsWith("<")) throw new Error("fetch retornou HTML — URL inválida ou sem auth");
+  const data = JSON.parse(text);
+  if(!Array.isArray(data)) throw new Error("fetch não retornou Array");
+  return { data, ms: Math.round(performance.now()-t0), source:"url" };
+}
+
+async function refreshData(){
+  // Watchdog
+  if(__refreshInFlight){
+    const elapsed = __refreshStartedAt ? (Date.now()-__refreshStartedAt) : 0;
+    if(elapsed < __REFRESH_WATCHDOG_MS) return;
+    __refreshInFlight = false;
+    __lastRefreshError = "Watchdog ativado — refresh travou. Reiniciando...";
+  }
+
+  __refreshInFlight = true;
+  __refreshStartedAt = Date.now();
+  __lastFetchAt = new Date();
+  __lastRefreshError = "";
+  __lastRefreshSource = "—";
+  __lastRefreshMs = null;
+  paintRefreshInfo();
+
+  let newData = null;
+  let renderPending = false;
+
+  try{
+    let result = null;
+
+    // ✅ PRIMÁRIO: fetch via URL pública — suporta payloads de qualquer tamanho
+    // gasCall tem limite ~10MB de retorno e falha silenciosamente com 4500 linhas
+    if(__WEBAPP_URL && __WEBAPP_URL.startsWith("http")){
+      try{
+        result = await fetchDadosViaUrl_();
+      }catch(urlErr){
+        // URL falhou — tenta gasCall como fallback (funciona bem para <500 linhas)
+        if(hasGAS()){
+          const t0 = performance.now();
+          const data = await gasCallWithTimeout("getDadosBaseAOG", 35000);
+          if(Array.isArray(data)){
+            result = { data, ms: Math.round(performance.now()-t0), source:"gas-fallback" };
+          } else {
+            throw new Error("URL: " + (urlErr&&urlErr.message?urlErr.message:urlErr));
+          }
+        } else {
+          throw urlErr;
+        }
+      }
+    } else if(hasGAS()){
+      // Sem URL configurada — usa gasCall direto (cuidado com limite de payload)
+      const t0 = performance.now();
+      const data = await gasCallWithTimeout("getDadosBaseAOG", 35000);
+      if(!Array.isArray(data)) throw new Error("GAS não retornou Array");
+      result = { data, ms: Math.round(performance.now()-t0), source:"gas" };
+    } else {
+      throw new Error("Sem URL e sem GAS disponível");
+    }
+
+    newData = result.data;
+    __lastRefreshMs = result.ms;
+    __lastRefreshSource = result.source;
+
+    dados = newData;
+    __lastSuccessAt = new Date();
+    __lastRefreshError = "";
+
+    try{ await syncSharedAllTables(); }catch(e){}
+    try{ await syncSharedObs(); }catch(e){}
+    try{ await syncSharedTurno(); }catch(e){}
+    try{ await syncSharedAvisos(); }catch(e){}
+    try{ await syncSharedLinks(); }catch(e){}
+
+    __dataVersion++;
+    __sortedBaseVersion = -1;
+    for(const tk of SHARED_TABLE_KEYS) invalidateFilterCache(tk);
+    markAllTablesDirty();
+    prepareDataCache();
+    __lastUpdateDate = computeLastUpdateFromData();
+
+    if(__isUserTyping__()){
+      renderPending = true;
+    } else {
+      rerenderAll({ onlyActive: true });
+    }
+
+  }catch(err){
+    __lastRefreshError = (err && err.message) ? err.message : String(err);
+  } finally {
+    // ✅ SEMPRE libera o flag — sem exceção
+    __refreshInFlight = false;
+    __refreshStartedAt = null;
+    paintUpdateInfo();
+    paintRefreshInfo();
+  }
+
+  if(renderPending) __pendingRerender = true;
+}
+async function refreshNowUrl(){ await refreshData(); }
+async function forceUpdateNow(){
+  __lastFetchAt = new Date();
+  __lastRefreshError = "";
+  __lastRefreshSource = "forceUpdate";
+  __lastRefreshMs = null;
+  paintRefreshInfo();
+  try{
+    const out = await fetchForceUpdateViaUrl();
+    __lastRefreshMs = out.ms;
+    await refreshData();
+  }catch(e){
+    __lastRefreshError = (e && e.message) ? e.message : String(e);
+    paintRefreshInfo();
+  }
+}
+
+/* ===== LINKS ===== */
+const LINKS_UTEIS = [];
+let __sharedLinksState = null;
+
+function friendlySiteName(url){
+  try{
+    const u = new URL(url);
+    const host = (u.hostname || "").toLowerCase();
+    if(host.includes("maintenix")) return "Maintenix";
+    if(host.includes("docs.google.com")) return "Google Sheets";
+    if(host.includes("lookerstudio.google.com")) return "Looker Studio";
+    if(host.includes("toolmanager")) return "Tool Manager";
+    return u.hostname.replace(/^www\./i, "");
+  }catch(e){ return "Link"; }
+}
+async function syncSharedLinks(){
+  try{ const st = await gasCall("getSharedLinksState"); __sharedLinksState = st || __sharedLinksState; }catch(e){}
+}
+async function deleteSharedLinkById_(id, label, url){
+  const rid = String(id || "").trim();
+  if(!rid) return;
+  if(!confirm(`Excluir este link?\n\n${label || ""}\n${url || ""}`)) return;
+  try{
+    let st = null;
+    try { st = await gasCall("deleteSharedLink", rid); }
+    catch(e1){ try { st = await gasCall("deleteSharedLinkItem", rid); } catch(e2){ try { st = await gasCall("deleteLink", rid); } catch(e3){ throw e1; } } }
+    __sharedLinksState = st || __sharedLinksState;
+    renderLinksUteis();
+  }catch(err){
+    console.error("Falha ao excluir link:", err);
+    alert("Não foi possível excluir o link.");
+  }
+}
+function renderLinksUteis(){
+  const wrap = document.getElementById("linksPills");
+  if(!wrap) return;
+  wrap.innerHTML = "";
+
+  LINKS_UTEIS.forEach((url)=>{
+    const name = friendlySiteName(url);
+    const a = document.createElement("a");
+    a.className = "linkPill";
+    a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = url;
+    a.innerHTML = `<span class="linkPillIcon"></span><span>${escapeHtml(name)}</span>`;
+    wrap.appendChild(a);
+  });
+
+  const list = (__sharedLinksState && Array.isArray(__sharedLinksState.items)) ? __sharedLinksState.items : [];
+  list.filter(it => it && !it.deleted && it.url).slice(0, 80).forEach(it=>{
+    const nm = (it.name && String(it.name).trim()) ? String(it.name).trim() : friendlySiteName(it.url);
+    const pillWrap = document.createElement("span");
+    pillWrap.className = "linkPillWrap";
+    const a = document.createElement("a");
+    a.className = "linkPill";
+    a.href = it.url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = it.url;
+    a.innerHTML = `<span class="linkPillIcon"></span><span>${escapeHtml(nm)}</span>`;
+    const x = document.createElement("button");
+    x.className = "linkPillX"; x.type = "button"; x.title = "Excluir link"; x.innerText = "×";
+    x.addEventListener("click", (ev)=>{ ev.preventDefault(); ev.stopPropagation(); deleteSharedLinkById_(it.id, nm, it.url); });
+    pillWrap.appendChild(a); pillWrap.appendChild(x);
+    wrap.appendChild(pillWrap);
+  });
+}
+function toggleLinkAdd(){
+  const inp = document.getElementById("linkAddInput");
+  if(!inp) return;
+  const show = inp.style.display === "none";
+  inp.style.display = show ? "block" : "none";
+  if(show){ inp.value=""; inp.focus(); }
+}
+function parseNameAndUrl(line){
+  const s = String(line||"").trim();
+  const m = s.match(/(https?:\/\/\S+)/i);
+  if(!m) return { name:"", url:"" };
+  const url = m[1];
+  return { name: s.replace(url, "").trim(), url };
+}
+async function addLinkFromInput(){
+  const inp = document.getElementById("linkAddInput");
+  if(!inp) return;
+  const { name, url } = parseNameAndUrl(inp.value);
+  if(!url) return;
+  try{
+    const st = await gasCall("addSharedLink", name, url);
+    __sharedLinksState = st || __sharedLinksState;
+    inp.value = ""; inp.style.display = "none";
+    renderLinksUteis();
+  }catch(e){}
+}
+
+/* ===== TURNO/AVISOS ===== */
+let __sharedTurnoState  = null;
+let __sharedAvisosState = null;
+
+function sanitizeHtmlLight(html){
+  let s = String(html || "");
+  s = s.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
+  s = s.replace(/\son\w+="[^"]*"/gi, "");
+  s = s.replace(/\son\w+='[^']*'/gi, "");
+  s = s.replace(/javascript:/gi, "");
+  const allowed = ["b","strong","span","br","div"];
+  s = s.replace(/<\/?([a-z0-9]+)(\s[^>]*)?>/gi, (m, tag, attrs)=>{
+    tag = String(tag||"").toLowerCase();
+    if(!allowed.includes(tag)) return "";
+    if(tag === "span" || tag === "div"){
+      const st = (attrs||"").match(/style\s*=\s*("([^"]*)"|'([^']*)')/i);
+      if(st){
+        const val = st[2] || st[3] || "";
+        const safe = val
+          .replace(/position\s*:\s*fixed/gi,"")
+          .replace(/position\s*:\s*absolute/gi,"")
+          .replace(/z-index\s*:\s*\d+/gi,"");
+        return m.startsWith("</") ? `</${tag}>` : `<${tag} style="${escapeHtml(safe)}">`;
+      }
+      return m.startsWith("</") ? `</${tag}>` : `<${tag}>`;
+    }
+    return m.startsWith("</") ? `</${tag}>` : `<${tag}>`;
+  });
+  return s;
+}
+async function syncSharedTurno(){
+  try{ const st = await gasCall("getSharedTurnoState"); __sharedTurnoState = st || __sharedTurnoState; }catch(e){}
+}
+async function syncSharedAvisos(){
+  try{ const st = await gasCall("getSharedAvisosState"); __sharedAvisosState = st || __sharedAvisosState; }catch(e){}
+}
+function renderSharedList(kind){
+  const wrap = document.getElementById(kind === "turno" ? "turnoList" : "avisosList");
+  if(!wrap) return;
+  const state = (kind === "turno") ? __sharedTurnoState : __sharedAvisosState;
+  const items = (state && Array.isArray(state.items)) ? state.items : [];
+  wrap.innerHTML = "";
+
+  items.filter(it => it && !it.deleted).slice(0, 120).forEach(it=>{
+    const row = document.createElement("div");
+    row.className = "itemRow" + (it.done ? " done" : "");
+    row.dataset.id = it.id;
+
+    const body = document.createElement("div");
+    body.className = "itemBody";
+    body.setAttribute("contenteditable", "true");
+    body.innerHTML = it.html || "";
+
+    body.addEventListener("blur", async ()=>{
+      const html = sanitizeHtmlLight(body.innerHTML);
+      try{
+        if(kind === "turno"){
+          const st = await gasCall("updateSharedTurnoItem", it.id, html);
+          __sharedTurnoState = st || __sharedTurnoState;
+        }else{
+          const st = await gasCall("updateSharedAvisoItem", it.id, html);
+          __sharedAvisosState = st || __sharedAvisosState;
+        }
+      }catch(e){}
+    });
+
+    row.innerHTML = `
+      <input type="checkbox" ${it.done ? "checked" : ""} onchange="toggleDone('${kind}','${escapeHtml(it.id)}')">
+      <button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')">🗑️</button>`;
+    row.appendChild(body);
+
+    if(it.by && it.t){
+      const meta = document.createElement("div");
+      meta.className = "markedBy";
+      meta.innerHTML = `Criado por: <b>${escapeHtml(it.by)}</b> • ${escapeHtml(fmtBR(parseMaybeDate(it.t) || new Date(it.t)))}`;
+      wrap.appendChild(row);
+      wrap.appendChild(meta);
+    }else{
+      wrap.appendChild(row);
+    }
+  });
+}
+async function toggleDone(kind, id){
+  try{
+    if(kind === "turno"){ const st = await gasCall("toggleSharedTurnoDone", id); __sharedTurnoState = st || __sharedTurnoState; }
+    else{ const st = await gasCall("toggleSharedAvisoDone", id); __sharedAvisosState = st || __sharedAvisosState; }
+    renderSharedList(kind);
+  }catch(e){}
+}
+async function deleteItem(kind, id){
+  try{
+    if(kind === "turno"){ const st = await gasCall("deleteSharedTurnoItem", id); __sharedTurnoState = st || __sharedTurnoState; }
+    else{ const st = await gasCall("deleteSharedAvisoItem", id); __sharedAvisosState = st || __sharedAvisosState; }
+    renderSharedList(kind);
+  }catch(e){}
+}
+function getRichHtmlFromInput(kind){
+  const el = document.getElementById(kind === "turno" ? "turnoInput" : "avisoInput");
+  if(!el) return "";
+  return sanitizeHtmlLight(el.innerHTML);
+}
+function clearRichInput(kind){
+  const el = document.getElementById(kind === "turno" ? "turnoInput" : "avisoInput");
+  if(el) el.innerHTML = "";
+}
+async function addTurno(){
+  const html = getRichHtmlFromInput("turno");
+  if(!html || !html.replace(/<br\s*\/?>/gi,"").trim()) return;
+  try{
+    const st = await gasCall("addSharedTurnoItem", html);
+    __sharedTurnoState = st || __sharedTurnoState;
+    clearRichInput("turno");
+    renderSharedList("turno");
+  }catch(e){}
+}
+async function addAviso(){
+  const html = getRichHtmlFromInput("avisos");
+  if(!html || !html.replace(/<br\s*\/?>/gi,"").trim()) return;
+  try{
+    const st = await gasCall("addSharedAvisoItem", `<div>📢 ${html}</div>`);
+    __sharedAvisosState = st || __sharedAvisosState;
+    clearRichInput("avisos");
+    renderSharedList("avisos");
+  }catch(e){}
+}
+
+/* ===== Context menu ===== */
+function getSelectionRangeSafe(){
+  const sel = window.getSelection();
+  if(!sel || sel.rangeCount === 0) return null;
+  const r = sel.getRangeAt(0);
+  if(!r || r.collapsed) return null;
+  return r;
+}
+function restoreRange(rng){
+  if(!rng) return false;
+  const sel = window.getSelection();
+  if(!sel) return false;
+  sel.removeAllRanges(); sel.addRange(rng);
+  return true;
+}
+function wrapSelectionWithSpan(styleText){
+  const sel = window.getSelection();
+  if(!sel || sel.rangeCount === 0) return false;
+  const range = sel.getRangeAt(0);
+  if(range.collapsed) return false;
+  const span = document.createElement("span");
+  span.setAttribute("style", styleText);
+  try{ range.surroundContents(span); }
+  catch(e){ const frag = range.extractContents(); span.appendChild(frag); range.insertNode(span); }
+  sel.removeAllRanges();
+  const r2 = document.createRange();
+  r2.selectNodeContents(span);
+  sel.addRange(r2);
+  return true;
+}
+let __ctxMenuOpen = false;
+let __ctxStoredRange = null;
+const __ctxPending = { bold: false, fontPx: 12, color: "#0f172a" };
+function ctxEl(){ return document.getElementById("ctxMenu"); }
+function ctxHide(){ const m = ctxEl(); if(m) m.style.display = "none"; __ctxMenuOpen = false; __ctxStoredRange = null; }
+function ctxShow(x,y){
+  const m = ctxEl();
+  if(!m) return;
+  const pad = 10, w = m.offsetWidth || 300, h = m.offsetHeight || 90;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = Math.min(x, vw - w - pad), top = Math.min(y, vh - h - pad);
+  if(left < pad) left = pad; if(top < pad) top = pad;
+  m.style.left = left + "px"; m.style.top = top + "px"; m.style.display = "block";
+  __ctxMenuOpen = true;
+}
+function isSelectionInsideAllowedArea(){
+  try{
+    const sel = window.getSelection();
+    if(!sel || sel.rangeCount === 0) return false;
+    const node = sel.anchorNode;
+    if(!node) return false;
+    const el = (node.nodeType === 1) ? node : node.parentElement;
+    if(!el) return false;
+    const turno = document.getElementById("turno");
+    const avisos = document.getElementById("avisos");
+    if(turno && turno.contains(el)) return true;
+    if(avisos && avisos.contains(el)) return true;
+    return false;
+  }catch(e){ return false; }
+}
+function initCtxMenuHandlers(){
+  const boldBtn = document.getElementById("ctxBold");
+  const fontSel = document.getElementById("ctxFont");
+  const colorIn = document.getElementById("ctxColor");
+  const applyBtn = document.getElementById("ctxApply");
+
+  if(boldBtn) boldBtn.onclick = (e)=>{ e.preventDefault(); __ctxPending.bold = !__ctxPending.bold; boldBtn.classList.toggle("on", __ctxPending.bold); };
+  if(fontSel) fontSel.onchange = ()=>{ __ctxPending.fontPx = Number(fontSel.value || 12); };
+  if(colorIn) colorIn.oninput = ()=>{ __ctxPending.color = String(colorIn.value || "#0f172a"); };
+  if(applyBtn){
+    applyBtn.onclick = (e)=>{
+      e.preventDefault();
+      if(!__ctxStoredRange) return;
+      restoreRange(__ctxStoredRange);
+      const styles = [];
+      if(__ctxPending.bold) styles.push("font-weight:700");
+      if(__ctxPending.fontPx) styles.push(`font-size:${__ctxPending.fontPx}px`);
+      if(__ctxPending.color) styles.push(`color:${__ctxPending.color}`);
+      if(styles.length) wrapSelectionWithSpan(styles.join(";"));
+      ctxHide();
+    };
+  }
+
+  document.addEventListener("click", (e)=>{ if(!__ctxMenuOpen) return; const m = ctxEl(); if(m && (e.target === m || m.contains(e.target))) return; ctxHide(); });
+  document.addEventListener("scroll", ()=>{ if(__ctxMenuOpen) ctxHide(); }, true);
+  document.addEventListener("keydown", (e)=>{ if(e.key === "Escape" && __ctxMenuOpen) ctxHide(); });
+
+  document.addEventListener("contextmenu", (e)=>{
+    const rng = getSelectionRangeSafe();
+    if(!rng) return;
+    if(!isSelectionInsideAllowedArea()) return;
+    __ctxStoredRange = rng.cloneRange();
+    e.preventDefault();
+    const bb = document.getElementById("ctxBold");
+    if(bb) bb.classList.toggle("on", __ctxPending.bold);
+    const fs = document.getElementById("ctxFont");
+    if(fs) fs.value = String(__ctxPending.fontPx || 12);
+    const cc = document.getElementById("ctxColor");
+    if(cc) cc.value = String(__ctxPending.color || "#0f172a");
+    ctxShow(e.clientX, e.clientY);
+  }, true);
+}
+
+(function bindSafeClickHandlers(){
+  if(window.__SAFE_CLICK_BINDED__) return;
+  window.__SAFE_CLICK_BINDED__ = true;
+  document.addEventListener("click", (e)=>{
+    const bell = e.target && e.target.closest ? e.target.closest("button.bellBtn") : null;
+    if(bell){
+      e.preventDefault(); e.stopImmediatePropagation();
+      const tk = bell.getAttribute("data-table");
+      const rid = bell.getAttribute("data-rid");
+      if(tk && rid) togglePrio(tk, rid);
+      return;
+    }
+    const air = e.target && e.target.closest ? e.target.closest("button.airWarnBtn") : null;
+    if(air){
+      e.preventDefault(); e.stopImmediatePropagation();
+      const tk = air.getAttribute("data-table");
+      const a  = air.getAttribute("data-air");
+      if(tk && a) toggleAirPinned(tk, a);
+      return;
+    }
+  }, true);
+})();
+
+(async function init(){
+  // ===== Auth (GitHub Pages) =====
+  __loadAuthFromStorage__();
+  const overlay = document.getElementById("loginOverlay");
+  const inEmail = document.getElementById("loginEmail");
+  const inPin   = document.getElementById("loginPin");
+  const msg     = document.getElementById("loginMsg");
+  const btn     = document.getElementById("loginBtn");
+  const clr     = document.getElementById("loginClear");
+
+  function showLogin(message){
+    if(message) msg.innerText = message;
+    if(overlay) overlay.style.display = "flex";
+    if(inEmail) inEmail.value = __AUTH.email || "";
+    if(inPin) inPin.value = __AUTH.pin || "";
+    setTimeout(()=>{ try{ (inEmail && !inEmail.value) ? inEmail.focus() : (inPin && inPin.focus()); }catch(e){} }, 50);
+  }
+  function hideLogin(){
+    if(msg) msg.innerText = "";
+    if(overlay) overlay.style.display = "none";
+  }
+
+  async function doLogin(){
+    const email = String(inEmail ? inEmail.value : "").trim().toLowerCase();
+    const pin   = String(inPin ? inPin.value : "").trim();
+    if(!email) { showLogin("email obrigatório"); return; }
+    if(!pin)   { showLogin("PIN obrigatório"); return; }
+
+    msg.innerText = "Validando…";
+    try{
+      const r = await gasCall("auth", email, pin);
+      if(r && r.ok){
+        __AUTH.email = email; __AUTH.pin = pin;
+        __saveAuthToStorage__(email, pin);
+        hideLogin();
+        // dispara refresh após login
+        setTimeout(()=>{ try{ refreshData(); }catch(e){} }, 200);
+      }else{
+        showLogin((r && r.error) ? r.error : "Falha no login");
+      }
+    }catch(e){
+      showLogin("Falha ao validar (deploy /exec + acesso 'Anyone with the link')");
+    }
+  }
+
+  if(btn) btn.addEventListener("click", doLogin);
+  if(clr) clr.addEventListener("click", ()=>{
+    __clearAuthStorage__();
+    if(inEmail) inEmail.value = "";
+    if(inPin) inPin.value = "";
+    showLogin("Dados limpos. Informe email + PIN.");
+  });
+  if(inPin) inPin.addEventListener("keydown", (ev)=>{ if(ev.key === "Enter") doLogin(); });
+  if(inEmail) inEmail.addEventListener("keydown", (ev)=>{ if(ev.key === "Enter") doLogin(); });
+
+  if(__AUTH.email && __AUTH.pin){
+    // tenta validar silencioso (não bloqueia UI)
+    try{
+      const r = await gasCall("auth", __AUTH.email, __AUTH.pin);
+      if(r && r.ok) hideLogin();
+      else showLogin("PIN inválido ou usuário não cadastrado");
+    }catch(e){
+      showLogin("Falha ao validar (deploy /exec + acesso 'Anyone with the link')");
+    }
+  }else{
+    showLogin("");
+  }
+
+  window.addEventListener("unhandledrejection", ()=>{
+    const st = document.getElementById("status");
+    if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
+  });
+  window.addEventListener("error", ()=>{
+    const st = document.getElementById("status");
+    if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno no script.");
+  });
+
+  __lastUpdateDate = computeLastUpdateFromData();
+  __lastSuccessAt = new Date();
+  __lastFetchAt   = new Date();
+
+  if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("✅ Inicializando...");
+
+  prepareDataCache();
+
+  try{ await presenceTick(); }catch(e){}
+
+  if(hasGAS()){
+    try{ await syncSharedAllTables(); }catch(e){}
+    try{ await syncSharedObs(); }catch(e){}
+    try{ await syncSharedTurno(); }catch(e){}
+    try{ await syncSharedAvisos(); }catch(e){}
+    try{ await syncSharedLinks(); }catch(e){}
+  }else{
+    renderConnected([]);
+  }
+
+  renderLinksUteis();
+  renderSharedList("turno");
+  renderSharedList("avisos");
+
+  rerenderAll({ onlyActive: true });
+
+  setInterval(paintUpdateInfo, 1000);
+  setInterval(paintRefreshInfo, 1000);
+  setInterval(__tryRerenderPending__, 700);
+  document.addEventListener("focusout", ()=>{ setTimeout(__tryRerenderPending__, 150); }, true);
+
+  scheduleNextRefresh(getAutoRefreshMs());
+  setTimeout(()=>{ refreshData(); }, 1500);
+
+  // ✅ Refresh robusto com setInterval fixo (não depende de setTimeout encadeado)
+  // Garante que mesmo se o refreshData travar, o ciclo não para
+  setInterval(()=>{
+    refreshData().catch(()=>{});
+  }, getAutoRefreshMs());
+
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshData(); });
+  window.addEventListener("focus", ()=>{ refreshData(); });
+
+  initCtxMenuHandlers();
+
+  setInterval(async ()=>{
+    try{ await presenceTick(); }catch(e){}
+    if(hasGAS()){
+      try{ await syncSharedAllTables(); }catch(e){}
+      try{ await syncSharedObs(); }catch(e){}
+      try{ await syncSharedTurno(); }catch(e){}
+      try{ await syncSharedAvisos(); }catch(e){}
+      try{ await syncSharedLinks(); }catch(e){}
+    }
+    renderSharedList("turno");
+    renderSharedList("avisos");
+    renderLinksUteis();
+    try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){}
+  }, 20000);
+
+  updateStatusVisibility();
 })();
 </script>
+
 </body>
 </html>
