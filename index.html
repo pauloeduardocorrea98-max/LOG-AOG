@@ -319,7 +319,7 @@ let dados = Array.isArray(INITIAL_DATA) ? INITIAL_DATA : [];
 // =====================================================
 // ✅ GITHUB PAGES + GAS (JSONP, sem CORS)
 // Coloque aqui a URL /exec do seu WebApp (Manage deployments → Web app URL)
-const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfy__COLE_SUA_URL_EXEC_AQUI__/exec";
+const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1wU2tiPZC1_iW1SYiIOJe9WYnm93QpumnQlUd4UJKFiBh28T3wFfd3RGYoi_iUtQKng/exec";
 
 function __qs__(params){
   const esc = encodeURIComponent;
@@ -995,7 +995,7 @@ function displayCell(colKey, rawValue, tableKey, row){
    GitHub Pages não pode usar fetch() no Apps Script por CORS.
    Solução: JSONP via <script src="...&callback=...">.
 */
-const GAS_WEBAPP_URL = "COLE_AQUI_SUA_URL_EXEC_DO_WEBAPP"; // exemplo: https://script.google.com/macros/s/XXXXX/exec
+const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1wU2tiPZC1_iW1SYiIOJe9WYnm93QpumnQlUd4UJKFiBh28T3wFfd3RGYoi_iUtQKng/exec"; // exemplo: https://script.google.com/macros/s/XXXXX/exec
 
 function buildGasUrl(params){
   const u = new URL(GAS_WEBAPP_URL);
