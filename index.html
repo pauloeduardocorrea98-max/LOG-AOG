@@ -292,44 +292,6 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   </div>
 </div>
 
-
-<!-- LOGIN MODAL (GitHub Pages) -->
-<div id="loginOverlay" style="
-  position:fixed; inset:0; z-index:99999;
-  background:rgba(0,0,0,.55);
-  display:flex; align-items:center; justify-content:center;
-">
-  <div style="
-    width:min(680px, calc(100vw - 32px));
-    background:#0b1d33; border:1px solid #334155; border-radius:16px;
-    box-shadow:0 30px 80px rgba(0,0,0,.35);
-    padding:18px 18px 16px;
-    color:#e5e7eb;
-  ">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <div style="font-size:18px">🔒</div>
-      <div style="font-weight:800;font-size:16px;color:#38bdf8">Acesso ao LOG-AOG</div>
-    </div>
-    <div style="font-size:13px;opacity:.92;margin-bottom:14px">
-      Entre com seu <b>email LATAM</b> e seu <b>PIN</b> para abrir o dashboard.
-      <span style="opacity:.8">(O PIN fica salvo somente neste navegador.)</span>
-    </div>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      <input id="loginEmail" type="email" placeholder="email@latam.com"
-        style="flex:1;min-width:220px;padding:10px 12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#e5e7eb;outline:none">
-      <input id="loginPin" type="password" placeholder="PIN"
-        style="flex:1;min-width:220px;padding:10px 12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#e5e7eb;outline:none">
-      <button id="loginClear" type="button"
-        style="padding:10px 14px;border-radius:12px;border:none;background:#334155;color:#fff;cursor:pointer">Limpar</button>
-      <button id="loginBtn" type="button"
-        style="padding:10px 16px;border-radius:12px;border:none;background:#0ea5e9;color:#fff;cursor:pointer;font-weight:700">Entrar</button>
-    </div>
-
-    <div id="loginMsg" style="margin-top:12px;font-size:12px;color:#fca5a5;min-height:16px"></div>
-  </div>
-</div>
-
 <div id="ctxMenu" class="ctxMenu">
   <div class="ctxTitle">Formatação (selecione o texto → botão direito → ajustar → Aplicar)</div>
   <div class="ctxRow">
@@ -350,19 +312,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   <div class="ctxHint">Dica: o texto só muda quando você clicar em <b>Aplicar</b>.</div>
 </div>
 
-
 <script>
-/*** =========================================================
- *  GITHUB PAGES + GAS (JSONP) — CONFIG
- *  Troque a URL abaixo pela URL /exec do seu WebApp:
- *  Deploy > Manage deployments > Web app > Copy "Web app URL"
- * ========================================================= */
-const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1wU2tiPZC1_iW1SYiIOJe9WYnm93QpumnQlUd4UJKFiBh28T3wFfd3RGYoi_iUtQKng/exec";
-
-/*** LOGIN (Email + PIN) ***/
-const AUTH_STORE_KEY = "LOGAOG_AUTH_V1";
-let __AUTH = { email:"", pin:"" };
-
 const INITIAL_DATA = [];
 let dados = Array.isArray(INITIAL_DATA) ? INITIAL_DATA : [];
 
@@ -1006,188 +956,109 @@ function displayCell(colKey, rawValue, tableKey, row){
 }
 
 
-/* ===== GITHUB PAGES: JSONP (sem CORS) ===== */
-function __loadAuthFromStorage__(){
-  try{
-    const raw = localStorage.getItem(AUTH_STORE_KEY);
-    if(!raw) return;
-    const obj = JSON.parse(raw);
-    if(obj && obj.email && obj.pin){
-      __AUTH.email = String(obj.email).trim().toLowerCase();
-      __AUTH.pin   = String(obj.pin);
-    }
-  }catch(e){}
-}
-function __saveAuthToStorage__(email, pin){
-  try{
-    localStorage.setItem(AUTH_STORE_KEY, JSON.stringify({ email:String(email||"").trim().toLowerCase(), pin:String(pin||"") }));
-  }catch(e){}
-}
-function __clearAuthStorage__(){
-  try{ localStorage.removeItem(AUTH_STORE_KEY); }catch(e){}
-  __AUTH = { email:"", pin:"" };
-}
+/* ===== GAS (JSONP) =====
+   GitHub Pages não pode usar fetch() no Apps Script por CORS.
+   Solução: JSONP via <script src="...&callback=...">.
+*/
+const GAS_WEBAPP_URL = "COLE_AQUI_SUA_URL_EXEC_DO_WEBAPP"; // exemplo: https://script.google.com/macros/s/XXXXX/exec
 
-function __qs__(obj){
-  const sp = new URLSearchParams();
-  Object.keys(obj||{}).forEach(k=>{
-    const v = obj[k];
-    if(v === undefined || v === null) return;
-    sp.set(k, String(v));
-  });
-  return sp.toString();
-}
-function __jsonp__(params, opts){
-  return new Promise((resolve, reject)=>{
-    const useAuth = !(opts && opts.skipAuth);
-    const p = Object.assign({}, params || {});
-    if(useAuth){
-      if(!__AUTH.email || !__AUTH.pin){
-        reject(new Error("auth_required"));
-        return;
-      }
-      p.email = __AUTH.email;
-      p.pin   = __AUTH.pin;
-    }
-    const cb = "__cb_" + Math.random().toString(16).slice(2);
-    p.callback = cb;
-
-    const cleanup = ()=>{
-      try{ delete window[cb]; }catch(e){}
-      if(s && s.parentNode) s.parentNode.removeChild(s);
-    };
-
-    window[cb] = (data)=>{
-      cleanup();
-      resolve(data);
-    };
-
-    const url = GAS_WEBAPP_URL + (GAS_WEBAPP_URL.includes("?") ? "&" : "?") + __qs__(p);
-    const s = document.createElement("script");
-    s.src = url;
-    s.async = true;
-    s.onerror = ()=>{
-      cleanup();
-      reject(new Error("jsonp_load_error"));
-    };
-    document.body.appendChild(s);
-  });
-}
-
-/* Compat: "gasCall" vira um roteador JSONP para o seu doGet() */
-function gasCall(fnName, ...args){
-  const fn = String(fnName || "");
-  // Auth explícito
-  if(fn === "auth") return __jsonp__({ auth:"1", email: args[0], pin: args[1] }, { skipAuth:true });
-
-  // Dados
-  if(fn === "getDadosBaseAOG") return __jsonp__({ dados:"1" });
-  if(fn === "getDadosChunk"){
-    const sheetName = args[0] || "BASE_AOG";
-    const offset = args[1] || 0;
-    const limit = args[2] || 250;
-    return __jsonp__({ dadosChunk:"1", sheetName, offset, limit });
-  }
-
-  // Presença
-  if(fn === "pingPresence") return __jsonp__({ presencePing:"1" }).then(r=> (r && r.users) ? r.users : []);
-  if(fn === "getConnectedUsers") return __jsonp__({ presenceList:"1" }).then(r=> (r && r.users) ? r.users : []);
-
-  // Shared: Prio / Air / Obs
-  if(fn === "getSharedPrioState") return __jsonp__({ sharedPrioGet:"1" }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "toggleSharedPrio") return __jsonp__({ sharedPrioToggle:"1", tableKey: args[0], rowId: args[1] }).then(r=> (r && r.state) ? r.state : r);
-
-  if(fn === "getSharedAirState") return __jsonp__({ sharedAirGet:"1" }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "toggleSharedAirPin") return __jsonp__({ sharedAirToggle:"1", tableKey: args[0], aircraft: args[1] }).then(r=> (r && r.state) ? r.state : r);
-
-  if(fn === "getSharedObsState") return __jsonp__({ sharedObsGet:"1" }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "setSharedObs") return __jsonp__({ sharedObsSet:"1", tableKey: args[0], materialId: args[1], text: args[2] }).then(r=> (r && r.state) ? r.state : r);
-
-  // Turno
-  if(fn === "getSharedTurnoState") return __jsonp__({ turnoGet:"1" }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "addSharedTurnoItem")  return __jsonp__({ turnoAdd:"1", html: args[0] }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "toggleSharedTurnoDone") return __jsonp__({ turnoToggleDone:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "deleteSharedTurnoItem") return __jsonp__({ turnoDelete:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "updateSharedTurnoItem") return __jsonp__({ turnoUpdate:"1", id: args[0], html: args[1] }).then(r=> (r && r.state) ? r.state : r);
-
-  // Avisos
-  if(fn === "getSharedAvisosState") return __jsonp__({ avisosGet:"1" }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "addSharedAvisoItem")  return __jsonp__({ avisosAdd:"1", html: args[0] }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "toggleSharedAvisoDone") return __jsonp__({ avisosToggleDone:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "deleteSharedAvisoItem") return __jsonp__({ avisosDelete:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "updateSharedAvisoItem") return __jsonp__({ avisosUpdate:"1", id: args[0], html: args[1] }).then(r=> (r && r.state) ? r.state : r);
-
-  // Links
-  if(fn === "getSharedLinksState") return __jsonp__({ linksGet:"1" }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "addSharedLink") return __jsonp__({ linksAdd:"1", name: args[0], url: args[1] }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "deleteSharedLink") return __jsonp__({ linksDelete:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "deleteSharedLinkItem") return __jsonp__({ linksDelete:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
-  if(fn === "deleteLink") return __jsonp__({ linksDelete:"1", id: args[0] }).then(r=> (r && r.state) ? r.state : r);
-
-  // Force update / progress
-  if(fn === "forceUpdate") return __jsonp__({ forceUpdate:"1" });
-  if(fn === "getLastProgress") return __jsonp__({ progressGet:"1" }).then(r=> (r && r.progress) ? r.progress : r);
-
-  return Promise.reject(new Error("Função não mapeada: " + fn));
-}
-function hasGAS(){ return true; } // compat para o resto do código
-
-function buildWebAppUrl(params){
-  // __WEBAPP_URL é injetada pelo doGet() via scriplet <?!= WEBAPP_URL ?>
-  const base = (__WEBAPP_URL && __WEBAPP_URL.startsWith("http"))
-    ? __WEBAPP_URL
-    : window.location.href.split("?")[0]; // fallback de emergência
-  const u = new URL(base);
-  // Limpa params antigos que possam conflitar
-  ["dados","forceUpdate","versionCheck","presencePing","presenceList",
-   "connectedPing","connectedList","pingPresence","listPresence","presence",
-   "sharedAirGet","sharedAirToggle","sharedPrioGet","sharedPrioToggle",
-   "sharedObsGet","sharedObsSet","progressGet","ferramentasIds","ts"
-  ].forEach(k => u.searchParams.delete(k));
+function buildGasUrl(params){
+  const u = new URL(GAS_WEBAPP_URL);
   Object.keys(params || {}).forEach(k => u.searchParams.set(k, String(params[k])));
   u.searchParams.set("ts", String(Date.now()));
   return u.toString();
 }
 
-async function fetchJsonStrict(url){
-  const resp = await fetch(url, { method:"GET", cache:"no-store", credentials:"same-origin" });
-  const text = await resp.text();
-  const t = String(text || "").trim();
-  if(t.startsWith("<!doctype") || t.startsWith("<html") || t.startsWith("<")){
-    throw new Error("Resposta não-JSON (HTML).");
-  }
-  try{ return JSON.parse(text); }
-  catch(e){ throw new Error("JSON inválido: " + (e && e.message ? e.message : e)); }
+function jsonpCall(params){
+  return new Promise((resolve, reject)=>{
+    if(!GAS_WEBAPP_URL || !/^https:\/\/script\.google\.com\/macros\/s\//i.test(GAS_WEBAPP_URL)){
+      return reject(new Error("GAS_WEBAPP_URL inválida"));
+    }
+    const cb = "__jsonp_cb_" + Date.now() + "_" + Math.floor(Math.random()*1e9);
+    params = Object.assign({}, params || {}, { callback: cb });
+    const url = buildGasUrl(params);
+
+    const script = document.createElement("script");
+    let done = false;
+
+    function cleanup(){
+      if(script && script.parentNode) script.parentNode.removeChild(script);
+      try{ delete window[cb]; }catch(e){ window[cb] = undefined; }
+    }
+
+    window[cb] = (data)=>{
+      if(done) return;
+      done = true;
+      cleanup();
+      resolve(data);
+    };
+
+    script.onerror = ()=>{
+      if(done) return;
+      done = true;
+      cleanup();
+      reject(new Error("Falha no JSONP (script.onerror)"));
+    };
+
+    script.src = url;
+    document.head.appendChild(script);
+  });
 }
 
-// ✅ NOVO: usa gasCall como PRIMÁRIO (mais confiável dentro do GAS iframe)
-// fetch via URL só como fallback se não tiver GAS disponível
 async function fetchDadosViaUrl(){
-  // Dentro do GAS, google.script.run é sempre mais confiável que fetch
-  if(hasGAS()){
-    const t0 = performance.now();
-    // ✅ timeout de 25s para não travar
-    const data = await gasCallWithTimeout("getDadosBaseAOG", 25000);
-    const ms = Math.round(performance.now() - t0);
-    if(!Array.isArray(data)) throw new Error("GAS não retornou Array");
-    return { data, ms };
-  }
-  // Fallback: fetch via URL (para ambientes fora do GAS)
-  const url = buildWebAppUrl({ dados: "1" });
   const t0 = performance.now();
-  const data = await fetchJsonStrict(url);
-  const t1 = performance.now();
-  if(!Array.isArray(data)) throw new Error("JSON inválido (esperado Array)");
-  return { data, ms: Math.round(t1 - t0) };
+  const data = await jsonpCall({ dados: "1" });
+  if(!Array.isArray(data)) throw new Error("Resposta inválida (esperado Array em ?dados=1)");
+  return { data, ms: Math.round(performance.now() - t0) };
+}
+
+async function fetchDadosViaUrlChunked(limitRows = 250, onProgress){
+  const t0 = performance.now();
+  const all = [];
+  let offset = 0;
+  let total = null;
+  let safety = 0;
+
+  while(true){
+    safety++;
+    if(safety > 500) throw new Error("Chunk loop excedeu limite de segurança");
+
+    const j = await jsonpCall({ dadosChunk: "1", offset: String(offset), limit: String(limitRows) });
+
+    if(!j || j.ok !== true) throw new Error((j && j.error) ? j.error : "Chunk inválido");
+    const rows = Array.isArray(j.rows) ? j.rows : [];
+
+    if(total == null) total = Number(j.total || 0) || 0;
+
+    for(let i=0;i<rows.length;i++) all.push(rows[i]);
+
+    if(typeof onProgress === "function"){
+      const doneCount = all.length;
+      const pct = total ? Math.min(100, Math.round((doneCount/total)*100)) : 0;
+      onProgress({ doneCount, total, pct, offset, received: rows.length });
+    }
+
+    if(j.done === true) break;
+
+    const next = (j.nextOffset != null) ? Number(j.nextOffset) : (offset + rows.length);
+    if(!isFinite(next) || next <= offset) throw new Error("Chunk nextOffset inválido");
+    offset = next;
+  }
+
+  return { data: all, ms: Math.round(performance.now() - t0), total: total || all.length };
 }
 
 async function fetchForceUpdateViaUrl(){
-  const url = buildWebAppUrl({ forceUpdate: "1" });
   const t0 = performance.now();
-  const data = await fetchJsonStrict(url);
-  const t1 = performance.now();
-  return { data, ms: Math.round(t1 - t0) };
+  const data = await jsonpCall({ forceUpdate: "1" });
+  return { data, ms: Math.round(performance.now() - t0) };
 }
+
+// Para este modo GitHub, google.script.run não existe:
+function hasGAS(){ return false; }
+function gasCall(){ return Promise.reject(new Error("google.script.run indisponível (GitHub Pages)")); }
+
+
 
 /* ===== Conectados ===== */
 async function fetchPresencePingViaUrl(){
@@ -1234,8 +1105,28 @@ async function presenceTick(){
   }, 8000);
 
   try{
-    const users = await gasCall("pingPresence");
-    renderConnected(users || []);
+    if(false){
+      try{
+        const users = await gasCall("pingPresence");
+        renderConnected(users || []);
+        clearTimeout(watchdog); return;
+      }catch(e1){
+        try{
+          const users2 = await gasCall("getConnectedUsers");
+          renderConnected(users2 || []);
+          clearTimeout(watchdog); return;
+        }catch(e2){}
+      }
+    }
+    try{
+      const users3 = await fetchPresencePingViaUrl();
+      renderConnected(users3 || []);
+      clearTimeout(watchdog); return;
+    }catch(e3){
+      const users4 = await fetchPresenceListViaUrl();
+      renderConnected(users4 || []);
+      clearTimeout(watchdog); return;
+    }
   }catch(err){
     const box = document.getElementById("connectedBox");
     if(box) box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`;
@@ -1893,7 +1784,7 @@ async function refreshData(){
         result = await fetchDadosViaUrl_();
       }catch(urlErr){
         // URL falhou — tenta gasCall como fallback (funciona bem para <500 linhas)
-        if(hasGAS()){
+        if(false){
           const t0 = performance.now();
           const data = await gasCallWithTimeout("getDadosBaseAOG", 35000);
           if(Array.isArray(data)){
@@ -2314,73 +2205,6 @@ function initCtxMenuHandlers(){
 })();
 
 (async function init(){
-  // ===== Auth (GitHub Pages) =====
-  __loadAuthFromStorage__();
-  const overlay = document.getElementById("loginOverlay");
-  const inEmail = document.getElementById("loginEmail");
-  const inPin   = document.getElementById("loginPin");
-  const msg     = document.getElementById("loginMsg");
-  const btn     = document.getElementById("loginBtn");
-  const clr     = document.getElementById("loginClear");
-
-  function showLogin(message){
-    if(message) msg.innerText = message;
-    if(overlay) overlay.style.display = "flex";
-    if(inEmail) inEmail.value = __AUTH.email || "";
-    if(inPin) inPin.value = __AUTH.pin || "";
-    setTimeout(()=>{ try{ (inEmail && !inEmail.value) ? inEmail.focus() : (inPin && inPin.focus()); }catch(e){} }, 50);
-  }
-  function hideLogin(){
-    if(msg) msg.innerText = "";
-    if(overlay) overlay.style.display = "none";
-  }
-
-  async function doLogin(){
-    const email = String(inEmail ? inEmail.value : "").trim().toLowerCase();
-    const pin   = String(inPin ? inPin.value : "").trim();
-    if(!email) { showLogin("email obrigatório"); return; }
-    if(!pin)   { showLogin("PIN obrigatório"); return; }
-
-    msg.innerText = "Validando…";
-    try{
-      const r = await gasCall("auth", email, pin);
-      if(r && r.ok){
-        __AUTH.email = email; __AUTH.pin = pin;
-        __saveAuthToStorage__(email, pin);
-        hideLogin();
-        // dispara refresh após login
-        setTimeout(()=>{ try{ refreshData(); }catch(e){} }, 200);
-      }else{
-        showLogin((r && r.error) ? r.error : "Falha no login");
-      }
-    }catch(e){
-      showLogin("Falha ao validar (deploy /exec + acesso 'Anyone with the link')");
-    }
-  }
-
-  if(btn) btn.addEventListener("click", doLogin);
-  if(clr) clr.addEventListener("click", ()=>{
-    __clearAuthStorage__();
-    if(inEmail) inEmail.value = "";
-    if(inPin) inPin.value = "";
-    showLogin("Dados limpos. Informe email + PIN.");
-  });
-  if(inPin) inPin.addEventListener("keydown", (ev)=>{ if(ev.key === "Enter") doLogin(); });
-  if(inEmail) inEmail.addEventListener("keydown", (ev)=>{ if(ev.key === "Enter") doLogin(); });
-
-  if(__AUTH.email && __AUTH.pin){
-    // tenta validar silencioso (não bloqueia UI)
-    try{
-      const r = await gasCall("auth", __AUTH.email, __AUTH.pin);
-      if(r && r.ok) hideLogin();
-      else showLogin("PIN inválido ou usuário não cadastrado");
-    }catch(e){
-      showLogin("Falha ao validar (deploy /exec + acesso 'Anyone with the link')");
-    }
-  }else{
-    showLogin("");
-  }
-
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
     if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
@@ -2400,7 +2224,7 @@ function initCtxMenuHandlers(){
 
   try{ await presenceTick(); }catch(e){}
 
-  if(hasGAS()){
+  if(false){
     try{ await syncSharedAllTables(); }catch(e){}
     try{ await syncSharedObs(); }catch(e){}
     try{ await syncSharedTurno(); }catch(e){}
@@ -2437,7 +2261,7 @@ function initCtxMenuHandlers(){
 
   setInterval(async ()=>{
     try{ await presenceTick(); }catch(e){}
-    if(hasGAS()){
+    if(false){
       try{ await syncSharedAllTables(); }catch(e){}
       try{ await syncSharedObs(); }catch(e){}
       try{ await syncSharedTurno(); }catch(e){}
