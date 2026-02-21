@@ -387,7 +387,7 @@ let __knownDataVersion = "0";
 /* =========================================================
    GITHUB PAGES + GAS (JSONP) + LOGIN
    - Sem CORS: usa <script src="...&callback=...">
-   - Autenticação: email+PIN -> token (salvo no navegador)
+   - Autenticação: email+PIN (salvo no navegador)
    ========================================================= */
 const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxVbXQvKbODA2WY6oHMFogB1o_Nigt1QoPfoGgsRjVq/dev";
 const AUTH_STORE_KEY = "LOGAOG_AUTH_V1";
@@ -437,7 +437,7 @@ function __jsonp__(params){
 
 async function __api__(params){
   const a = __readAuth__();
-  if(a && a.token) params = Object.assign({}, params, { token: a.token });
+  if(a && a.email && a.pin) params = Object.assign({}, params, { email: a.email, pin: a.pin });
   const out = await __jsonp__(params);
   // Padroniza erro
   if(out && out.ok === false) throw new Error(out.error || "Erro");
@@ -481,8 +481,8 @@ async function authSubmit(){
   try{
     authMsg("ok","Validando...");
     const resp = await __jsonp__({ auth:"1", email: email, pin: p });
-    if(!resp || resp.ok !== true || !resp.token) throw new Error(resp && resp.error ? resp.error : "Falha no login");
-    __writeAuth__({ email: email, token: resp.token, issuedAt: resp.issuedAt || new Date().toISOString() });
+    if(!resp || resp.ok !== true) throw new Error(resp && resp.error ? resp.error : "Falha no login");
+    __writeAuth__({ email: email, pin: p, issuedAt: resp.issuedAt || new Date().toISOString() });
     authHide();
     // dispara refresh completo
     try{ await refreshData(); }catch(e){}
@@ -1963,7 +1963,7 @@ function rerenderAll(opts){
   prepareDataCache();
   // GITHUB: exige login
   const __a = __readAuth__();
-  if(!__a || !__a.token){ authShow(); }
+  if(!__a || !__a.email || !__a.pin){ authShow(); }
 
   __lastUpdateDate = computeLastUpdateFromData();
 
@@ -2459,9 +2459,9 @@ function initCtxMenuHandlers(){
 })();
 
 (async function init(){
-  // ✅ GitHub Pages: só inicia após login (email+PIN) para não disparar chamadas sem token
+  // ✅ GitHub Pages: só inicia após login (email+PIN) para não disparar chamadas sem login
   const __a = __readAuth__();
-  if(!__a || !__a.token){ authShow(); return; }
+  if(!__a || !__a.email || !__a.pin){ authShow(); return; }
 
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
