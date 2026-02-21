@@ -172,42 +172,36 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .ctxApply{ height:34px; padding:0 12px; border:none; border-radius:10px; background:#0ea5e9; color:#fff; cursor:pointer; font-size:13px; }
 .ctxApply:hover{ filter:brightness(.95); }
 .ctxHint{ margin-top:8px; font-size:12px; color:#64748b; }
+
+/* ===== LOGIN (PIN por usuário) ===== */
+.loginOverlay{
+  position:fixed; inset:0; background:rgba(2,6,23,.68);
+  display:none; align-items:center; justify-content:center; z-index:10000;
+}
+.loginCard{
+  width:min(560px, calc(100vw - 32px));
+  background:#0b1d33; border:1px solid #334155; border-radius:16px;
+  padding:16px; box-shadow:0 22px 50px rgba(0,0,0,.35);
+}
+.loginTitle{ font-weight:800; color:#38bdf8; font-size:16px; display:flex; align-items:center; gap:10px; }
+.loginHint{ margin-top:8px; font-size:12px; color:#cbd5e1; }
+.loginRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.loginIn{
+  flex:1; min-width:240px;
+  padding:10px; border:1px solid #334155; border-radius:10px; outline:none;
+  background:#0f172a; color:#e5e7eb;
+}
+.loginIn:focus{ border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.18); }
+.loginBtns{ display:flex; gap:10px; margin-top:12px; justify-content:flex-end; flex-wrap:wrap; }
+.loginBtn{ padding:10px 12px; border:none; border-radius:10px; cursor:pointer; }
+.loginBtn.primary{ background:#0ea5e9; color:#fff; }
+.loginBtn.gray{ background:#334155; color:#fff; }
+.loginMsg{ margin-top:10px; font-size:12px; color:#fca5a5; display:none; }
+
 </style>
 </head>
 
 <body>
-
-<!-- LOGIN (PIN) - GitHub Pages (client-side) -->
-<div id="loginOverlay" style="
-  position:fixed; inset:0; z-index:99999;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(2,6,23,.78);
-">
-  <div style="
-    width:min(520px, 92vw);
-    background:#0f172a; border:1px solid #334155;
-    border-radius:16px; padding:18px 18px 14px;
-    box-shadow:0 28px 60px rgba(0,0,0,.45);
-    color:#e5e7eb;
-  ">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-      <div style="font-size:18px">🔐</div>
-      <div style="font-weight:800;font-size:16px;color:#38bdf8">Acesso ao LOG-AOG</div>
-    </div>
-    <div style="font-size:13px;color:#cbd5e1;line-height:1.35;margin-bottom:12px;">
-      Digite o <b>PIN</b> para abrir o dashboard.<br>
-      <span style="opacity:.8">Obs: este PIN é salvo neste navegador.</span>
-    </div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <input id="pinInput" type="password" autocomplete="off" placeholder="PIN"
-        style="flex:1;min-width:220px;padding:12px;border-radius:12px;border:1px solid #334155;background:#0b1d33;color:#e5e7eb;outline:none;">
-      <button id="pinBtn" class="noteBtn" type="button" style="padding:12px 14px;border-radius:12px;">Entrar</button>
-      <button id="pinClear" class="noteBtn gray" type="button" style="padding:12px 14px;border-radius:12px;">Limpar</button>
-    </div>
-    <div id="pinMsg" style="margin-top:10px;font-size:12px;color:#fca5a5;display:none;"></div>
-  </div>
-</div>
-
 
 <div class="sidebar">
   <h2>LOGÍSTICA AOG</h2>
@@ -239,18 +233,6 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 
   <div id="turno" class="section active">
     <h1>Passagem de Turno</h1>
-<div class="box" id="ghNotice" style="display:none;margin-top:10px;"><b>Modo GitHub Pages:</b> Passagem de Turno/Avisos/Links ainda precisam de endpoints JSONP específicos (vamos ligar no próximo passo). As tabelas e OBS/Prio/Aeronave já funcionam.</div>
-
-    <!-- MARCADOR DE FRESCOR DOS DADOS -->
-    <div id="frescorBanner" style="
-      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-      background:#0f172a; border:1px solid #334155; border-radius:10px;
-      padding:10px 14px; margin-bottom:12px; font-size:13px; color:#e5e7eb;
-    ">
-      <span style="font-size:16px">🟢</span>
-      <span id="frescorTexto">Aguardando primeira atualização…</span>
-      <span id="frescorContador" style="margin-left:auto; font-size:12px; color:#94a3b8;"></span>
-    </div>
 
     <div class="noteRow">
       <div id="turnoInput" class="noteInput" contenteditable="true" data-placeholder="Digite a passagem..."></div>
@@ -357,13 +339,14 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 </div>
 
 <script>
-const INITIAL_DATA = [];
+const INITIAL_DATA = <?!= JSON.stringify(INITIAL_DATA || []) ?>;
 let dados = Array.isArray(INITIAL_DATA) ? INITIAL_DATA : [];
 
-const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxVbXQvKbODA2WY6oHMFogB1o_Nigt1QoPfoGgsRjVq/dev";
-const PIN_STORAGE_KEY = "LOGAOG_PIN_V1"; // PIN local (cliente)
-function getPin(){ return String(localStorage.getItem(PIN_STORAGE_KEY) || "").trim(); }
-function setPin(v){ localStorage.setItem(PIN_STORAGE_KEY, String(v||"").trim()); }
+// ✅ URL pública real do WebApp — injetada pelo GAS. NUNCA use window.location.href para fetch!
+const __WEBAPP_URL = "<?!= WEBAPP_URL || '' ?>";
+
+// ✅ Versão dos dados — o HTML compara com o servidor para saber se precisa rebuscar
+let __knownDataVersion = "<?!= INITIAL_DATA_VERSION || '0' ?>";
 
 const __ADMIN_MODE = (/\badmin=1\b/i.test(window.location.search) || localStorage.getItem("ADMIN_MODE")==="1");
 
@@ -419,11 +402,9 @@ function openTab(id,btn){
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  try{ const n=document.getElementById('ghNotice'); if(n) n.style.display='block'; }catch(e){}
   updateStatusVisibility();
 
-  try{ scheduleNextRefresh(getAutoRefreshMs()); }catch(e){}
-
+  // ✅ NÃO reseta o timer aqui — só renderiza a aba se estiver suja
   try{
     const tk = tableKeysBySection[id];
     if(tk){
@@ -870,7 +851,9 @@ function getFilteredBaseRows(tableKey){
 }
 
 /* =========================================================
-   OBS COMPARTILHADO
+   ✅ OBS COMPARTILHADO CORRIGIDO
+   - Global por Material_ID
+   - Salva no ENTER com os 3 parâmetros corretos pro GAS
    ========================================================= */
 let __sharedObsState = null;
 const __obsDraftGlobal = {};
@@ -906,6 +889,7 @@ function obsInput(ev, tableKey, materialId){
   __obsDraftGlobal[id] = (ev && ev.target) ? ev.target.value : "";
 }
 
+/* ✅ CORRIGIDO: passa (tableKey, id, text) corretamente para o GAS */
 async function obsKeyDown(ev, tableKey, materialId){
   if(!ev) return;
   if(ev.key !== "Enter") return;
@@ -923,19 +907,23 @@ async function obsKeyDown(ev, tableKey, materialId){
   const text = String(el.value || "");
 
   try{
-    const st = await jsonpSetSharedObs(id, text);
+    // ✅ CORRIGIDO: GAS espera (tableKey, materialId, text) — 3 parâmetros
+    const st = await __gasCall__("setSharedObs", tableKey, id, text);
     __sharedObsState = st || __sharedObsState;
 
+    // Limpa o rascunho local pois foi salvo com sucesso
     if(__obsDraftGlobal[id] != null) delete __obsDraftGlobal[id];
 
     el.classList.remove("obsSaving");
     el.classList.add("obsSaved");
 
+    // Atualiza a tabela para refletir o novo valor
     const tk = String(tableKey || "").toLowerCase();
     markDirty(tk);
     renderTable(tk);
     clearDirty(tk);
   }catch(e){
+    // Se falhou, mantém o rascunho para não perder o que o usuário digitou
     el.classList.remove("obsSaving");
     __obsDraftGlobal[id] = String(el.value || "");
     console.error("Erro ao salvar OBS:", e);
@@ -971,7 +959,7 @@ function updateObsVisibleActiveTable(){
 
 async function syncSharedObs(){
   try{
-    const st = await fetchSharedObsStateJsonp();
+    const st = await __gasCall__("getSharedObsState");
     __sharedObsState = st || __sharedObsState;
     try{
       if(!__isUserTyping__()) updateObsVisibleActiveTable();
@@ -993,136 +981,150 @@ function displayCell(colKey, rawValue, tableKey, row){
   return String(rawValue ?? "");
 }
 
-/* ===== GAS (JSONP) =====
-   GitHub Pages NÃO tem google.script.run e NÃO pode usar fetch() pro WebApp (CORS).
-   Então consumimos o WebApp via JSONP (<script src=...>).
-*/
-function __qs__(obj){
-  const p = [];
-  Object.keys(obj||{}).forEach(k=>{
-    const v = obj[k];
-    if(v === undefined || v === null) return;
-    p.push(encodeURIComponent(k) + "=" + encodeURIComponent(String(v)));
-  });
-  return p.join("&");
-}
-function __jsonp__(params, timeoutMs){
-  return new Promise((resolve, reject)=>{
-    const cb = "__jsonp_cb_" + Date.now() + "_" + Math.floor(Math.random()*1e9);
-    const t = setTimeout(()=>{
-      try{ cleanup(); }catch(e){}
-      reject(new Error("JSONP timeout"));
-    }, Math.max(3000, Number(timeoutMs||15000)));
+/* ===== GAS/JSONP (GitHub Pages) =====
+   - GitHub Pages NÃO pode usar google.script.run
+   - fetch() para script.google.com costuma falhar por CORS
+   - JSONP via <script src="...&callback=fn"> contorna CORS
+===================================== */
 
-    function cleanup(){
-      clearTimeout(t);
-      try{ delete window[cb]; }catch(e){ window[cb] = undefined; }
-      if(script && script.parentNode) script.parentNode.removeChild(script);
+const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxVbXQvKbODA2WY6oHMFogB1o_Nigt1QoPfoGgsRjVq/dev";  // ✅ seu WebApp (dev ou /exec)
+
+const LS_EMAIL = "LOGAOG_AUTH_EMAIL_V1";
+const LS_PIN   = "LOGAOG_AUTH_PIN_V1";
+
+function getAuth(){
+  return {
+    email: String(localStorage.getItem(LS_EMAIL) || "").trim().toLowerCase(),
+    pin:   String(localStorage.getItem(LS_PIN)   || "").trim()
+  };
+}
+function setAuth(email, pin){
+  localStorage.setItem(LS_EMAIL, String(email||"").trim().toLowerCase());
+  localStorage.setItem(LS_PIN,   String(pin||"").trim());
+}
+function clearAuth(){
+  localStorage.removeItem(LS_EMAIL);
+  localStorage.removeItem(LS_PIN);
+}
+
+function showLogin(msg){
+  const ov = document.getElementById("loginOverlay");
+  const em = document.getElementById("loginEmail");
+  const pn = document.getElementById("loginPin");
+  const m  = document.getElementById("loginMsg");
+  if(ov) ov.style.display = "flex";
+  if(m){
+    if(msg){ m.style.display="block"; m.innerText = String(msg); }
+    else{ m.style.display="none"; m.innerText=""; }
+  }
+  try{ if(em && !em.value) em.value = getAuth().email || ""; }catch(e){}
+  try{ if(pn) pn.value = ""; }catch(e){}
+}
+function hideLogin(){
+  const ov = document.getElementById("loginOverlay");
+  if(ov) ov.style.display = "none";
+  const m  = document.getElementById("loginMsg");
+  if(m){ m.style.display="none"; m.innerText=""; }
+}
+
+function __jsonp__(params, opts){
+  const timeoutMs = (opts && opts.timeoutMs) ? Number(opts.timeoutMs) : 20000;
+  return new Promise((resolve, reject)=>{
+    const cb = "__cb_" + Math.random().toString(36).slice(2);
+    const t0 = Date.now();
+    const done = (ok, payload)=>{
+      try{ delete window[cb]; }catch(e){}
+      try{ script.remove(); }catch(e){}
+      try{ clearTimeout(timer); }catch(e){}
+      if(ok) resolve(payload);
+      else reject(payload);
+    };
+
+    const auth = getAuth();
+    const p = Object.assign({}, params || {});
+    if(p && p.__noAuth !== true){
+      // inclui auth em todas as chamadas (exceto quando explicitamente desligado)
+      if(!p.email) p.email = auth.email;
+      if(!p.pin)   p.pin   = auth.pin;
     }
+    delete p.__noAuth;
+    p.callback = cb;
 
     window[cb] = (data)=>{
-      cleanup();
-      resolve(data);
+      done(true, data);
     };
 
-    const pin = getPin();
-    const url = GAS_WEBAPP_URL + (GAS_WEBAPP_URL.includes("?") ? "&" : "?")
-      + __qs__(Object.assign({}, params||{}, { callback: cb, pin: pin, ts: Date.now() }));
+    const qs = new URLSearchParams();
+    Object.keys(p).forEach(k=>{ if(p[k] != null) qs.set(k, String(p[k])); });
+    const src = GAS_WEBAPP_URL + (GAS_WEBAPP_URL.includes("?") ? "&" : "?") + qs.toString();
 
     const script = document.createElement("script");
-    script.src = url;
+    script.src = src;
     script.async = true;
-    script.onerror = ()=>{
-      cleanup();
-      reject(new Error("Falha ao carregar JSONP"));
-    };
+    script.onerror = ()=> done(false, new Error("Falha ao carregar JSONP (script.onerror)"));
     document.head.appendChild(script);
+
+    const timer = setTimeout(()=>{
+      done(false, new Error("Timeout JSONP (" + timeoutMs + "ms)"));
+    }, timeoutMs);
   });
 }
 
-/* ===== Dados / ForceUpdate via JSONP ===== */
-async function fetchDadosViaJsonp(){
-  const t0 = performance.now();
-  const data = await __jsonp__({ dados: 1 }, 25000);
-  if(!Array.isArray(data)) throw new Error("Resposta inválida (esperado Array) em ?dados=1");
-  return { data, ms: Math.round(performance.now() - t0) };
+async function authCheck(email, pin){
+  // authCheck precisa enviar email/pin explícitos
+  const out = await __jsonp__({ authCheck:"1", email:String(email||"").trim().toLowerCase(), pin:String(pin||"").trim() }, { timeoutMs: 20000 });
+  return out;
 }
-async function fetchDadosChunkViaJsonp(sheetName, offset, limit){
-  const j = await __jsonp__({ dadosChunk: 1, sheetName: sheetName || "BASE_AOG", offset: offset||0, limit: limit||250 }, 25000);
-  if(!j || j.ok !== true) throw new Error((j && j.error) ? j.error : "Chunk inválido");
-  return j;
-}
-async function fetchDadosViaJsonpChunked(sheetName, limitRows, onProgress){
-  const t0 = performance.now();
-  const all = [];
-  let offset = 0;
-  let total = null;
-  let safety = 0;
-  const lim = Math.max(50, Math.min(500, Number(limitRows||250)));
 
-  while(true){
-    safety++;
-    if(safety > 500) throw new Error("Chunk loop excedeu limite de segurança");
-    const part = await fetchDadosChunkViaJsonp(sheetName, offset, lim);
-    const rows = Array.isArray(part.rows) ? part.rows : [];
-    if(total == null) total = Number(part.total || 0) || 0;
-    for(const r of rows) all.push(r);
 
-    if(typeof onProgress === "function"){
-      const pct = total ? Math.min(100, Math.round((all.length/total)*100)) : 0;
-      onProgress({ doneCount: all.length, total, pct, offset, received: rows.length });
-    }
-
-    if(part.done === true) break;
-    const next = (part.nextOffset != null) ? Number(part.nextOffset) : (offset + rows.length);
-    if(!isFinite(next) || next <= offset) break;
-    offset = next;
+function __gasCall__(fnName, ...args){
+  // mapeia chamadas antigas do google.script.run
+  const fn = String(fnName || "");
+  if(fn === "getDadosBaseAOG"){ return __jsonp__({ dados:"1" }); }
+  if(fn === "getDadosChunk"){ 
+    const sheetName = args[0] || "BASE_AOG";
+    const offset = args[1] || 0;
+    const limit  = args[2] || 250;
+    return __jsonp__({ dadosChunk:"1", sheetName: sheetName, offset: String(offset), limit: String(limit) });
   }
+  if(fn === "pingPresence"){ return __jsonp__({ presencePing:"1" }).then(r=> (r && r.users) ? r.users : []); }
+  if(fn === "getConnectedUsers"){ return __jsonp__({ presenceList:"1" }).then(r=> (r && r.users) ? r.users : []); }
 
-  return { data: all, ms: Math.round(performance.now() - t0), total: total || all.length };
-}
-async function fetchForceUpdateViaJsonp(){
-  const t0 = performance.now();
-  const data = await __jsonp__({ forceUpdate: 1 }, 60000);
-  return { data, ms: Math.round(performance.now() - t0) };
-}
+  if(fn === "getSharedPrioState"){ return __jsonp__({ sharedPrioGet:"1" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "toggleSharedPrio"){ return __jsonp__({ sharedPrioToggle:"1", tableKey: args[0] || "", rowId: args[1] || "" }).then(r=> (r && r.state) ? r.state : r); }
 
-/* ===== Presença / Shared states via JSONP ===== */
-async function fetchPresencePingViaJsonp(){
-  const j = await __jsonp__({ presencePing: 1 }, 15000);
-  return (j && j.users) ? j.users : [];
-}
-async function fetchPresenceListViaJsonp(){
-  const j = await __jsonp__({ presenceList: 1 }, 15000);
-  return (j && j.users) ? j.users : [];
-}
-async function fetchSharedPrioStateJsonp(){
-  const j = await __jsonp__({ sharedPrioGet: 1 }, 15000);
-  return (j && j.state) ? j.state : null;
-}
-async function fetchSharedAirStateJsonp(){
-  const j = await __jsonp__({ sharedAirGet: 1 }, 15000);
-  return (j && j.state) ? j.state : null;
-}
-async function fetchSharedObsStateJsonp(){
-  const j = await __jsonp__({ sharedObsGet: 1 }, 15000);
-  return (j && j.state) ? j.state : null;
-}
-async function jsonpToggleSharedPrio(tableKey, rowId){
-  const j = await __jsonp__({ sharedPrioToggle: 1, tableKey: tableKey, rowId: rowId }, 15000);
-  return (j && j.state) ? j.state : null;
-}
-async function jsonpToggleSharedAir(tableKey, aircraft){
-  const j = await __jsonp__({ sharedAirToggle: 1, tableKey: tableKey, aircraft: aircraft }, 15000);
-  return (j && j.state) ? j.state : null;
-}
-async function jsonpSetSharedObs(materialId, text){
-  const j = await __jsonp__({ sharedObsSet: 1, materialId: materialId, text: text }, 20000);
-  return (j && j.state) ? j.state : null;
+  if(fn === "getSharedAirState"){ return __jsonp__({ sharedAirGet:"1" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "toggleSharedAirPin"){ return __jsonp__({ sharedAirToggle:"1", tableKey: args[0] || "", aircraft: args[1] || "" }).then(r=> (r && r.state) ? r.state : r); }
+
+  if(fn === "getSharedObsState"){ return __jsonp__({ sharedObsGet:"1" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "setSharedObs"){ return __jsonp__({ sharedObsSet:"1", tableKey: args[0] || "", materialId: args[1] || "", text: args[2] || "" }).then(r=> (r && r.state) ? r.state : r); }
+
+  if(fn === "getSharedTurnoState"){ return __jsonp__({ sharedTurnoGet:"1" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "addSharedTurnoItem"){ return __jsonp__({ sharedTurnoAdd:"1", html: args[0] || "" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "toggleSharedTurnoDone"){ return __jsonp__({ sharedTurnoDone:"1", id: args[0] || "" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "deleteSharedTurnoItem"){ return __jsonp__({ sharedTurnoDel:"1", id: args[0] || "" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "updateSharedTurnoItem"){ return __jsonp__({ sharedTurnoUpd:"1", id: args[0] || "", html: args[1] || "" }).then(r=> (r && r.state) ? r.state : r); }
+
+  if(fn === "getSharedAvisosState"){ return __jsonp__({ sharedAvisosGet:"1" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "addSharedAvisoItem"){ return __jsonp__({ sharedAvisosAdd:"1", html: args[0] || "" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "toggleSharedAvisoDone"){ return __jsonp__({ sharedAvisosDone:"1", id: args[0] || "" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "deleteSharedAvisoItem"){ return __jsonp__({ sharedAvisosDel:"1", id: args[0] || "" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "updateSharedAvisoItem"){ return __jsonp__({ sharedAvisosUpd:"1", id: args[0] || "", html: args[1] || "" }).then(r=> (r && r.state) ? r.state : r); }
+
+  if(fn === "getSharedLinksState"){ return __jsonp__({ sharedLinksGet:"1" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "addSharedLink"){ return __jsonp__({ sharedLinksAdd:"1", name: args[0] || "", url: args[1] || "" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "deleteSharedLink"){ return __jsonp__({ sharedLinksDel:"1", id: args[0] || "" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "deleteSharedLinkItem"){ return __jsonp__({ sharedLinksDel:"1", id: args[0] || "" }).then(r=> (r && r.state) ? r.state : r); }
+  if(fn === "deleteLink"){ return __jsonp__({ sharedLinksDel:"1", id: args[0] || "" }).then(r=> (r && r.state) ? r.state : r); }
+
+  if(fn === "progressGet" || fn === "getLastProgress"){ return __jsonp__({ progressGet:"1" }); }
+
+  throw new Error("Função não mapeada no GitHub JSONP: " + fn);
 }
 
-function hasGAS(){ return true; } // aqui significa "tem WebApp"
-* ===== Conectados ===== */
+
+
+/* ===== Conectados ===== */
 async function fetchPresencePingViaUrl(){
   try{
     const url = buildWebAppUrl({ presencePing: "1" });
@@ -1167,8 +1169,28 @@ async function presenceTick(){
   }, 8000);
 
   try{
-    const users = await fetchPresencePingViaJsonp();
-    renderConnected(users || []);
+    if(true){
+      try{
+        const users = await __gasCall__("pingPresence");
+        renderConnected(users || []);
+        clearTimeout(watchdog); return;
+      }catch(e1){
+        try{
+          const users2 = await __gasCall__("getConnectedUsers");
+          renderConnected(users2 || []);
+          clearTimeout(watchdog); return;
+        }catch(e2){}
+      }
+    }
+    try{
+      const users3 = await fetchPresencePingViaUrl();
+      renderConnected(users3 || []);
+      clearTimeout(watchdog); return;
+    }catch(e3){
+      const users4 = await fetchPresenceListViaUrl();
+      renderConnected(users4 || []);
+      clearTimeout(watchdog); return;
+    }
   }catch(err){
     const box = document.getElementById("connectedBox");
     if(box) box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`;
@@ -1181,8 +1203,8 @@ let __sharedAirState  = null;
 
 async function syncSharedAllTables(){
   try{
-    const pr = await fetchSharedPrioStateJsonp();
-    const ar = await fetchSharedAirStateJsonp();
+    const pr = await __gasCall__("getSharedPrioState");
+    const ar = await __gasCall__("getSharedAirState");
     __sharedPrioState = pr || __sharedPrioState;
     __sharedAirState  = ar || __sharedAirState;
 
@@ -1220,7 +1242,7 @@ async function togglePrioShared(tableKey, id){
   updateBellButton(tk, id);
 
   try{
-    const st = await jsonpToggleSharedPrio(tk, id);
+    const st = await __gasCall__("toggleSharedPrio", tk, id);
     __sharedPrioState = st || __sharedPrioState;
     const pins = (__sharedPrioState && __sharedPrioState[tk] && Array.isArray(__sharedPrioState[tk].pins)) ? __sharedPrioState[tk].pins : [];
     priosByTable[tk] = new Set(pins);
@@ -1244,7 +1266,7 @@ async function toggleAirShared(tableKey, aircraft){
   renderAircraftBox(tk);
 
   try{
-    const st = await jsonpToggleSharedAir(tk, a);
+    const st = await __gasCall__("toggleSharedAirPin", tk, a);
     __sharedAirState = st || __sharedAirState;
     const pins = (__sharedAirState && __sharedAirState[tk] && Array.isArray(__sharedAirState[tk].pins)) ? __sharedAirState[tk].pins : [];
     airPinnedByTable[tk] = new Set(pins);
@@ -1703,11 +1725,8 @@ function paintUpdateInfo(){
   p1.innerText = `Atualizado = frescor do dado: ${fmtBR(__lastUpdateDate)}`;
 }
 
-// =====================================================
-// ✅ MUDANÇA 1: Delay de refresh aumentado para 2min30s
-// =====================================================
-const REFRESH_EVERY_MS = 150 * 1000; // 2 minutos e 30 segundos
-
+// ✅ 45s — suficiente para dados grandes (4500 linhas), evita sobrecarga do GAS
+const REFRESH_EVERY_MS = 45 * 1000;
 function getAutoRefreshMs(){ return REFRESH_EVERY_MS; }
 
 let __lastFetchAt = null;
@@ -1728,8 +1747,8 @@ function scheduleNextRefresh(ms){
   const delay = Math.max(1000, Number(ms || getAutoRefreshMs()));
   __nextRefreshAt = Date.now() + delay;
   __refreshTimeout = setTimeout(async ()=>{
-    try{ await refreshData(); }catch(e){ console.error("refreshData erro no timer:", e); }
-    scheduleNextRefresh(getAutoRefreshMs()); // sempre agenda o próximo, mesmo se der erro
+    await refreshData();
+    scheduleNextRefresh(getAutoRefreshMs());
   }, delay);
 }
 function stopAutoRefresh(){
@@ -1776,94 +1795,84 @@ function rerenderAll(opts){
   }
   paintUpdateInfo();
   paintRefreshInfo();
-  try{ const n=document.getElementById('ghNotice'); if(n) n.style.display='block'; }catch(e){}
   updateStatusVisibility();
 }
 
-/*
- * ─────────────────────────────────────────────────────────────
- * DIAGNÓSTICO DEFINITIVO:
- *   fetch() do GAS HtmlService é BLOQUEADO por CORS.
- *   O HTML roda em script.googleusercontent.com e não pode
- *   chamar script.google.com via fetch — bloqueio de navegador.
- *
- *   ÚNICA forma confiável = google.script.run
- *
- *   Estratégia:
- *   1) getDadosBaseAOG  — 1 chamada, sempre existiu, mais simples
- *   2) getDadosChunk    — loop de chunks (requer novo deploy)
- * ─────────────────────────────────────────────────────────────
- */
+// ✅ ESTRATÉGIA DEFINITIVA DE REFRESH:
+// 1. Tenta fetch via URL pública (?dados=1) — suporta payloads grandes (4500 linhas)
+// 2. Fallback: gasCall com timeout (para casos sem URL válida)
+// 3. Watchdog de 40s — garante que __refreshInFlight nunca trava forever
 
-async function __gasGetDadosFull__(){
-  return await fetchDadosViaJsonp();
-}
+let __refreshStartedAt = null;
+const __REFRESH_WATCHDOG_MS = 40000;
 
-async function __gasGetDadosChunked__(onProgress){
-  const out = await fetchDadosViaJsonpChunked("BASE_AOG", 250, (p)=>{ if(typeof onProgress === "function") onProgress(p); });
-  return { data: out.data, ms: out.ms };
+async function fetchDadosViaUrl_(){
+  const url = buildWebAppUrl({ dados:"1" });
+  const t0 = performance.now();
+  const resp = await fetch(url, { method:"GET", cache:"no-store", credentials:"include" });
+  const text = await resp.text();
+  const t = String(text||"").trim();
+  if(t.startsWith("<")) throw new Error("fetch retornou HTML — URL inválida ou sem auth");
+  const data = JSON.parse(text);
+  if(!Array.isArray(data)) throw new Error("fetch não retornou Array");
+  return { data, ms: Math.round(performance.now()-t0), source:"url" };
 }
 
 async function refreshData(){
-  if(__refreshInFlight) return;
+  // Watchdog
+  if(__refreshInFlight){
+    const elapsed = __refreshStartedAt ? (Date.now()-__refreshStartedAt) : 0;
+    if(elapsed < __REFRESH_WATCHDOG_MS) return;
+    __refreshInFlight = false;
+    __lastRefreshError = "Watchdog ativado — refresh travou. Reiniciando...";
+  }
+
   __refreshInFlight = true;
+  __refreshStartedAt = Date.now();
   __lastFetchAt = new Date();
   __lastRefreshError = "";
   __lastRefreshSource = "—";
   __lastRefreshMs = null;
   paintRefreshInfo();
-  renderFrescorBanner();
 
   let newData = null;
-  const erros = [];
+  let renderPending = false;
 
   try{
-    if(!hasGAS()){
-      __lastRefreshError = "google.script.run indisponível (fora do GAS?)";
-      return;
-    }
+    let result = null;
 
-    // ── Tentativa 1: getDadosBaseAOG (simples, confiável, sempre existiu) ──
-    try{
-      __lastRefreshSource = "gas-full";
-      const out = await __gasGetDadosFull__();
-      newData = out.data;
-      __lastRefreshMs = out.ms;
-    }catch(e1){
-      const msg = e1 && e1.message ? e1.message : String(e1);
-      erros.push("gas-full: " + msg);
-      console.warn("gas-full falhou:", msg);
-      newData = null;
-    }
-
-    // ── Tentativa 2: getDadosChunk em loop (requer novo deploy com getDadosChunk) ──
-    if(!newData){
+    // ✅ PRIMÁRIO: fetch via URL pública — suporta payloads de qualquer tamanho
+    // gasCall tem limite ~10MB de retorno e falha silenciosamente com 4500 linhas
+    if(__WEBAPP_URL && __WEBAPP_URL.startsWith("http")){
       try{
-        __lastRefreshSource = "gas-chunk";
-        const out = await __gasGetDadosChunked__((p)=>{
-          try{
-            const st = document.getElementById("status");
-            if(st && __ADMIN_MODE){
-              st.style.display = "block";
-              st.innerHTML = makeStatusHtml(`⏳ Carregando chunks... ${p.doneCount}/${p.total} (${p.pct}%)`);
-            }
-          }catch(e){}
-        });
-        newData = out.data;
-        __lastRefreshMs = out.ms;
-      }catch(e2){
-        const msg = e2 && e2.message ? e2.message : String(e2);
-        erros.push("gas-chunk: " + msg);
-        console.warn("gas-chunk falhou:", msg);
-        newData = null;
+        result = await fetchDadosViaUrl_();
+      }catch(urlErr){
+        // URL falhou — tenta gasCall como fallback (funciona bem para <500 linhas)
+        if(true){
+          const t0 = performance.now();
+          const data = await gasCallWithTimeout("getDadosBaseAOG", 35000);
+          if(Array.isArray(data)){
+            result = { data, ms: Math.round(performance.now()-t0), source:"gas-fallback" };
+          } else {
+            throw new Error("URL: " + (urlErr&&urlErr.message?urlErr.message:urlErr));
+          }
+        } else {
+          throw urlErr;
+        }
       }
+    } else if(true){
+      // Sem URL configurada — usa gasCall direto (cuidado com limite de payload)
+      const t0 = performance.now();
+      const data = await gasCallWithTimeout("getDadosBaseAOG", 35000);
+      if(!Array.isArray(data)) throw new Error("GAS não retornou Array");
+      result = { data, ms: Math.round(performance.now()-t0), source:"gas" };
+    } else {
+      throw new Error("Sem URL e sem GAS disponível");
     }
 
-    if(!Array.isArray(newData) || newData.length === 0){
-      // Ambas tentativas falharam — mostra erro visível no banner
-      __lastRefreshError = erros.length ? erros.join(" | ") : "Sem dados retornados";
-      return;
-    }
+    newData = result.data;
+    __lastRefreshMs = result.ms;
+    __lastRefreshSource = result.source;
 
     dados = newData;
     __lastSuccessAt = new Date();
@@ -1883,76 +1892,24 @@ async function refreshData(){
     __lastUpdateDate = computeLastUpdateFromData();
 
     if(__isUserTyping__()){
-      __pendingRerender = true;
-      setTimeout(()=>{ if(__pendingRerender){ __pendingRerender = false; rerenderAll({ onlyActive: true }); } }, 3000);
-    }else{
+      renderPending = true;
+    } else {
       rerenderAll({ onlyActive: true });
     }
 
   }catch(err){
     __lastRefreshError = (err && err.message) ? err.message : String(err);
-    console.error("refreshData erro:", err);
-  }finally{
+  } finally {
+    // ✅ SEMPRE libera o flag — sem exceção
     __refreshInFlight = false;
+    __refreshStartedAt = null;
     paintUpdateInfo();
     paintRefreshInfo();
-    try{ renderFrescorBanner(); }catch(e){}
-  }
-}
-
-
-/* ===== MARCADOR DE FRESCOR DOS DADOS ===== */
-function renderFrescorBanner(){
-  const texto = document.getElementById("frescorTexto");
-  const banner = document.getElementById("frescorBanner");
-  if(!texto || !banner) return;
-
-  // Se há erro de refresh — mostra em vermelho com o erro real
-  if(__lastRefreshError){
-    banner.style.borderColor = "#ef4444";
-    banner.style.background = "#1a0000";
-    texto.innerHTML = `<span style="color:#ef4444">🔴</span> <b>Erro no refresh automático:</b> <span style="color:#f87171">${escapeHtml(__lastRefreshError)}</span><br><span style="font-size:11px;color:#94a3b8">Clique em "Atualizar agora" ou aguarde o próximo ciclo</span>`;
-    const ctr = document.getElementById("frescorContador");
-    if(ctr && __nextRefreshAt){
-      const s = Math.max(0, Math.floor((__nextRefreshAt - Date.now()) / 1000));
-      ctr.innerText = `Próx tentativa: ${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
-    }
-    return;
   }
 
-  const dt = __lastSuccessAt;
-  if(!dt){ texto.innerText = "Aguardando primeira atualização…"; return; }
-
-  const now = Date.now();
-  const diffMs = now - dt.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffSec = Math.floor((diffMs % 60000) / 1000);
-
-  let cor = "#22c55e";
-  if(diffMin >= 10){ cor = "#ef4444"; }
-  else if(diffMin >= 5){ cor = "#f59e0b"; }
-
-  banner.style.borderColor = cor;
-  banner.style.background = diffMin >= 10 ? "#1a0000" : (diffMin >= 5 ? "#1a1000" : "#0f172a");
-
-  const tempoStr = diffMin > 0 ? `há ${diffMin}min ${diffSec}s` : `há ${diffSec}s`;
-  const alerta = diffMin >= 10 ? " — DADOS POSSIVELMENTE DESATUALIZADOS" : (diffMin >= 5 ? " — atualizando em breve" : "");
-  const emoji = diffMin >= 10 ? "🔴" : (diffMin >= 5 ? "🟡" : "🟢");
-
-  texto.innerHTML = `<span style="color:${cor}">${emoji}</span> <b>Última atualização:</b> <span style="color:#38bdf8">${fmtBR(dt)}</span> <span style="color:${cor}">(${tempoStr}${alerta})</span>`;
-
-  const ctr = document.getElementById("frescorContador");
-  if(ctr && __nextRefreshAt){
-    const s = Math.max(0, Math.floor((__nextRefreshAt - Date.now()) / 1000));
-    ctr.innerText = `Próx. refresh: ${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
-  } else if(ctr){ ctr.innerText = ""; }
+  if(renderPending) __pendingRerender = true;
 }
-
-// Atualiza o banner a cada segundo para o contador ser ao vivo
-setInterval(()=>{ try{ renderFrescorBanner(); }catch(e){} }, 1000);
-
 async function refreshNowUrl(){ await refreshData(); }
-
 async function forceUpdateNow(){
   __lastFetchAt = new Date();
   __lastRefreshError = "";
@@ -1960,8 +1917,8 @@ async function forceUpdateNow(){
   __lastRefreshMs = null;
   paintRefreshInfo();
   try{
-    const out = await fetchForceUpdateViaJsonp();
-    __lastRefreshMs = out.ms;
+    const out = await __jsonp__({ forceUpdate:"1" }, { timeoutMs: 60000 });
+    // out.force pode trazer status/tempo
     await refreshData();
   }catch(e){
     __lastRefreshError = (e && e.message) ? e.message : String(e);
@@ -1985,7 +1942,7 @@ function friendlySiteName(url){
   }catch(e){ return "Link"; }
 }
 async function syncSharedLinks(){
-  try{ const st = Promise.resolve(null); __sharedLinksState = st || __sharedLinksState; }catch(e){}
+  try{ const st = await __gasCall__("getSharedLinksState"); __sharedLinksState = st || __sharedLinksState; }catch(e){}
 }
 async function deleteSharedLinkById_(id, label, url){
   const rid = String(id || "").trim();
@@ -1993,8 +1950,8 @@ async function deleteSharedLinkById_(id, label, url){
   if(!confirm(`Excluir este link?\n\n${label || ""}\n${url || ""}`)) return;
   try{
     let st = null;
-    try { st = Promise.resolve(null); }
-    catch(e1){ try { st = await gasCall("deleteSharedLinkItem", rid); } catch(e2){ try { st = await gasCall("deleteLink", rid); } catch(e3){ throw e1; } } }
+    try { st = await __gasCall__("deleteSharedLink", rid); }
+    catch(e1){ try { st = await __gasCall__("deleteSharedLinkItem", rid); } catch(e2){ try { st = await __gasCall__("deleteLink", rid); } catch(e3){ throw e1; } } }
     __sharedLinksState = st || __sharedLinksState;
     renderLinksUteis();
   }catch(err){
@@ -2052,7 +2009,7 @@ async function addLinkFromInput(){
   const { name, url } = parseNameAndUrl(inp.value);
   if(!url) return;
   try{
-    const st = Promise.resolve(null);
+    const st = await __gasCall__("addSharedLink", name, url);
     __sharedLinksState = st || __sharedLinksState;
     inp.value = ""; inp.style.display = "none";
     renderLinksUteis();
@@ -2090,10 +2047,10 @@ function sanitizeHtmlLight(html){
   return s;
 }
 async function syncSharedTurno(){
-  try{ const st = Promise.resolve(null); __sharedTurnoState = st || __sharedTurnoState; }catch(e){}
+  try{ const st = await __gasCall__("getSharedTurnoState"); __sharedTurnoState = st || __sharedTurnoState; }catch(e){}
 }
 async function syncSharedAvisos(){
-  try{ const st = Promise.resolve(null); __sharedAvisosState = st || __sharedAvisosState; }catch(e){}
+  try{ const st = await __gasCall__("getSharedAvisosState"); __sharedAvisosState = st || __sharedAvisosState; }catch(e){}
 }
 function renderSharedList(kind){
   const wrap = document.getElementById(kind === "turno" ? "turnoList" : "avisosList");
@@ -2116,10 +2073,10 @@ function renderSharedList(kind){
       const html = sanitizeHtmlLight(body.innerHTML);
       try{
         if(kind === "turno"){
-          const st = await gasCall("updateSharedTurnoItem", it.id, html);
+          const st = await __gasCall__("updateSharedTurnoItem", it.id, html);
           __sharedTurnoState = st || __sharedTurnoState;
         }else{
-          const st = await gasCall("updateSharedAvisoItem", it.id, html);
+          const st = await __gasCall__("updateSharedAvisoItem", it.id, html);
           __sharedAvisosState = st || __sharedAvisosState;
         }
       }catch(e){}
@@ -2143,15 +2100,15 @@ function renderSharedList(kind){
 }
 async function toggleDone(kind, id){
   try{
-    if(kind === "turno"){ const st = await gasCall("toggleSharedTurnoDone", id); __sharedTurnoState = st || __sharedTurnoState; }
-    else{ const st = await gasCall("toggleSharedAvisoDone", id); __sharedAvisosState = st || __sharedAvisosState; }
+    if(kind === "turno"){ const st = await __gasCall__("toggleSharedTurnoDone", id); __sharedTurnoState = st || __sharedTurnoState; }
+    else{ const st = await __gasCall__("toggleSharedAvisoDone", id); __sharedAvisosState = st || __sharedAvisosState; }
     renderSharedList(kind);
   }catch(e){}
 }
 async function deleteItem(kind, id){
   try{
-    if(kind === "turno"){ const st = await gasCall("deleteSharedTurnoItem", id); __sharedTurnoState = st || __sharedTurnoState; }
-    else{ const st = await gasCall("deleteSharedAvisoItem", id); __sharedAvisosState = st || __sharedAvisosState; }
+    if(kind === "turno"){ const st = await __gasCall__("deleteSharedTurnoItem", id); __sharedTurnoState = st || __sharedTurnoState; }
+    else{ const st = await __gasCall__("deleteSharedAvisoItem", id); __sharedAvisosState = st || __sharedAvisosState; }
     renderSharedList(kind);
   }catch(e){}
 }
@@ -2168,7 +2125,7 @@ async function addTurno(){
   const html = getRichHtmlFromInput("turno");
   if(!html || !html.replace(/<br\s*\/?>/gi,"").trim()) return;
   try{
-    const st = await gasCall("addSharedTurnoItem", html);
+    const st = await __gasCall__("addSharedTurnoItem", html);
     __sharedTurnoState = st || __sharedTurnoState;
     clearRichInput("turno");
     renderSharedList("turno");
@@ -2178,7 +2135,7 @@ async function addAviso(){
   const html = getRichHtmlFromInput("avisos");
   if(!html || !html.replace(/<br\s*\/?>/gi,"").trim()) return;
   try{
-    const st = await gasCall("addSharedAvisoItem", `<div>📢 ${html}</div>`);
+    const st = await __gasCall__("addSharedAvisoItem", `<div>📢 ${html}</div>`);
     __sharedAvisosState = st || __sharedAvisosState;
     clearRichInput("avisos");
     renderSharedList("avisos");
@@ -2311,70 +2268,54 @@ function initCtxMenuHandlers(){
   }, true);
 })();
 
-
 (async function init(){
-  // ===== Login PIN =====
-  function showPinMsg(msg){
-    const el = document.getElementById("pinMsg");
-    if(!el) return;
-    el.style.display = msg ? "block" : "none";
-    el.textContent = msg || "";
-  }
-  async function tryLogin(pin){
-    const p = String(pin||"").trim();
-    if(!p) { showPinMsg("Digite o PIN."); return false; }
-    setPin(p);
+  // ===== LOGIN bootstrap (GitHub Pages) =====
+  const btnEnter = document.getElementById("loginEnter");
+  const btnClear = document.getElementById("loginClear");
+  const inEmail  = document.getElementById("loginEmail");
+  const inPin    = document.getElementById("loginPin");
+
+  async function doLogin(){
+    const email = String(inEmail && inEmail.value ? inEmail.value : "").trim().toLowerCase();
+    const pin   = String(inPin && inPin.value ? inPin.value : "").trim();
+    if(!email || !pin){ showLogin("Informe e-mail e PIN."); return false; }
+
     try{
-      await fetchPresenceListViaJsonp();
-      return true;
-    }catch(e){
-      try{
-        await fetchDadosViaJsonp();
-        return true;
-      }catch(e2){
-        showPinMsg("PIN inválido ou WebApp indisponível. Verifique e tente novamente.");
+      const chk = await authCheck(email, pin);
+      if(!chk || chk.ok !== true){
+        showLogin((chk && chk.error) ? chk.error : "Login inválido.");
         return false;
       }
+      setAuth(email, pin);
+      hideLogin();
+      return true;
+    }catch(e){
+      showLogin((e && e.message) ? e.message : String(e));
+      return false;
     }
   }
-  async function unlock(){
-    const ov = document.getElementById("loginOverlay");
-    if(ov) ov.style.display = "none";
-  }
-  async function lock(){
-    const ov = document.getElementById("loginOverlay");
-    if(ov) ov.style.display = "flex";
-  }
-  const pinInput = document.getElementById("pinInput");
-  const pinBtn = document.getElementById("pinBtn");
-  const pinClear = document.getElementById("pinClear");
-  if(pinBtn) pinBtn.onclick = async ()=>{
-    showPinMsg("");
-    const ok = await tryLogin(pinInput ? pinInput.value : "");
-    if(ok) await unlock();
-  };
-  if(pinClear) pinClear.onclick = ()=>{
-    setPin("");
-    if(pinInput) pinInput.value = "";
-    showPinMsg("PIN limpo.");
-  };
-  if(pinInput){
-    pinInput.addEventListener("keydown", async (e)=>{
-      if(e.key === "Enter"){
-        showPinMsg("");
-        const ok = await tryLogin(pinInput.value);
-        if(ok) await unlock();
-      }
-    });
-  }
-  const savedPin = getPin();
-  if(savedPin){
-    if(pinInput) pinInput.value = savedPin;
-    const ok = await tryLogin(savedPin);
-    if(ok) await unlock();
-    else await lock();
+
+  if(btnEnter) btnEnter.onclick = ()=>{ doLogin().then(ok=>{ if(ok) location.reload(); }); };
+  if(btnClear) btnClear.onclick = ()=>{ clearAuth(); showLogin(""); };
+
+  // tenta login silencioso
+  const existing = getAuth();
+  if(!existing.email || !existing.pin){
+    showLogin("");
+    return; // NÃO inicia o app sem login
   }else{
-    await lock();
+    try{
+      const chk = await authCheck(existing.email, existing.pin);
+      if(!chk || chk.ok !== true){
+        clearAuth();
+        showLogin((chk && chk.error) ? chk.error : "Faça login novamente.");
+        return;
+      }
+      hideLogin();
+    }catch(e){
+      showLogin("Falha ao validar login. Tente novamente.");
+      return;
+    }
   }
 
   window.addEventListener("unhandledrejection", ()=>{
@@ -2396,7 +2337,7 @@ function initCtxMenuHandlers(){
 
   try{ await presenceTick(); }catch(e){}
 
-  if(hasGAS()){
+  if(true){
     try{ await syncSharedAllTables(); }catch(e){}
     try{ await syncSharedObs(); }catch(e){}
     try{ await syncSharedTurno(); }catch(e){}
@@ -2420,22 +2361,20 @@ function initCtxMenuHandlers(){
   scheduleNextRefresh(getAutoRefreshMs());
   setTimeout(()=>{ refreshData(); }, 1500);
 
+  // ✅ Refresh robusto com setInterval fixo (não depende de setTimeout encadeado)
+  // Garante que mesmo se o refreshData travar, o ciclo não para
+  setInterval(()=>{
+    refreshData().catch(()=>{});
+  }, getAutoRefreshMs());
+
   document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshData(); });
   window.addEventListener("focus", ()=>{ refreshData(); });
 
   initCtxMenuHandlers();
 
-  // =====================================================
-  // ✅ MUDANÇA 3: Dois setIntervals separados:
-  //   - Colaborativo (presença, OBS, turno, avisos): 30s
-  //     → Dados que mudam rápido entre usuários
-  //   - Dados da planilha: controlado pelo scheduleNextRefresh (2min30s)
-  // =====================================================
-
-  // Sync colaborativo leve (30s) — não busca planilha, só estado compartilhado
   setInterval(async ()=>{
     try{ await presenceTick(); }catch(e){}
-    if(hasGAS()){
+    if(true){
       try{ await syncSharedAllTables(); }catch(e){}
       try{ await syncSharedObs(); }catch(e){}
       try{ await syncSharedTurno(); }catch(e){}
@@ -2446,12 +2385,29 @@ function initCtxMenuHandlers(){
     renderSharedList("avisos");
     renderLinksUteis();
     try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){}
-  }, 30000); // 30 segundos — só dados colaborativos leves
+  }, 20000);
 
-  try{ const n=document.getElementById('ghNotice'); if(n) n.style.display='block'; }catch(e){}
   updateStatusVisibility();
 })();
 </script>
+
+
+<!-- ===== LOGIN (GitHub Pages) ===== -->
+<div class="loginOverlay" id="loginOverlay">
+  <div class="loginCard">
+    <div class="loginTitle">🔐 Acesso ao LOG-AOG</div>
+    <div class="loginHint">Digite seu e-mail LATAM e seu PIN para abrir o dashboard. (Fica salvo neste navegador.)</div>
+    <div class="loginRow">
+      <input id="loginEmail" class="loginIn" type="email" placeholder="email@latam.com" autocomplete="username">
+      <input id="loginPin" class="loginIn" type="password" placeholder="PIN" autocomplete="current-password">
+    </div>
+    <div class="loginBtns">
+      <button class="loginBtn gray" type="button" id="loginClear">Limpar</button>
+      <button class="loginBtn primary" type="button" id="loginEnter">Entrar</button>
+    </div>
+    <div class="loginMsg" id="loginMsg"></div>
+  </div>
+</div>
 
 </body>
 </html>
