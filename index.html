@@ -316,6 +316,41 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 const INITIAL_DATA = [];
 let dados = Array.isArray(INITIAL_DATA) ? INITIAL_DATA : [];
 
+// =====================================================
+// ✅ GITHUB PAGES + GAS (JSONP, sem CORS)
+// Coloque aqui a URL /exec do seu WebApp (Manage deployments → Web app URL)
+const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfy__COLE_SUA_URL_EXEC_AQUI__/exec";
+
+function __qs__(params){
+  const esc = encodeURIComponent;
+  return Object.keys(params||{}).map(k=>`${esc(k)}=${esc(String(params[k]))}`).join("&");
+}
+function jsonpCall(params, timeoutMs=20000){
+  return new Promise((resolve, reject)=>{
+    if(!GAS_WEBAPP_URL || GAS_WEBAPP_URL.includes("COLE_SUA_URL")) return reject(new Error("GAS_WEBAPP_URL não configurada"));
+    const cb = "__cb_" + Math.random().toString(36).slice(2);
+    const t0 = Date.now();
+    const cleanup = ()=>{
+      try{ delete window[cb]; }catch(e){}
+      if(script && script.parentNode) script.parentNode.removeChild(script);
+      if(timer) clearTimeout(timer);
+    };
+    window[cb] = (data)=>{ cleanup(); resolve({ data, ms: Date.now()-t0 }); };
+
+    const q = __qs__(Object.assign({}, params||{}, { callback: cb, ts: Date.now() }));
+    const src = GAS_WEBAPP_URL + (GAS_WEBAPP_URL.includes("?") ? "&" : "?") + q;
+
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.onerror = ()=>{ cleanup(); reject(new Error("Falha ao carregar JSONP (script.onerror)")); };
+    document.head.appendChild(script);
+
+    const timer = setTimeout(()=>{ cleanup(); reject(new Error("Timeout JSONP")); }, Math.max(3000, timeoutMs||20000));
+  });
+}
+// =====================================================
+
 // ✅ URL pública real do WebApp — injetada pelo GAS. NUNCA use window.location.href para fetch!
 const __WEBAPP_URL = "<?!= WEBAPP_URL || '' ?>";
 
@@ -960,7 +995,7 @@ function displayCell(colKey, rawValue, tableKey, row){
    GitHub Pages não pode usar fetch() no Apps Script por CORS.
    Solução: JSONP via <script src="...&callback=...">.
 */
-const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1wU2tiPZC1_iW1SYiIOJe9WYnm93QpumnQlUd4UJKFiBh28T3wFfd3RGYoi_iUtQKng/exec"; // exemplo: https://script.google.com/macros/s/XXXXX/exec
+const GAS_WEBAPP_URL = "COLE_AQUI_SUA_URL_EXEC_DO_WEBAPP"; // exemplo: https://script.google.com/macros/s/XXXXX/exec
 
 function buildGasUrl(params){
   const u = new URL(GAS_WEBAPP_URL);
@@ -1767,83 +1802,32 @@ async function refreshData(){
   __refreshStartedAt = Date.now();
   __lastFetchAt = new Date();
   __lastRefreshError = "";
-  __lastRefreshSource = "—";
   __lastRefreshMs = null;
   paintRefreshInfo();
 
-  let newData = null;
-  let renderPending = false;
-
   try{
-    let result = null;
-
-    // ✅ PRIMÁRIO: fetch via URL pública — suporta payloads de qualquer tamanho
-    // gasCall tem limite ~10MB de retorno e falha silenciosamente com 4500 linhas
-    if(__WEBAPP_URL && __WEBAPP_URL.startsWith("http")){
-      try{
-        result = await fetchDadosViaUrl_();
-      }catch(urlErr){
-        // URL falhou — tenta gasCall como fallback (funciona bem para <500 linhas)
-        if(false){
-          const t0 = performance.now();
-          const data = await gasCallWithTimeout("getDadosBaseAOG", 35000);
-          if(Array.isArray(data)){
-            result = { data, ms: Math.round(performance.now()-t0), source:"gas-fallback" };
-          } else {
-            throw new Error("URL: " + (urlErr&&urlErr.message?urlErr.message:urlErr));
-          }
-        } else {
-          throw urlErr;
-        }
-      }
-    } else if(hasGAS()){
-      // Sem URL configurada — usa gasCall direto (cuidado com limite de payload)
-      const t0 = performance.now();
-      const data = await gasCallWithTimeout("getDadosBaseAOG", 35000);
-      if(!Array.isArray(data)) throw new Error("GAS não retornou Array");
-      result = { data, ms: Math.round(performance.now()-t0), source:"gas" };
-    } else {
-      throw new Error("Sem URL e sem GAS disponível");
-    }
-
-    newData = result.data;
-    __lastRefreshMs = result.ms;
-    __lastRefreshSource = result.source;
-
-    dados = newData;
+    const out = await jsonpCall({ dados: "1", tab: "aog" }, 30000);
+    const arr = out && Array.isArray(out.data) ? out.data : null;
+    if(!arr) throw new Error("Resposta inválida (esperado Array)");
+    dados = arr;
     __lastSuccessAt = new Date();
-    __lastRefreshError = "";
-
-    try{ await syncSharedAllTables(); }catch(e){}
-    try{ await syncSharedObs(); }catch(e){}
-    try{ await syncSharedTurno(); }catch(e){}
-    try{ await syncSharedAvisos(); }catch(e){}
-    try{ await syncSharedLinks(); }catch(e){}
+    __lastRefreshMs = out.ms;
 
     __dataVersion++;
     __sortedBaseVersion = -1;
     for(const tk of SHARED_TABLE_KEYS) invalidateFilterCache(tk);
     markAllTablesDirty();
-    prepareDataCache();
-    __lastUpdateDate = computeLastUpdateFromData();
-
-    if(__isUserTyping__()){
-      renderPending = true;
-    } else {
-      rerenderAll({ onlyActive: true });
-    }
-
+    rerenderAll({ onlyActive: true });
   }catch(err){
     __lastRefreshError = (err && err.message) ? err.message : String(err);
-  } finally {
-    // ✅ SEMPRE libera o flag — sem exceção
+    console.error("refreshData erro:", err);
+    // mostra no banner de frescor (Turno)
+    try{ renderFrescorBanner(); }catch(e){}
+  }finally{
     __refreshInFlight = false;
-    __refreshStartedAt = null;
-    paintUpdateInfo();
     paintRefreshInfo();
+    try{ renderFrescorBanner(); }catch(e){}
   }
-
-  if(renderPending) __pendingRerender = true;
 }
 async function refreshNowUrl(){ await refreshData(); }
 async function forceUpdateNow(){
