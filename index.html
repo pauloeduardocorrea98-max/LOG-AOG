@@ -459,10 +459,6 @@ function fmtTimeHM(dt){
   const pad = n => String(n).padStart(2,"0");
   return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 }
-function timeHMFromRaw(rawValue){
-  const dt = parseMaybeDate(rawValue);
-  return dt ? fmtTimeHM(dt) : "";
-}
 function getDatePartsForDisplay(rawValue){
   const dt = parseMaybeDate(rawValue);
   if(!dt) return { date:"", time:"" };
@@ -492,8 +488,8 @@ function buildFilterToken(input){
 }
 
 const DATE_COL = "Data_da_solicitacao";
-const EMBARQUE_COL = "Data_de_embarque_logistica";
-const POUSO_COL = "Data_do_pouso_logistica";
+const EMB_COL  = "Data_de_embarque_logistica";
+const LAND_COL = "Data_do_pouso_logistica";
 const STATUS_COL = "Status_material_ferramenta";
 const AIR_COL = "Aeronave";
 const TYPE_COL = "Tipo";
@@ -553,12 +549,10 @@ function statusTagHtml(statusRaw){
 }
 
 const cols = [
-  Material_ID",
+  "Material_ID",
   "Status_material_ferramenta",
   "Numero_de_solicitacao",
   "Data_da_solicitacao",
-  "Data_de_embarque_logistica",
-  "Data_do_pouso_logistica",
   "Barcode",
   "Aeronave",
   "PN",
@@ -568,6 +562,8 @@ const cols = [
   "Descricao_logistica",
   "Nota_fiscal",
   "AWB",
+  "Data_de_embarque_logistica",
+  "Data_do_pouso_logistica",
   "OBS"
 ];
 
@@ -667,9 +663,12 @@ let __sortedBaseVersion = -1;
 let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
-  const da = (a && a.__dateKey != null) ? a.__dateKey : (parseMaybeDate(a ? a[DATE_COL] : "") ? new Date(parseMaybeDate(a[DATE_COL]).getFullYear(), parseMaybeDate(a[DATE_COL]).getMonth(), parseMaybeDate(a[DATE_COL]).getDate()).getTime() : 0);
-  const db = (b && b.__dateKey != null) ? b.__dateKey : (parseMaybeDate(b ? b[DATE_COL] : "") ? new Date(parseMaybeDate(b[DATE_COL]).getFullYear(), parseMaybeDate(b[DATE_COL]).getMonth(), parseMaybeDate(b[DATE_COL]).getDate()).getTime() : 0);
-  if(da !== db) return db - da; // data mais recente primeiro
+  // ✅ Ordem primária: Data_da_solicitacao (mais recente em cima)
+  const da = (a && a.__dtKey != null) ? a.__dtKey : (a ? (a.__dtKey = (parseMaybeDate(a[DATE_COL]) ? parseMaybeDate(a[DATE_COL]).getTime() : 0)) : 0);
+  const db = (b && b.__dtKey != null) ? b.__dtKey : (b ? (b.__dtKey = (parseMaybeDate(b[DATE_COL]) ? parseMaybeDate(b[DATE_COL]).getTime() : 0)) : 0);
+  if(da !== db) return db - da;
+
+  // Mantém a ordem antiga como critério secundário
   const ra = (a && a.__stRank != null) ? a.__stRank : statusPriorityRank(a ? a[STATUS_COL] : "");
   const rb = (b && b.__stRank != null) ? b.__stRank : statusPriorityRank(b ? b[STATUS_COL] : "");
   if(ra !== rb) return ra - rb;
@@ -709,15 +708,6 @@ function prepareDataCache(){
       if(r.__stRank == null) r.__stRank = statusPriorityRank(r[STATUS_COL]);
       if(r.__midStr == null) r.__midStr = String(r.Material_ID ?? "");
       if(r.__solStr == null) r.__solStr = String(r.Numero_de_solicitacao ?? "");
-      if(r.__dateKey == null){
-        const dtt = parseMaybeDate(r[DATE_COL]);
-        if(dtt){
-          const d0 = new Date(dtt.getFullYear(), dtt.getMonth(), dtt.getDate());
-          r.__dateKey = d0.getTime();
-        }else{
-          r.__dateKey = 0;
-        }
-      }
     }
     if(r && r.__dispDateLower == null){
       const shown = displayCell(DATE_COL, r[DATE_COL], "aog", r);
@@ -966,7 +956,7 @@ async function syncSharedObs(){
 }
 
 function displayCell(colKey, rawValue, tableKey, row){
-  if(colKey === DATE_COL){
+  if(colKey === DATE_COL || colKey === EMB_COL || colKey === LAND_COL){
     const parts = getDatePartsForDisplay(rawValue);
     if(!parts.date) return "";
     if(parts.time) return `${parts.date} ${parts.time}`;
@@ -1378,9 +1368,6 @@ function renderPrios(tableKey){
     const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : "";
     const vLOG   = cleanVal(r.Descricao_logistica);
     const vSTATUS = cleanVal(r[STATUS_COL]);
-    const vEMB = timeHMFromRaw(r[EMBARQUE_COL]);
-    const vPOU = timeHMFromRaw(r[POUSO_COL]);
-    const vTIMES = [vEMB, vPOU].filter(Boolean).join(" • ");
 
     let marked = "";
     try{
@@ -1401,7 +1388,6 @@ function renderPrios(tableKey){
       <div class="prioLine prioNoWrap">PN: ${escapeHtml(vPN)}</div>
       <div class="prioLine prioNoWrap">NF:${escapeHtml(vNF)} / AWB:${escapeHtml(vAWB)}</div>
       <div class="prioLine prioNoWrap">LOG:${escapeHtml(vLOG)}</div>
-      ${vTIMES ? `<div class="prioLine prioNoWrap">${escapeHtml(vTIMES)}</div>` : ""}
       <div class="prioLine">${statusTagHtml(vSTATUS)}</div>
       ${marked}
       <button class="prioRemove" type="button" onclick="removePrio('${tableKey}','${escapeHtml(id)}')">Remover</button>`;
@@ -1609,7 +1595,7 @@ function renderTable(tableKey){
           </div></td>`;
         }
 
-        if(c === DATE_COL || c === EMBARQUE_COL || c === POUSO_COL){
+        if(c === DATE_COL || c === EMB_COL || c === LAND_COL){
           const parts = getDatePartsForDisplay(r[c]);
           if(!parts.date) return `<td></td>`;
           const timeHtml = parts.time ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(parts.time)}</div>` : "";
