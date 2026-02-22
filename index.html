@@ -1,3 +1,5 @@
+HTML PERFEITO
+
 <!-- index.html (COMPLETO) - cole no Apps Script (HTML) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -296,6 +298,12 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
       <div id="avisoInput" class="noteInput" contenteditable="true" data-placeholder="Digite o aviso..."></div>
       <div class="noteTools">
         <button class="noteBtn" type="button" onclick="addAviso()">Adicionar</button>
+        <button class="noteBtn gray" type="button" title="Anexar imagem" onclick="pickAvisoImage()">🖼️</button>
+        <span id="avisoImgChip" style="display:none;align-items:center;gap:6px;font-size:12px;color:#0f172a;background:#f8fafc;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;">
+          <span>📎</span><span id="avisoImgName"></span>
+          <button class="iconBtn" type="button" title="Remover imagem" onclick="clearAvisoImage()">✖</button>
+        </span>
+        <input id="avisoImgFile" type="file" accept="image/*" style="display:none" onchange="onAvisoImagePicked(event)">
       </div>
     </div>
 
@@ -2033,48 +2041,102 @@ async function addLinkFromInput(){
 let __sharedTurnoState  = null;
 let __sharedAvisosState = null;
 
+
+/* ===== AVISOS: IMAGEM (upload via Drive) ===== */
+let __avisoImg = null; // { name, dataUrl }
+
+function pickAvisoImage(){
+  const inp = document.getElementById("avisoImgFile");
+  if(!inp) return;
+  inp.value = "";
+  inp.click();
+}
+function onAvisoImagePicked(ev){
+  const f = ev && ev.target && ev.target.files ? ev.target.files[0] : null;
+  if(!f) return;
+  // limite de segurança (3MB) para não travar
+  const max = 3 * 1024 * 1024;
+  if(f.size > max){
+    alert("Imagem muito grande. Use até 3MB.");
+    try{ ev.target.value=""; }catch(e){}
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    __avisoImg = { name: f.name || "imagem.png", dataUrl: String(reader.result || "") };
+    renderAvisoImgChip();
+  };
+  reader.readAsDataURL(f);
+}
+function clearAvisoImage(){
+  __avisoImg = null;
+  const inp = document.getElementById("avisoImgFile");
+  if(inp) inp.value = "";
+  renderAvisoImgChip();
+}
+function renderAvisoImgChip(){
+  const chip = document.getElementById("avisoImgChip");
+  const nm = document.getElementById("avisoImgName");
+  if(!chip || !nm) return;
+  if(__avisoImg && __avisoImg.dataUrl){
+    nm.textContent = __avisoImg.name || "imagem";
+    chip.style.display = "inline-flex";
+  }else{
+    chip.style.display = "none";
+    nm.textContent = "";
+  }
+}
+
 function sanitizeHtmlLight(html){
   let s = String(html || "");
   s = s.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
   s = s.replace(/\son\w+="[^"]*"/gi, "");
   s = s.replace(/\son\w+='[^']*'/gi, "");
   s = s.replace(/javascript:/gi, "");
-  const allowed = ["b","strong","span","br","div","img"];
+
+  const allowed = ["b","strong","span","br","div","a"];
+
+  // mantém só tags permitidas; e em <a> mantém href/target/rel; em span/div/a mantém style seguro
   s = s.replace(/<\/?([a-z0-9]+)(\s[^>]*)?>/gi, (m, tag, attrs)=>{
     tag = String(tag||"").toLowerCase();
+    const closing = m.startsWith("</");
     if(!allowed.includes(tag)) return "";
-    if(tag === "img"){
-      // permite apenas src + style (sem on*). bloqueia data: e javascript:
-      const srcm = (attrs||"").match(/src\s*=\s*("([^"]*)"|\'([^\']*)\')/i);
-      const src = srcm ? (srcm[2] || srcm[3] || "") : "";
-      if(!src) return "";
-      const ssrc = String(src).trim();
-      if(/^javascript:/i.test(ssrc)) return "";
-      if(/^data:/i.test(ssrc)) return "";
-      if(!/^https?:\/\//i.test(ssrc)) return "";
-      const st = (attrs||"").match(/style\s*=\s*("([^"]*)"|\'([^\']*)\')/i);
-      let style = st ? (st[2] || st[3] || "") : "";
-      style = String(style)
+
+    if(closing) return `</${tag}>`;
+
+    attrs = String(attrs || "");
+
+    // Extrai style se existir e remove coisas perigosas
+    let style = "";
+    const st = attrs.match(/style\s*=\s*("([^"]*)"|'([^']*)')/i);
+    if(st){
+      const val = st[2] || st[3] || "";
+      style = val
         .replace(/position\s*:\s*fixed/gi,"")
         .replace(/position\s*:\s*absolute/gi,"")
         .replace(/z-index\s*:\s*\d+/gi,"");
-      const safeStyle = style ? ` style="${escapeHtml(style)}"` : "";
-      return `<img src="${escapeHtml(ssrc)}"${safeStyle}>`;
     }
+
+    if(tag === "a"){
+      const hrefm = attrs.match(/href\s*=\s*("([^"]*)"|'([^']*)')/i);
+      const href = hrefm ? (hrefm[2] || hrefm[3] || "") : "";
+      const safeHref = href.replace(/javascript:/gi,"").trim();
+      const target = /target\s*=\s*("([^"]*)"|'([^']*)')/i.test(attrs) ? "_blank" : "_blank";
+      const rel = "noopener noreferrer";
+      const styleAttr = style ? ` style="${escapeHtml(style)}"` : "";
+      const hrefAttr = safeHref ? ` href="${escapeHtml(safeHref)}"` : "";
+      return `<a${hrefAttr} target="${target}" rel="${rel}"${styleAttr}>`;
+    }
+
     if(tag === "span" || tag === "div"){
-      const st = (attrs||"").match(/style\s*=\s*("([^"]*)"|'([^']*)')/i);
-      if(st){
-        const val = st[2] || st[3] || "";
-        const safe = val
-          .replace(/position\s*:\s*fixed/gi,"")
-          .replace(/position\s*:\s*absolute/gi,"")
-          .replace(/z-index\s*:\s*\d+/gi,"");
-        return m.startsWith("</") ? `</${tag}>` : `<${tag} style="${escapeHtml(safe)}">`;
-      }
-      return m.startsWith("</") ? `</${tag}>` : `<${tag}>`;
+      const styleAttr = style ? ` style="${escapeHtml(style)}"` : "";
+      return `<${tag}${styleAttr}>`;
     }
-    return m.startsWith("</") ? `</${tag}>` : `<${tag}>`;
+
+    // b/strong/br: sem attrs
+    return `<${tag}>`;
   });
+
   return s;
 }
 async function syncSharedTurno(){
@@ -2165,72 +2227,31 @@ async function addTurno(){
 async function addAviso(){
   const html = getRichHtmlFromInput("avisos");
   if(!html || !html.replace(/<br\s*\/?>/gi,"").trim()) return;
+
+  let finalHtml = `<div>📢 ${html}</div>`;
+
+  // Se tiver imagem selecionada, sobe no Drive e salva só o link (ícone)
+  if(__avisoImg && __avisoImg.dataUrl){
+    try{
+      const up = await gasCall("uploadAvisoImage", __avisoImg.dataUrl, __avisoImg.name);
+      if(up && up.ok && up.url){
+        finalHtml += `<div style="margin-top:8px"><a href="${escapeHtml(up.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">🖼️ Abrir imagem</a></div>`;
+      }else{
+        alert("Não foi possível enviar a imagem.");
+      }
+    }catch(e){
+      console.error("uploadAvisoImage erro:", e);
+      alert("Falha ao enviar a imagem.");
+    }
+  }
+
   try{
-    const st = await gasCall("addSharedAvisoItem", `<div>📢 ${html}</div>`);
+    const st = await gasCall("addSharedAvisoItem", finalHtml);
     __sharedAvisosState = st || __sharedAvisosState;
     clearRichInput("avisos");
+    clearAvisoImage();
     renderSharedList("avisos");
   }catch(e){}
-}
-
-
-/* ===== AVISOS: colar imagem (Ctrl+V) tipo WhatsApp ===== */
-function __insertHtmlAtCaret__(html){
-  try{
-    const sel = window.getSelection();
-    if(!sel || sel.rangeCount === 0) return;
-    const range = sel.getRangeAt(0);
-    range.deleteContents();
-    const el = document.createElement("div");
-    el.innerHTML = html;
-    const frag = document.createDocumentFragment();
-    let node, lastNode = null;
-    while((node = el.firstChild)){
-      lastNode = frag.appendChild(node);
-    }
-    range.insertNode(frag);
-    if(lastNode){
-      range.setStartAfter(lastNode);
-      range.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-  }catch(e){}
-}
-
-async function __handlePasteImageAvisos__(ev){
-  try{
-    const cb = ev && ev.clipboardData;
-    if(!cb || !cb.items) return;
-
-    let file = null;
-    for(const it of cb.items){
-      if(it && it.kind === "file" && it.type && it.type.startsWith("image/")){
-        file = it.getAsFile();
-        break;
-      }
-    }
-    if(!file) return;
-
-    ev.preventDefault();
-
-    __insertHtmlAtCaret__(`<div><span style="color:#64748b">📷 enviando imagem...</span></div>`);
-
-    const dataUrl = await new Promise((resolve, reject)=>{
-      const r = new FileReader();
-      r.onload = ()=> resolve(String(r.result || ""));
-      r.onerror = ()=> reject(new Error("Falha ao ler a imagem"));
-      r.readAsDataURL(file);
-    });
-
-    const up = await gasCall("uploadAvisoImage", dataUrl);
-    if(!up || up.ok !== true || !up.url) throw new Error((up && up.error) ? up.error : "Upload falhou");
-
-    __insertHtmlAtCaret__(`<div><img src="${escapeHtml(up.url)}" style="max-width:100%;border-radius:10px;border:1px solid #e5e7eb"></div>`);
-  }catch(err){
-    console.error("Paste image avisos erro:", err);
-    alert("Não foi possível colar a imagem. Tente recortar/compactar e colar novamente.");
-  }
 }
 
 /* ===== Context menu ===== */
@@ -2408,14 +2429,8 @@ function initCtxMenuHandlers(){
 
   initCtxMenuHandlers();
 
-  // cola imagem no Avisos (Ctrl+V)
-  try{
-    const avisoEl = document.getElementById("avisoInput");
-    if(avisoEl && !avisoEl.__pasteBound){
-      avisoEl.__pasteBound = true;
-      avisoEl.addEventListener("paste", __handlePasteImageAvisos__);
-    }
-  }catch(e){}
+  // Avisos: chip de imagem
+  try{ renderAvisoImgChip(); }catch(e){}
 
   // =====================================================
   // ✅ MUDANÇA 3: Dois setIntervals separados:
