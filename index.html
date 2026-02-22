@@ -534,22 +534,46 @@ function isFerramentaRow(r){
   return isFerramentaStatus(r ? r[STATUS_COL] : "");
 }
 
+// Ordem pedida (dentro da mesma DATA):
+// 1 Em Fila de Atendimento
+// 2 Aguardando separação
+// 3 Pronto para envio
+// 4 Log 1 Transito
+// 5 Mtl Stock Zero
+// 6 Comprar
+// 7 Outras / Mtl Divergente
+// 8 Na Base / Recebido no destino
+const __STATUS_ORDER = [
+  ["emfiladeatendimento"],
+  ["aguardandoseparacao"],
+  ["prontoparaenvio"],
+  ["log1transito"],
+  ["mtlstockzero","mtlzero","stockzero"],
+  ["comprar","compra"],
+  ["outras","mtldivergente"],
+  ["base","recebidonodestino"]
+];
+
+function statusPriorityRank(statusRaw){
+  const s = normalizeText(statusRaw || "");
+  if(!s) return 50;
+  for(let i=0;i<__STATUS_ORDER.length;i++){
+    const keys = __STATUS_ORDER[i];
+    for(let k=0;k<keys.length;k++){
+      if(s.includes(keys[k])) return i; // menor = mais prioritário
+    }
+  }
+  return 50;
+}
+
 function statusCategory(statusRaw){
   const s = normalizeText(statusRaw || "");
-  if(s.includes("outras") || s.includes("mtldivergente")) return "orange";
-  if(s.includes("emfiladeatendimento") || s.includes("aguardandoseparacao") || s.includes("mtlzero")) return "red";
+  if(!s) return "default";
+  if(s.includes("emfiladeatendimento") || s.includes("aguardandoseparacao") || s.includes("mtlstockzero") || s.includes("mtlzero") || s.includes("stockzero")) return "red";
   if(s.includes("prontoparaenvio") || s.includes("log1transito")) return "yellow";
+  if(s.includes("comprar") || s.includes("compra") || s.includes("outras") || s.includes("mtldivergente")) return "orange";
   if(s.includes("base") || s.includes("recebidonodestino")) return "green";
   return "default";
-}
-function statusPriorityRank(statusRaw){
-  const cat = statusCategory(statusRaw);
-  if(cat === "red") return 0;
-  if(cat === "yellow") return 1;
-  if(cat === "green") return 2;
-  if(cat === "default") return 2;
-  if(cat === "orange") return 3;
-  return 2;
 }
 function statusTagHtml(statusRaw){
   const txt = String(statusRaw ?? "");
