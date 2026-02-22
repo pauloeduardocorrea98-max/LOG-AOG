@@ -452,12 +452,13 @@ function fmtDateOnlyBR(dt){
 function fmtTimeOnly(dt){
   if(!dt) return "";
   const pad = n => String(n).padStart(2,"0");
-  return `${pad(dt.getHours())}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`;
-}
-function fmtTimeHM(dt){
-  if(!dt) return "";
-  const pad = n => String(n).padStart(2,"0");
+  return `${pad(dt.getHours())}
+function fmtHM(dt){
+  if(!dt) return \"\";
+  const pad=n=>String(n).padStart(2,\"0\");
   return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+}
+:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`;
 }
 function getDatePartsForDisplay(rawValue){
   const dt = parseMaybeDate(rawValue);
@@ -488,8 +489,6 @@ function buildFilterToken(input){
 }
 
 const DATE_COL = "Data_da_solicitacao";
-const EMB_COL  = "Data_de_embarque_logistica";
-const LAND_COL = "Data_do_pouso_logistica";
 const STATUS_COL = "Status_material_ferramenta";
 const AIR_COL = "Aeronave";
 const TYPE_COL = "Tipo";
@@ -663,21 +662,29 @@ let __sortedBaseVersion = -1;
 let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
-  // ✅ Ordem primária: Data_da_solicitacao (mais recente em cima)
-  const da = (a && a.__dtKey != null) ? a.__dtKey : (a ? (a.__dtKey = (parseMaybeDate(a[DATE_COL]) ? parseMaybeDate(a[DATE_COL]).getTime() : 0)) : 0);
-  const db = (b && b.__dtKey != null) ? b.__dtKey : (b ? (b.__dtKey = (parseMaybeDate(b[DATE_COL]) ? parseMaybeDate(b[DATE_COL]).getTime() : 0)) : 0);
+  const da = (a && a.__solDayTs != null) ? Number(a.__solDayTs) : (()=>{
+    const d = parseMaybeDate(a ? a[DATE_COL] : null);
+    if(!d) return 0;
+    const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    return dd.getTime();
+  })();
+  const db = (b && b.__solDayTs != null) ? Number(b.__solDayTs) : (()=>{
+    const d = parseMaybeDate(b ? b[DATE_COL] : null);
+    if(!d) return 0;
+    const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    return dd.getTime();
+  })();
   if(da !== db) return db - da;
-
-  // Mantém a ordem antiga como critério secundário
+  
   const ra = (a && a.__stRank != null) ? a.__stRank : statusPriorityRank(a ? a[STATUS_COL] : "");
-  const rb = (b && b.__stRank != null) ? b.__stRank : statusPriorityRank(b ? b[STATUS_COL] : "");
-  if(ra !== rb) return ra - rb;
-  const ida = (a && a.__midStr != null) ? a.__midStr : String((a && a.Material_ID) ?? "");
-  const idb = (b && b.__midStr != null) ? b.__midStr : String((b && b.Material_ID) ?? "");
-  if(ida !== idb) return ida.localeCompare(idb);
-  const sa = (a && a.__solStr != null) ? a.__solStr : String((a && a.Numero_de_solicitacao) ?? "");
-  const sb = (b && b.__solStr != null) ? b.__solStr : String((b && b.Numero_de_solicitacao) ?? "");
-  return sa.localeCompare(sb);
+    const rb = (b && b.__stRank != null) ? b.__stRank : statusPriorityRank(b ? b[STATUS_COL] : "");
+    if(ra !== rb) return ra - rb;
+    const ida = (a && a.__midStr != null) ? a.__midStr : String((a && a.Material_ID) ?? "");
+    const idb = (b && b.__midStr != null) ? b.__midStr : String((b && b.Material_ID) ?? "");
+    if(ida !== idb) return ida.localeCompare(idb);
+    const sa = (a && a.__solStr != null) ? a.__solStr : String((a && a.Numero_de_solicitacao) ?? "");
+    const sb = (b && b.__solStr != null) ? b.__solStr : String((b && b.Numero_de_solicitacao) ?? "");
+    return sa.localeCompare(sb);
 }
 
 function buildSortedBaseCache(){
@@ -708,7 +715,17 @@ function prepareDataCache(){
       if(r.__stRank == null) r.__stRank = statusPriorityRank(r[STATUS_COL]);
       if(r.__midStr == null) r.__midStr = String(r.Material_ID ?? "");
       if(r.__solStr == null) r.__solStr = String(r.Numero_de_solicitacao ?? "");
-    }
+    
+      if(r.__solDayTs == null){
+        const d0 = parseMaybeDate(r[DATE_COL]);
+        if(d0){
+          const dd = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate());
+          r.__solDayTs = dd.getTime();
+        }else{
+          r.__solDayTs = 0;
+        }
+      }
+}
     if(r && r.__dispDateLower == null){
       const shown = displayCell(DATE_COL, r[DATE_COL], "aog", r);
       r.__dispDateLower = String(shown || "").toLowerCase();
@@ -956,7 +973,7 @@ async function syncSharedObs(){
 }
 
 function displayCell(colKey, rawValue, tableKey, row){
-  if(colKey === DATE_COL || colKey === EMB_COL || colKey === LAND_COL){
+  if(colKey === DATE_COL){
     const parts = getDatePartsForDisplay(rawValue);
     if(!parts.date) return "";
     if(parts.time) return `${parts.date} ${parts.time}`;
@@ -1385,6 +1402,15 @@ function renderPrios(tableKey){
     card.innerHTML = `
       <div class="prioLine1 prioNoWrap">ID: ${escapeHtml(vID)} / ${escapeHtml(vSOL)}</div>
       ${vROUTE ? `<div class="prioLine prioNoWrap">${escapeHtml(vROUTE)}</div>` : ""}
+      ${(() => {
+        const b = parseMaybeDate(r && r.Data_de_embarque_logistica);
+        const p = parseMaybeDate(r && r.Data_do_pouso_logistica);
+        const bh = b ? fmtHM(b) : \"\";
+        const ph = p ? fmtHM(p) : \"\";
+        if(!bh && !ph) return \"\";
+        const dot = bh && ph ? \" • \" : \"\";
+        return `<div class=\\"prioLine prioNoWrap\\">${escapeHtml(bh)}${dot}${escapeHtml(ph)}</div>`;
+      })()}
       <div class="prioLine prioNoWrap">PN: ${escapeHtml(vPN)}</div>
       <div class="prioLine prioNoWrap">NF:${escapeHtml(vNF)} / AWB:${escapeHtml(vAWB)}</div>
       <div class="prioLine prioNoWrap">LOG:${escapeHtml(vLOG)}</div>
@@ -1595,7 +1621,7 @@ function renderTable(tableKey){
           </div></td>`;
         }
 
-        if(c === DATE_COL || c === EMB_COL || c === LAND_COL){
+        if(c === DATE_COL){
           const parts = getDatePartsForDisplay(r[c]);
           if(!parts.date) return `<td></td>`;
           const timeHtml = parts.time ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(parts.time)}</div>` : "";
