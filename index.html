@@ -654,30 +654,12 @@ let __sortedBaseVersion = -1;
 let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
-  // ✅ 1) Ordena por Data_da_solicitacao (mais recente primeiro)
-  const ta = (a && a.__dateTs != null) ? a.__dateTs : (function(){
-    const d = parseMaybeDate(a ? a[DATE_COL] : null);
-    const t = d ? d.getTime() : 0;
-    if(a) a.__dateTs = t;
-    return t;
-  })();
-  const tb = (b && b.__dateTs != null) ? b.__dateTs : (function(){
-    const d = parseMaybeDate(b ? b[DATE_COL] : null);
-    const t = d ? d.getTime() : 0;
-    if(b) b.__dateTs = t;
-    return t;
-  })();
-  if(ta !== tb) return tb - ta;
-
-  // ✅ 2) Mantém as outras ordens exatamente como antes
   const ra = (a && a.__stRank != null) ? a.__stRank : statusPriorityRank(a ? a[STATUS_COL] : "");
   const rb = (b && b.__stRank != null) ? b.__stRank : statusPriorityRank(b ? b[STATUS_COL] : "");
   if(ra !== rb) return ra - rb;
-
   const ida = (a && a.__midStr != null) ? a.__midStr : String((a && a.Material_ID) ?? "");
   const idb = (b && b.__midStr != null) ? b.__midStr : String((b && b.Material_ID) ?? "");
   if(ida !== idb) return ida.localeCompare(idb);
-
   const sa = (a && a.__solStr != null) ? a.__solStr : String((a && a.Numero_de_solicitacao) ?? "");
   const sb = (b && b.__solStr != null) ? b.__solStr : String((b && b.Numero_de_solicitacao) ?? "");
   return sa.localeCompare(sb);
