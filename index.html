@@ -464,6 +464,12 @@ function fmtTimeOnly(dt){
   const pad = n => String(n).padStart(2,"0");
   return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 }
+
+function fmtTimeHM(dt){
+  if(!dt) return "";
+  const pad = n => String(n).padStart(2,"0");
+  return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+}
 function getDatePartsForDisplay(rawValue, forceTime){
   const dt = parseMaybeDate(rawValue);
   if(!dt) return { date:"", time:"" };
@@ -1396,6 +1402,12 @@ function renderPrios(tableKey){
     const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : "";
     const vLOG   = cleanVal(r.Descricao_logistica);
     const vSTATUS = cleanVal(r[STATUS_COL]);
+    const vEMB_RAW  = (r && (r.Data_de_embarque_logistica ?? r["Data_de_embarque_logistica"])) ?? "";
+    const vPOUSO_RAW= (r && (r.Data_do_pouso_logistica ?? r["Data_do_pouso_logistica"])) ?? "";
+    const tEMB = fmtTimeHM(parseMaybeDate(vEMB_RAW));
+    const tPOUSO = fmtTimeHM(parseMaybeDate(vPOUSO_RAW));
+    const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : "";
+
 
     let marked = "";
     try{
@@ -1414,6 +1426,7 @@ function renderPrios(tableKey){
       <div class="prioLine1 prioNoWrap">ID: ${escapeHtml(vID)} / ${escapeHtml(vSOL)}</div>
       ${vROUTE ? `<div class="prioLine prioNoWrap">${escapeHtml(vROUTE)}</div>` : ""}
       <div class="prioLine prioNoWrap">PN: ${escapeHtml(vPN)}</div>
+      ${tLine ? `<div class="prioLine prioNoWrap">${escapeHtml(tLine)}</div>` : ""}
       <div class="prioLine prioNoWrap">NF:${escapeHtml(vNF)} / AWB:${escapeHtml(vAWB)}</div>
       <div class="prioLine prioNoWrap">LOG:${escapeHtml(vLOG)}</div>
       <div class="prioLine">${statusTagHtml(vSTATUS)}</div>
@@ -1570,7 +1583,7 @@ function renderTable(tableKey){
   const rowsOrdered = prioRows.concat(restRows);
   const pageRows = paginateRows(rowsOrdered, tableKey);
 
-  let html = `<thead><tr><th style="min-width:60px">Pri</th>`;
+  let html = `<thead><tr><th style="min-width:60px"></th>`;
   html += cols.map(c=>{
     const cls = (c==="PN") ? `class="th-pn th-resize"` : "";
     return `<th ${cls}>${colLabel(c)}</th>`;
