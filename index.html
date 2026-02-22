@@ -462,16 +462,17 @@ function fmtDateOnlyBR(dt){
 function fmtTimeOnly(dt){
   if(!dt) return "";
   const pad = n => String(n).padStart(2,"0");
-  return `${pad(dt.getHours())}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`;
+  return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 }
-function getDatePartsForDisplay(rawValue){
+function getDatePartsForDisplay(rawValue, forceTime){
   const dt = parseMaybeDate(rawValue);
   if(!dt) return { date:"", time:"" };
   const date = fmtDateOnlyBR(dt);
   const time = fmtTimeOnly(dt);
   const s = String(rawValue ?? "").trim();
   const hasTimeInText = /\b\d{2}:\d{2}(:\d{2})?\b/.test(s);
-  return { date, time: hasTimeInText ? time : "" };
+  const ft = !!forceTime;
+  return { date, time: (ft || hasTimeInText) ? time : "" };
 }
 
 function normalizeText(v){
@@ -493,6 +494,8 @@ function buildFilterToken(input){
 }
 
 const DATE_COL = "Data_da_solicitacao";
+const EMB_COL = "Data_de_embarque_logistica";
+const LAND_COL = "Data_do_pouso_logistica";
 const STATUS_COL = "Status_material_ferramenta";
 const AIR_COL = "Aeronave";
 const TYPE_COL = "Tipo";
@@ -565,6 +568,8 @@ const cols = [
   "Descricao_logistica",
   "Nota_fiscal",
   "AWB",
+  "Data_de_embarque_logistica",
+  "Data_do_pouso_logistica",
   "OBS"
 ];
 
@@ -969,8 +974,8 @@ async function syncSharedObs(){
 }
 
 function displayCell(colKey, rawValue, tableKey, row){
-  if(colKey === DATE_COL){
-    const parts = getDatePartsForDisplay(rawValue);
+  if(colKey === DATE_COL || colKey === EMB_COL || colKey === LAND_COL){
+    const parts = getDatePartsForDisplay(rawValue, (colKey===EMB_COL || colKey===LAND_COL));
     if(!parts.date) return "";
     if(parts.time) return `${parts.date} ${parts.time}`;
     return parts.date;
@@ -1608,8 +1613,8 @@ function renderTable(tableKey){
           </div></td>`;
         }
 
-        if(c === DATE_COL){
-          const parts = getDatePartsForDisplay(r[c]);
+        if(c === DATE_COL || c === EMB_COL || c === LAND_COL){
+          const parts = getDatePartsForDisplay(r[c], (c===EMB_COL || c===LAND_COL));
           if(!parts.date) return `<td></td>`;
           const timeHtml = parts.time ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(parts.time)}</div>` : "";
           return `<td><div>${escapeHtml(parts.date)}</div>${timeHtml}</td>`;
