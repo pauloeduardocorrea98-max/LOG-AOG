@@ -573,6 +573,16 @@ const cols = [
   "OBS"
 ];
 
+const COL_LABELS = {
+  "Numero_de_solicitacao": "Solicitação",
+  "Data_da_solicitacao": "Data",
+  "Descricao_logistica": "Log",
+  "Data_de_embarque_logistica": "Data de Embarque",
+  "Data_do_pouso_logistica": "Data de Pouso"
+};
+function colLabel(col){ return COL_LABELS[col] || col; }
+
+
 const tableKeysBySection = { aog:"aog", war:"war", fast:"fast", cargo:"cargo", cargas:"cargas", tools:"tools" };
 const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
 
@@ -1563,7 +1573,7 @@ function renderTable(tableKey){
   let html = `<thead><tr><th style="min-width:60px">Pri</th>`;
   html += cols.map(c=>{
     const cls = (c==="PN") ? `class="th-pn th-resize"` : "";
-    return `<th ${cls}>${c}</th>`;
+    return `<th ${cls}>${colLabel(c)}</th>`;
   }).join("");
   html += `</tr></thead>`;
 
