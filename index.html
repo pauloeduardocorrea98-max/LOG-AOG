@@ -177,19 +177,15 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 
 <body>
 
-<div id="authOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(2,6,23,.72);backdrop-filter:blur(2px);">
-  <div style="max-width:520px;margin:10vh auto 0;background:#0b1d33;color:#e5e7eb;border:1px solid #334155;border-radius:16px;padding:18px 18px 14px;box-shadow:0 18px 60px rgba(0,0,0,.35);">
-    <div style="font-weight:800;font-size:16px;margin-bottom:8px;">🔐 Acesso restrito</div>
-    <div id="authMsg" style="font-size:13px;line-height:1.45;color:#cbd5e1;">
-      Faça login no Google com sua conta <b>@latam.com</b> e depois recarregue a página.
+<div id="authOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;align-items:center;justify-content:center;padding:18px;">
+  <div style="max-width:520px;width:100%;background:#0b1d33;border:1px solid #334155;border-radius:16px;padding:18px;color:#e5e7eb;box-shadow:0 18px 40px rgba(0,0,0,.35)">
+    <div style="font-weight:800;font-size:16px;color:#38bdf8;margin-bottom:8px">🔒 Login necessário</div>
+    <div id="authMsg" style="font-size:13px;line-height:1.4;opacity:.95">Faça login com sua conta Google <b>@latam.com</b> para acessar o dashboard.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="noteBtn" type="button" onclick="openGoogleLogin()">Fazer login Google</button>
+      <button class="noteBtn gray" type="button" onclick="location.reload()">Recarregar</button>
     </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;">
-      <button type="button" id="btnAuthOpen" style="padding:10px 12px;border:none;border-radius:10px;background:#0ea5e9;color:#fff;cursor:pointer;">Abrir login Google</button>
-      <button type="button" id="btnAuthReload" style="padding:10px 12px;border:none;border-radius:10px;background:#334155;color:#fff;cursor:pointer;">Recarregar</button>
-    </div>
-    <div style="margin-top:10px;font-size:12px;color:#94a3b8;">
-      Dica: se você já estiver logado, abra o link acima uma vez, depois volte e clique em Recarregar.
-    </div>
+    <div style="margin-top:10px;font-size:12px;color:#94a3b8">Dica: o login abre em outra aba. Depois volte aqui e clique em <b>Recarregar</b>.</div>
   </div>
 </div>
 
@@ -1028,36 +1024,6 @@ function jsonpCall(params, timeoutMs = 20000){
 
 // Mantém a interface "gasCall" do seu HTML antigo,
 // mas por baixo usa JSONP (sem google.script.run)
-
-function showAuthOverlay(msg){
-  const ov = document.getElementById("authOverlay");
-  const tx = document.getElementById("authMsg");
-  if(tx) tx.innerHTML = msg ? String(msg) : 'Faça login no Google com sua conta <b>@latam.com</b> e depois recarregue a página.';
-  if(ov) ov.style.display = "block";
-  const btnOpen = document.getElementById("btnAuthOpen");
-  const btnReload = document.getElementById("btnAuthReload");
-  if(btnOpen){
-    btnOpen.onclick = ()=>{ try{ window.open(String(GAS_WEBAPP_URL||""), "_blank", "noopener"); }catch(e){} };
-  }
-  if(btnReload){
-    btnReload.onclick = ()=>{ try{ location.reload(); }catch(e){} };
-  }
-}
-function hideAuthOverlay(){
-  const ov = document.getElementById("authOverlay");
-  if(ov) ov.style.display = "none";
-}
-function unwrapAuth(res){
-  // Quando o GAS bloqueia (não logado), ele retorna {ok:false,error:"login_required",msg:"..."}
-  if(res && typeof res === "object" && res.ok === false){
-    if(res.error === "login_required"){
-      showAuthOverlay(res.msg || "Faça login com sua conta Google LATAM.");
-    }
-    throw new Error(res.msg || res.error || "Acesso negado");
-  }
-  return res;
-}
-
 function gasCall(fnName, ...args){
   if(!hasGAS()) return Promise.reject(new Error("GAS_WEBAPP_URL não configurado"));
 
@@ -1065,57 +1031,57 @@ function gasCall(fnName, ...args){
 
   // Dados
   if(fn === "getDadosBaseAOG" || fn === "getDadosBase" || fn === "getDados") {
-    return jsonpCall({ dados: 1 }).then(unwrapAuth);
+    return jsonpCall({ dados: 1 });
   }
 
   // Force update (roda atualizarAOG)
   if(fn === "forceUpdate" || fn === "atualizarAOG" || fn === "runForceUpdate") {
-    return jsonpCall({ forceUpdate: 1 }).then(unwrapAuth);
+    return jsonpCall({ forceUpdate: 1 });
   }
 
   // Presença
-  if(fn === "pingPresence") return jsonpCall({ presencePing: 1 }).then(unwrapAuth);
-  if(fn === "getConnectedUsers") return jsonpCall({ presenceList: 1 }).then(unwrapAuth);
+  if(fn === "pingPresence") return jsonpCall({ presencePing: 1 });
+  if(fn === "getConnectedUsers") return jsonpCall({ presenceList: 1 });
 
   // Estados compartilhados
-  if(fn === "getSharedPrioState") return jsonpCall({ sharedPrioGet: 1 }).then(unwrapAuth);
+  if(fn === "getSharedPrioState") return jsonpCall({ sharedPrioGet: 1 });
   if(fn === "toggleSharedPrio") {
-    return jsonpCall({ sharedPrioToggle: 1, tableKey: args[0] || "", rowId: args[1] || "" }).then(unwrapAuth);
+    return jsonpCall({ sharedPrioToggle: 1, tableKey: args[0] || "", rowId: args[1] || "" });
   }
 
-  if(fn === "getSharedAirState") return jsonpCall({ sharedAirGet: 1 }).then(unwrapAuth);
+  if(fn === "getSharedAirState") return jsonpCall({ sharedAirGet: 1 });
   if(fn === "toggleSharedAirPin") {
-    return jsonpCall({ sharedAirToggle: 1, tableKey: args[0] || "", aircraft: args[1] || "" }).then(unwrapAuth);
+    return jsonpCall({ sharedAirToggle: 1, tableKey: args[0] || "", aircraft: args[1] || "" });
   }
 
-  if(fn === "getSharedObsState") return jsonpCall({ sharedObsGet: 1 }).then(unwrapAuth);
+  if(fn === "getSharedObsState") return jsonpCall({ sharedObsGet: 1 });
   if(fn === "setSharedObs") {
-    return jsonpCall({ sharedObsSet: 1, tableKey: args[0] || "", materialId: args[1] || "", text: args[2] || "" }).then(unwrapAuth);
+    return jsonpCall({ sharedObsSet: 1, tableKey: args[0] || "", materialId: args[1] || "", text: args[2] || "" });
   }
 
   // Turno
-  if(fn === "getSharedTurnoState") return jsonpCall({ sharedTurnoGet: 1 }).then(unwrapAuth);
-  if(fn === "addSharedTurnoItem") return jsonpCall({ sharedTurnoAdd: 1, html: args[0] || "" }).then(unwrapAuth);
-  if(fn === "updateSharedTurnoItem") return jsonpCall({ sharedTurnoUpdate: 1, id: args[0] || "", html: args[1] || "" }).then(unwrapAuth);
-  if(fn === "toggleSharedTurnoDone") return jsonpCall({ sharedTurnoDone: 1, id: args[0] || "" }).then(unwrapAuth);
-  if(fn === "deleteSharedTurnoItem") return jsonpCall({ sharedTurnoDelete: 1, id: args[0] || "" }).then(unwrapAuth);
+  if(fn === "getSharedTurnoState") return jsonpCall({ sharedTurnoGet: 1 });
+  if(fn === "addSharedTurnoItem") return jsonpCall({ sharedTurnoAdd: 1, html: args[0] || "" });
+  if(fn === "updateSharedTurnoItem") return jsonpCall({ sharedTurnoUpdate: 1, id: args[0] || "", html: args[1] || "" });
+  if(fn === "toggleSharedTurnoDone") return jsonpCall({ sharedTurnoDone: 1, id: args[0] || "" });
+  if(fn === "deleteSharedTurnoItem") return jsonpCall({ sharedTurnoDelete: 1, id: args[0] || "" });
 
   // Avisos
-  if(fn === "getSharedAvisosState") return jsonpCall({ sharedAvisosGet: 1 }).then(unwrapAuth);
-  if(fn === "addSharedAvisoItem") return jsonpCall({ sharedAvisosAdd: 1, html: args[0] || "" }).then(unwrapAuth);
-  if(fn === "updateSharedAvisoItem") return jsonpCall({ sharedAvisosUpdate: 1, id: args[0] || "", html: args[1] || "" }).then(unwrapAuth);
-  if(fn === "toggleSharedAvisoDone") return jsonpCall({ sharedAvisosDone: 1, id: args[0] || "" }).then(unwrapAuth);
-  if(fn === "deleteSharedAvisoItem") return jsonpCall({ sharedAvisosDelete: 1, id: args[0] || "" }).then(unwrapAuth);
+  if(fn === "getSharedAvisosState") return jsonpCall({ sharedAvisosGet: 1 });
+  if(fn === "addSharedAvisoItem") return jsonpCall({ sharedAvisosAdd: 1, html: args[0] || "" });
+  if(fn === "updateSharedAvisoItem") return jsonpCall({ sharedAvisosUpdate: 1, id: args[0] || "", html: args[1] || "" });
+  if(fn === "toggleSharedAvisoDone") return jsonpCall({ sharedAvisosDone: 1, id: args[0] || "" });
+  if(fn === "deleteSharedAvisoItem") return jsonpCall({ sharedAvisosDelete: 1, id: args[0] || "" });
 
   // Links
-  if(fn === "getSharedLinksState") return jsonpCall({ sharedLinksGet: 1 }).then(unwrapAuth);
-  if(fn === "addSharedLink") return jsonpCall({ sharedLinksAdd: 1, name: args[0] || "", url: args[1] || "" }).then(unwrapAuth);
+  if(fn === "getSharedLinksState") return jsonpCall({ sharedLinksGet: 1 });
+  if(fn === "addSharedLink") return jsonpCall({ sharedLinksAdd: 1, name: args[0] || "", url: args[1] || "" });
   if(fn === "deleteSharedLink" || fn === "deleteSharedLinkItem" || fn === "deleteLink") {
-    return jsonpCall({ sharedLinksDelete: 1, id: args[0] || "" }).then(unwrapAuth);
+    return jsonpCall({ sharedLinksDelete: 1, id: args[0] || "" });
   }
 
   // Progresso
-  if(fn === "getLastProgress") return jsonpCall({ progressGet: 1 }).then(unwrapAuth);
+  if(fn === "getLastProgress") return jsonpCall({ progressGet: 1 });
 
   return Promise.reject(new Error("Função não mapeada no GitHub: " + fn));
 }
@@ -2328,6 +2294,43 @@ function initCtxMenuHandlers(){
   }, true);
 })();
 
+
+/* ===== AUTH (Google @latam.com via GAS) ===== */
+function showAuthOverlay(msg){
+  const ov = document.getElementById("authOverlay");
+  const m = document.getElementById("authMsg");
+  if(m && msg) m.innerHTML = msg;
+  if(ov){ ov.style.display = "flex"; }
+}
+function hideAuthOverlay(){
+  const ov = document.getElementById("authOverlay");
+  if(ov) ov.style.display = "none";
+}
+function openGoogleLogin(){
+  try{
+    const url = GAS_WEBAPP_URL + (GAS_WEBAPP_URL.includes("?") ? "&" : "?") + "login=1";
+    window.open(url, "_blank", "noopener,noreferrer");
+  }catch(e){}
+}
+async function ensureLatamAuth(){
+  try{
+    const url = buildJsonpUrl({ whoami: "1" });
+    const j = await jsonpCall(url);
+    if(j && j.ok === true && j.domainOk === true){
+      hideAuthOverlay();
+      return true;
+    }
+    const em = (j && j.email) ? String(j.email) : "";
+    const msg = em
+      ? `Conta detectada: <b>${escapeHtml(em)}</b><br>Faça login com uma conta <b>@latam.com</b>.`
+      : `Nenhuma conta detectada.<br>Faça login com uma conta <b>@latam.com</b>.`;
+    showAuthOverlay(msg);
+    return false;
+  }catch(e){
+    showAuthOverlay("Não foi possível validar o login agora. Clique em <b>Fazer login Google</b> e depois recarregue.");
+    return false;
+  }
+}
 (async function init(){
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
@@ -2345,6 +2348,14 @@ function initCtxMenuHandlers(){
   if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("✅ Inicializando...");
 
   prepareDataCache();
+
+  // ✅ Exige login LATAM antes de buscar qualquer dado
+  const __okAuth = await ensureLatamAuth();
+  if(!__okAuth){
+    // Mantém overlay e não inicia loops
+    return;
+  }
+
 
   try{ await presenceTick(); }catch(e){}
 
