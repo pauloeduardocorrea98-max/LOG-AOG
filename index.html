@@ -146,8 +146,6 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .itemBody{ flex:1; min-height:22px; padding:2px 0; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
 .itemBody[contenteditable="true"]{ outline:2px solid rgba(56,189,248,.45); border-radius:8px; padding:6px; background:#f8fafc; }
 .iconBtn{ border:none;background:none;cursor:pointer; font-size:14px; line-height:1; }
-.trashIcon{width:18px;height:18px;display:inline-block;vertical-align:middle;}
-
 .markedBy{ margin-top:6px; font-size:12px; color:#64748b; }
 
 .obsArea{
@@ -174,35 +172,6 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .ctxApply{ height:34px; padding:0 12px; border:none; border-radius:10px; background:#0ea5e9; color:#fff; cursor:pointer; font-size:13px; }
 .ctxApply:hover{ filter:brightness(.95); }
 .ctxHint{ margin-top:8px; font-size:12px; color:#64748b; }
-
-/* ✅ LOGIN POR SENHA DO DIA */
-#authOverlay{
-  position:fixed; inset:0; z-index:99999;
-  display:none; align-items:center; justify-content:center;
-  background:rgba(2,6,23,.72);
-}
-#authCard{
-  width:min(560px, calc(100% - 24px));
-  background:#0b1d33;
-  border:1px solid #334155;
-  border-radius:16px;
-  padding:18px;
-  box-shadow:0 24px 60px rgba(0,0,0,.35);
-}
-#authCard h3{ margin:0 0 6px; color:#38bdf8; font-size:16px; }
-#authCard p{ margin:0 0 12px; color:#cbd5e1; font-size:12px; line-height:1.35; }
-#authRow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-#authPw{
-  flex:1; min-width:240px;
-  padding:10px 12px; border-radius:10px; border:1px solid #334155;
-  background:#0f172a; color:#e5e7eb; outline:none;
-}
-#authPw:focus{ border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.18); }
-#authErr{ margin-top:10px; color:#f87171; font-size:12px; display:none; }
-.trashBtn{ width:26px; height:26px; border:none; background:none; cursor:pointer; padding:0; display:inline-flex; align-items:center; justify-content:center; }
-.trashBtn svg{ width:18px; height:18px; fill:#0f172a; opacity:.85; }
-.trashBtn:hover svg{ opacity:1; }
-
 </style>
 </head>
 
@@ -334,6 +303,26 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   </div>
 </div>
 
+
+<!-- ✅ SENHA DO DIA (bloqueio simples) -->
+<div id="pwdGate" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.75);z-index:99999;">
+  <div style="width:min(560px,92vw);background:#0b1d33;border:1px solid #334155;border-radius:16px;padding:18px 18px 14px;box-shadow:0 30px 80px rgba(0,0,0,.35);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:18px">🔐</div>
+      <div style="font-weight:800;color:#38bdf8">Acesso protegido</div>
+      <div style="margin-left:auto;font-size:12px;color:#94a3b8" id="pwdGateHint"></div>
+    </div>
+    <div style="font-size:13px;color:#e5e7eb;margin-bottom:12px">Digite a <b>senha do dia</b> para abrir o dashboard.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <input id="pwdInput" type="password" autocomplete="one-time-code" placeholder="Senha do dia"
+        style="flex:1;min-width:220px;padding:12px 12px;border:1px solid #334155;border-radius:12px;background:#0f172a;color:#e5e7eb;outline:none;">
+      <button class="noteBtn" type="button" onclick="pwdTryLogin()" style="padding:10px 14px;border-radius:12px">Entrar</button>
+      <button class="noteBtn gray" type="button" onclick="pwdClear()" style="padding:10px 14px;border-radius:12px">Limpar</button>
+    </div>
+    <div id="pwdErr" style="margin-top:10px;font-size:12px;color:#f87171;min-height:16px"></div>
+  </div>
+</div>
+
 <div id="ctxMenu" class="ctxMenu">
   <div class="ctxTitle">Formatação (selecione o texto → botão direito → ajustar → Aplicar)</div>
   <div class="ctxRow">
@@ -354,28 +343,9 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   <div class="ctxHint">Dica: o texto só muda quando você clicar em <b>Aplicar</b>.</div>
 </div>
 
-
-<!-- ✅ LOGIN POR SENHA DO DIA -->
-<div id="authOverlay">
-  <div id="authCard">
-    <h3>🔒 Acesso protegido</h3>
-    <p>Digite a <b>senha do dia</b> para abrir o dashboard.</p>
-    <div id="authRow">
-      <input id="authPw" type="password" placeholder="Senha do dia" autocomplete="off">
-      <button class="noteBtn" type="button" onclick="authSubmit()">Entrar</button>
-      <button class="noteBtn gray" type="button" onclick="authClear()">Limpar</button>
-    </div>
-    <div id="authErr">Senha inválida.</div>
-  </div>
-</div>
-
 <script>
 // GitHub Pages: dados vem do GAS via JSONP
 let dados = [];
-
-// ✅ Ícone da lixeira (substitui 🗑️)
-const TRASH_ICON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 7h2v9h-2v-9zm4 0h2v9h-2v-9zM7 10h2v9H7v-9zM6 8h12l-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8z"/></svg>`;
-
 
 const __ADMIN_MODE = (/\badmin=1\b/i.test(window.location.search) || localStorage.getItem("ADMIN_MODE")==="1");
 
@@ -1060,61 +1030,87 @@ function jsonpCall(params, timeoutMs = 20000){
 }
 
 
-// ✅ SENHA DO DIA (server-side): valida no GAS, não expõe a senha
-const AUTH_KEY_DATE = "LOGAOG_AUTH_DATE";
-function __authTodayKey__(){
-  // yyyy-mm-dd no fuso local
+/* ===== SENHA DO DIA (GitHub Pages) ===== */
+const __PWD_STORE_KEY = "AOG_PWD_OK_DAY_V1";
+
+function __todayKey__(){
   const d = new Date();
   const pad = n => String(n).padStart(2,"0");
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
-function __authIsOk__(){
-  try{ return localStorage.getItem(AUTH_KEY_DATE) === __authTodayKey__(); }catch(e){ return false; }
+
+function pwdShow(){
+  const g = document.getElementById("pwdGate");
+  if(g) g.style.display = "flex";
+  const err = document.getElementById("pwdErr");
+  if(err) err.textContent = "";
+  const inp = document.getElementById("pwdInput");
+  if(inp){ inp.value = ""; setTimeout(()=>inp.focus(), 30); }
+  const hint = document.getElementById("pwdGateHint");
+  if(hint) hint.textContent = __todayKey__();
 }
-function __authShow__(){
-  const ov = document.getElementById("authOverlay");
-  const err = document.getElementById("authErr");
-  if(err) err.style.display = "none";
-  if(ov) ov.style.display = "flex";
-  const inp = document.getElementById("authPw");
-  if(inp){ inp.value=""; setTimeout(()=>inp.focus(), 50); }
+
+function pwdHide(){
+  const g = document.getElementById("pwdGate");
+  if(g) g.style.display = "none";
 }
-function __authHide__(){
-  const ov = document.getElementById("authOverlay");
-  if(ov) ov.style.display = "none";
-}
-function authClear(){
-  const inp = document.getElementById("authPw");
+
+function pwdClear(){
+  const inp = document.getElementById("pwdInput");
   if(inp) inp.value = "";
-  const err = document.getElementById("authErr");
-  if(err) err.style.display = "none";
+  const err = document.getElementById("pwdErr");
+  if(err) err.textContent = "";
+  try{ localStorage.removeItem(__PWD_STORE_KEY); }catch(e){}
 }
-async function authSubmit(){
-  const inp = document.getElementById("authPw");
-  const err = document.getElementById("authErr");
+
+async function pwdTryLogin(){
+  const inp = document.getElementById("pwdInput");
   const pw = inp ? String(inp.value||"").trim() : "";
-  if(!pw){
-    if(err){ err.textContent = "Digite a senha."; err.style.display = "block"; }
-    return;
-  }
+  const err = document.getElementById("pwdErr");
+  if(!pw){ if(err) err.textContent = "Digite a senha do dia."; return; }
+
   try{
-    const out = await jsonpCall({ auth: 1, pw });
-    if(out && out.ok){
-      try{ localStorage.setItem(AUTH_KEY_DATE, __authTodayKey__()); }catch(e){}
-      __authHide__();
-      if(window.__AUTH_RESOLVE__){ const r = window.__AUTH_RESOLVE__; window.__AUTH_RESOLVE__ = null; r(true); }
-    }else{
-      if(err){ err.textContent = (out && out.error) ? out.error : "Senha inválida."; err.style.display = "block"; }
+    // chama GAS: ?auth=1&pw=...&callback=...
+    const res = await jsonpCall({ auth: 1, pw });
+    if(res && res.ok){
+      try{ localStorage.setItem(__PWD_STORE_KEY, __todayKey__()); }catch(e){}
+      pwdHide();
+      // dispara refresh imediato após liberar
+      try{ refreshData(); }catch(e){}
+      return;
     }
+    if(err) err.textContent = "Senha inválida.";
   }catch(e){
-    if(err){ err.textContent = "Falha ao validar senha (GAS)."; err.style.display = "block"; }
+    if(err) err.textContent = "Não foi possível validar agora. Tente novamente.";
   }
 }
-function ensureAuthOrShow(){
-  if(!hasGAS()) return Promise.resolve(true);
-  if(__authIsOk__()) return Promise.resolve(true);
-  __authShow__();
-  return new Promise(resolve=>{ window.__AUTH_RESOLVE__ = resolve; });
+
+function requireSenhaDoDia(){
+  // se já validou hoje, não pede de novo
+  try{
+    const okDay = localStorage.getItem(__PWD_STORE_KEY) || "";
+    if(okDay && okDay === __todayKey__()) return Promise.resolve(true);
+  }catch(e){}
+  pwdShow();
+
+  return new Promise((resolve)=>{
+    // Enter no input = entrar
+    const inp = document.getElementById("pwdInput");
+    const handler = (ev)=>{
+      if(ev.key === "Enter"){ ev.preventDefault(); pwdTryLogin().then(()=>{}); }
+    };
+    if(inp && !inp.__pwdBound){ inp.__pwdBound = true; inp.addEventListener("keydown", handler); }
+
+    // resolve quando gate sumir (login ok)
+    const t = setInterval(()=>{
+      const g = document.getElementById("pwdGate");
+      const showing = g && g.style.display !== "none";
+      if(!showing){
+        clearInterval(t);
+        resolve(true);
+      }
+    }, 200);
+  });
 }
 
 // Mantém a interface "gasCall" do seu HTML antigo,
@@ -2205,7 +2201,7 @@ function renderSharedList(kind){
 
     row.innerHTML = `
       <input type="checkbox" ${it.done ? "checked" : ""} onchange="toggleDone('${kind}','${escapeHtml(it.id)}')">
-      <button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')" class="trashBtn">${TRASH_ICON_SVG}</button>`;
+      <button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="display:block"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg></button>`;
     row.appendChild(body);
 
     if(it.by && it.t){
@@ -2390,27 +2386,7 @@ function initCtxMenuHandlers(){
 })();
 
 (async function init(){
-
-  // ===== SENHA DO DIA (Gate) =====
-  // Só inicia o app depois de validar a senha do dia no GAS.
-  function __authStorageKey__(){
-    // trava por dia (se trocar a senha, vai pedir de novo)
-    const d = new Date();
-    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    return "AOG_AUTH_OK_LEGACY_" + k;
-  }
-  function __isAuthed__(){ return localStorage.getItem(__authStorageKey__()) === "1"; }
-  function __setAuthed__(){ localStorage.setItem(__authStorageKey__(), "1"); }
-
-  // Se não está autenticado, mostra modal e não inicia refresh ainda
-  if(!__isAuthed__()){
-    const m = document.getElementById("authModal");
-    if(m) m.style.display = "flex";
-    // bloqueia botões/auto refresh até autenticar
-    stopAutoRefresh();
-    return;
-  }
-
+  await requireSenhaDoDia();
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
     if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
@@ -2420,10 +2396,7 @@ function initCtxMenuHandlers(){
     if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno no script.");
   });
 
-    // ✅ trava acesso: senha do dia
-  await ensureAuthOrShow();
-
-__lastUpdateDate = computeLastUpdateFromData();
+  __lastUpdateDate = computeLastUpdateFromData();
   __lastSuccessAt = new Date();
   __lastFetchAt   = new Date();
 
