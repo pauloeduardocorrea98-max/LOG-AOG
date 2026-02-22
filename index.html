@@ -452,7 +452,14 @@ function fmtDateOnlyBR(dt){
 function fmtTimeOnly(dt){
   if(!dt) return "";
   const pad = n => String(n).padStart(2,"0");
-  return `${pad(dt.getHours())}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`;
+  return `${pad(dt.getHours())}
+
+function fmtHHMM(dt){
+  if(!dt) return "";
+  const pad = n => String(n).padStart(2,"0");
+  return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+}
+:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`;
 }
 function getDatePartsForDisplay(rawValue){
   const dt = parseMaybeDate(rawValue);
@@ -487,6 +494,8 @@ const STATUS_COL = "Status_material_ferramenta";
 const AIR_COL = "Aeronave";
 const TYPE_COL = "Tipo";
 
+const EMBARQUE_COL = "Data_de_embarque_logistica";
+const POUSO_COL = "Data_do_pouso_logistica";
 function hasCargasKeyword(text){
   return normalizeText(text || "").includes("carga");
 }
@@ -542,10 +551,12 @@ function statusTagHtml(statusRaw){
 }
 
 const cols = [
-  "Material_ID",
+    "Material_ID",
   "Status_material_ferramenta",
   "Numero_de_solicitacao",
   "Data_da_solicitacao",
+  "Data_de_embarque_logistica",
+  "Data_do_pouso_logistica",
   "Barcode",
   "Aeronave",
   "PN",
@@ -654,7 +665,14 @@ let __sortedBaseVersion = -1;
 let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
-  const ra = (a && a.__stRank != null) ? a.__stRank : statusPriorityRank(a ? a[STATUS_COL] : "");
+  
+// ✅ NOVO: ordenar por Data_da_solicitacao (mais recente primeiro), mantendo resto igual
+const __dtSolA = parseMaybeDate(a ? a[DATE_COL] : null);
+const __dtSolB = parseMaybeDate(b ? b[DATE_COL] : null);
+const __tA = (__dtSolA && !isNaN(__dtSolA.getTime())) ? __dtSolA.getTime() : 0;
+const __tB = (__dtSolB && !isNaN(__dtSolB.getTime())) ? __dtSolB.getTime() : 0;
+if(__tA !== __tB) return __tB - __tA;
+const ra = (a && a.__stRank != null) ? a.__stRank : statusPriorityRank(a ? a[STATUS_COL] : "");
   const rb = (b && b.__stRank != null) ? b.__stRank : statusPriorityRank(b ? b[STATUS_COL] : "");
   if(ra !== rb) return ra - rb;
   const ida = (a && a.__midStr != null) ? a.__midStr : String((a && a.Material_ID) ?? "");
@@ -1354,7 +1372,14 @@ function renderPrios(tableKey){
     const vLOG   = cleanVal(r.Descricao_logistica);
     const vSTATUS = cleanVal(r[STATUS_COL]);
 
-    let marked = "";
+    
+
+    const dtEmb = parseMaybeDate(r && r[EMBARQUE_COL]);
+    const dtPou = parseMaybeDate(r && r[POUSO_COL]);
+    const vEMB = dtEmb ? fmtHHMM(dtEmb) : "";
+    const vPOU = dtPou ? fmtHHMM(dtPou) : "";
+    const vTimes = (vEMB || vPOU) ? `${vEMB || "—"} • ${vPOU || "—"}` : "";
+let marked = "";
     try{
       if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){
         const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()];
@@ -1374,6 +1399,7 @@ function renderPrios(tableKey){
       <div class="prioLine prioNoWrap">NF:${escapeHtml(vNF)} / AWB:${escapeHtml(vAWB)}</div>
       <div class="prioLine prioNoWrap">LOG:${escapeHtml(vLOG)}</div>
       <div class="prioLine">${statusTagHtml(vSTATUS)}</div>
+      ${vTimes ? `<div class="prioLine prioNoWrap">🛫 ${escapeHtml(vTimes)}</div>` : ""}
       ${marked}
       <button class="prioRemove" type="button" onclick="removePrio('${tableKey}','${escapeHtml(id)}')">Remover</button>`;
     grid.appendChild(card);
@@ -1586,6 +1612,14 @@ function renderTable(tableKey){
           const timeHtml = parts.time ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(parts.time)}</div>` : "";
           return `<td><div>${escapeHtml(parts.date)}</div>${timeHtml}</td>`;
         }
+
+
+if(c === EMBARQUE_COL || c === POUSO_COL){
+  const parts = getDatePartsForDisplay(r[c]);
+  if(!parts.date) return `<td></td>`;
+  const timeHtml = parts.time ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(parts.time)}</div>` : "";
+  return `<td><div>${escapeHtml(parts.date)}</div>${timeHtml}</td>`;
+}
 
         if(c === "OBS"){
           const mid = cleanVal(r.Material_ID);
