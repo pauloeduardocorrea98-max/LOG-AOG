@@ -709,26 +709,29 @@ let __sortedBaseVersion = -1;
 let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
-  // ✅ 1) Ordena por Data_da_solicitacao (mais recente primeiro)
-  const ta = (a && a.__dateTs != null) ? a.__dateTs : (function(){
+  // ✅ 1) Ordena por DIA de Data_da_solicitacao (mais recente primeiro) — ignora hora
+  const da = (a && a.__dateDayTs != null) ? a.__dateDayTs : (function(){
     const d = parseMaybeDate(a ? a[DATE_COL] : null);
-    const t = d ? d.getTime() : 0;
-    if(a) a.__dateTs = t;
+    if(!d){ if(a) a.__dateDayTs = 0; return 0; }
+    const t = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    if(a) a.__dateDayTs = t;
     return t;
   })();
-  const tb = (b && b.__dateTs != null) ? b.__dateTs : (function(){
+  const db = (b && b.__dateDayTs != null) ? b.__dateDayTs : (function(){
     const d = parseMaybeDate(b ? b[DATE_COL] : null);
-    const t = d ? d.getTime() : 0;
-    if(b) b.__dateTs = t;
+    if(!d){ if(b) b.__dateDayTs = 0; return 0; }
+    const t = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    if(b) b.__dateDayTs = t;
     return t;
   })();
-  if(ta !== tb) return tb - ta;
+  if(da !== db) return db - da;
 
-  // ✅ 2) Mantém as outras ordens exatamente como antes
+  // ✅ 2) Dentro do mesmo dia, aplica a ordem de Status (Em Fila... → ... → Na Base)
   const ra = (a && a.__stRank != null) ? a.__stRank : statusPriorityRank(a ? a[STATUS_COL] : "");
   const rb = (b && b.__stRank != null) ? b.__stRank : statusPriorityRank(b ? b[STATUS_COL] : "");
   if(ra !== rb) return ra - rb;
 
+  // ✅ 3) Mantém os desempates originais
   const ida = (a && a.__midStr != null) ? a.__midStr : String((a && a.Material_ID) ?? "");
   const idb = (b && b.__midStr != null) ? b.__midStr : String((b && b.Material_ID) ?? "");
   if(ida !== idb) return ida.localeCompare(idb);
@@ -737,6 +740,7 @@ function __compareBaseOrder__(a,b){
   const sb = (b && b.__solStr != null) ? b.__solStr : String((b && b.Numero_de_solicitacao) ?? "");
   return sa.localeCompare(sb);
 }
+
 
 function buildSortedBaseCache(){
   if(__sortedBaseVersion === __dataVersion) return;
