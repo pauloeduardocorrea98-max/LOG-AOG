@@ -2129,9 +2129,10 @@ function pickAvisoImage(){
   if(!hasGAS()) { alert("GAS_WEBAPP_URL não configurado."); return; }
   const u = new URL(GAS_WEBAPP_URL);
   u.searchParams.set("uploader","1");
+  // ✅ volta para o GitHub com hash contendo a URL da imagem (fallback se window.opener vier null por segurança do navegador)
+  u.searchParams.set("returnTo", window.location.href);
   u.searchParams.set("ts", String(Date.now()));
-  // abre a janela do uploader
-  window.open(u.toString(), "AOG_AVISO_UPLOADER", "width=520,height=560");
+  window.open(u.toString(), "_blank", "width=520,height=520,noopener=0");
 }
 
 function clearAvisoImage(){
@@ -2168,6 +2169,26 @@ window.addEventListener("message", (ev)=>{
     }
   }catch(e){}
 });
+function __consumeAvisoHash__(){
+  try{
+    const h = String(window.location.hash || "");
+    if(!h) return;
+    // formato: #avisoImgUrl=...&avisoImgName=...
+    const hh = h.startsWith("#") ? h.slice(1) : h;
+    const p = new URLSearchParams(hh);
+    const url = p.get("avisoImgUrl") || p.get("imgUrl") || "";
+    const name = p.get("avisoImgName") || p.get("imgName") || "";
+    if(!url) return;
+
+    __avisoImg = { name: name || "imagem", url: url };
+    try{ renderAvisoImgChip(); }catch(e){}
+  try{ __consumeAvisoHash__(); }catch(e){}
+    // limpa o hash para não repetir
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }catch(e){}
+}
+window.addEventListener("hashchange", __consumeAvisoHash__);
+
 
 let __sharedTurnoState  = null;
 let __sharedAvisosState = null;
