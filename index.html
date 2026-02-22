@@ -177,19 +177,6 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 
 <body>
 
-<div id="authOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;align-items:center;justify-content:center;padding:18px;">
-  <div style="max-width:520px;width:100%;background:#0b1d33;border:1px solid #334155;border-radius:16px;padding:18px;color:#e5e7eb;box-shadow:0 18px 40px rgba(0,0,0,.35)">
-    <div style="font-weight:800;font-size:16px;color:#38bdf8;margin-bottom:8px">🔒 Login necessário</div>
-    <div id="authMsg" style="font-size:13px;line-height:1.4;opacity:.95">Faça login com sua conta Google <b>@latam.com</b> para acessar o dashboard.</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-      <button class="noteBtn" type="button" onclick="openGoogleLogin()">Fazer login Google</button>
-      <button class="noteBtn gray" type="button" onclick="location.reload()">Recarregar</button>
-    </div>
-    <div style="margin-top:10px;font-size:12px;color:#94a3b8">Dica: o login abre em outra aba. Depois volte aqui e clique em <b>Recarregar</b>.</div>
-  </div>
-</div>
-
-
 <div class="sidebar">
   <h2>LOGÍSTICA AOG</h2>
 
@@ -2294,43 +2281,6 @@ function initCtxMenuHandlers(){
   }, true);
 })();
 
-
-/* ===== AUTH (Google @latam.com via GAS) ===== */
-function showAuthOverlay(msg){
-  const ov = document.getElementById("authOverlay");
-  const m = document.getElementById("authMsg");
-  if(m && msg) m.innerHTML = msg;
-  if(ov){ ov.style.display = "flex"; }
-}
-function hideAuthOverlay(){
-  const ov = document.getElementById("authOverlay");
-  if(ov) ov.style.display = "none";
-}
-function openGoogleLogin(){
-  try{
-    const url = GAS_WEBAPP_URL + (GAS_WEBAPP_URL.includes("?") ? "&" : "?") + "login=1";
-    window.open(url, "_blank", "noopener,noreferrer");
-  }catch(e){}
-}
-async function ensureLatamAuth(){
-  try{
-    const url = buildJsonpUrl({ whoami: "1" });
-    const j = await jsonpCall(url);
-    if(j && j.ok === true && j.domainOk === true){
-      hideAuthOverlay();
-      return true;
-    }
-    const em = (j && j.email) ? String(j.email) : "";
-    const msg = em
-      ? `Conta detectada: <b>${escapeHtml(em)}</b><br>Faça login com uma conta <b>@latam.com</b>.`
-      : `Nenhuma conta detectada.<br>Faça login com uma conta <b>@latam.com</b>.`;
-    showAuthOverlay(msg);
-    return false;
-  }catch(e){
-    showAuthOverlay("Não foi possível validar o login agora. Clique em <b>Fazer login Google</b> e depois recarregue.");
-    return false;
-  }
-}
 (async function init(){
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
@@ -2348,14 +2298,6 @@ async function ensureLatamAuth(){
   if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("✅ Inicializando...");
 
   prepareDataCache();
-
-  // ✅ Exige login LATAM antes de buscar qualquer dado
-  const __okAuth = await ensureLatamAuth();
-  if(!__okAuth){
-    // Mantém overlay e não inicia loops
-    return;
-  }
-
 
   try{ await presenceTick(); }catch(e){}
 
