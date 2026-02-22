@@ -1089,7 +1089,7 @@ function authClear(){
   const err = document.getElementById("authErr");
   if(err) err.style.display = "none";
 }
-async async function authSubmit(){
+async function authSubmit(){
   const inp = document.getElementById("authPw");
   const err = document.getElementById("authErr");
   const pw = inp ? String(inp.value||"").trim() : "";
