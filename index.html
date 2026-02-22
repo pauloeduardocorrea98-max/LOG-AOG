@@ -146,6 +146,8 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .itemBody{ flex:1; min-height:22px; padding:2px 0; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
 .itemBody[contenteditable="true"]{ outline:2px solid rgba(56,189,248,.45); border-radius:8px; padding:6px; background:#f8fafc; }
 .iconBtn{ border:none;background:none;cursor:pointer; font-size:14px; line-height:1; }
+.trashIcon{width:18px;height:18px;display:inline-block;vertical-align:middle;}
+
 .markedBy{ margin-top:6px; font-size:12px; color:#64748b; }
 
 .obsArea{
@@ -1087,7 +1089,7 @@ function authClear(){
   const err = document.getElementById("authErr");
   if(err) err.style.display = "none";
 }
-async function authSubmit(){
+async async function authSubmit(){
   const inp = document.getElementById("authPw");
   const err = document.getElementById("authErr");
   const pw = inp ? String(inp.value||"").trim() : "";
@@ -2388,6 +2390,27 @@ function initCtxMenuHandlers(){
 })();
 
 (async function init(){
+
+  // ===== SENHA DO DIA (Gate) =====
+  // Só inicia o app depois de validar a senha do dia no GAS.
+  function __authStorageKey__(){
+    // trava por dia (se trocar a senha, vai pedir de novo)
+    const d = new Date();
+    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return "AOG_AUTH_OK_LEGACY_" + k;
+  }
+  function __isAuthed__(){ return localStorage.getItem(__authStorageKey__()) === "1"; }
+  function __setAuthed__(){ localStorage.setItem(__authStorageKey__(), "1"); }
+
+  // Se não está autenticado, mostra modal e não inicia refresh ainda
+  if(!__isAuthed__()){
+    const m = document.getElementById("authModal");
+    if(m) m.style.display = "flex";
+    // bloqueia botões/auto refresh até autenticar
+    stopAutoRefresh();
+    return;
+  }
+
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
     if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
