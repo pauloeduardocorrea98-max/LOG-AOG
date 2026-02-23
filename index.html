@@ -2348,7 +2348,7 @@ function pwdClear(){
   if(err) err.textContent = "";
   try{ if(inp) inp.focus(); }catch(e){}
 }
-async function pwdSubmit(){
+async async function pwdSubmit(){
   const inp = document.getElementById("pwdInput");
   const err = document.getElementById("pwdErr");
   const pw = inp ? String(inp.value || "").trim() : "";
