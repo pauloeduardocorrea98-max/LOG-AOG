@@ -429,6 +429,13 @@ function openTab(id,btn){
       }else{
         try{ updateObsVisibleForTable(tk); }catch(e){}
       }
+
+      // ✅ FAST PASS: ao abrir a aba, auto-marca as aeronaves de HOJE no balão (⚠️)
+      if(String(id||"").toLowerCase() === "fast"){
+        __autoPinFastTodayAircraft__()
+          .then(()=>{ try{ renderAircraftBox("fast"); }catch(e){} })
+          .catch(()=>{});
+      }
     }else{
       if(id === "links"){
         markDirty("links");
@@ -1259,6 +1266,70 @@ async function syncSharedAllTables(){
       }catch(e){}
     }
   }catch(e){}
+}
+
+/* =========================================================
+   ✅ AUTO-MARCAR AERONAVES DO DIA (SOMENTE FAST PASS)
+   - Ao abrir a aba FAST, marca automaticamente (⚠️ compartilhado)
+     as aeronaves que possuem Data_da_solicitacao = HOJE.
+   - Não desmarca nada, apenas garante que as de hoje estejam no balão.
+   - Evita spam: roda no máximo 1x por dia por navegador.
+   ========================================================= */
+
+const __FAST_AUTO_AIR_LS_KEY = "FAST_AUTO_AIR_LASTDAY_V1";
+
+function __dateKeyLocal__(dt){
+  if(!dt) return "";
+  const d = (dt instanceof Date) ? dt : parseMaybeDate(dt);
+  if(!d || isNaN(d.getTime())) return "";
+  const pad = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+async function __autoPinFastTodayAircraft__(){
+  try{
+    if(!hasGAS()) return;
+
+    // roda no máximo 1x por dia por navegador
+    const todayKey = __dateKeyLocal__(new Date());
+    const lastKey = String(localStorage.getItem(__FAST_AUTO_AIR_LS_KEY) || "").trim();
+    if(lastKey === todayKey) return;
+
+    // garante estado compartilhado carregado
+    if(!__sharedAirState){
+      try{ await syncSharedAllTables(); }catch(e){}
+    }
+
+    const rows = getBaseRows("fast") || [];
+    const setToday = new Set();
+    for(let i=0;i<rows.length;i++){
+      const r = rows[i];
+      const dk = __dateKeyLocal__(r && r[DATE_COL]);
+      if(dk !== todayKey) continue;
+      const a = cleanVal(r && r[AIR_COL]);
+      if(a) setToday.add(a);
+    }
+
+    if(setToday.size === 0){
+      localStorage.setItem(__FAST_AUTO_AIR_LS_KEY, todayKey);
+      return;
+    }
+
+    const pinned = airPinnedByTable.fast || new Set();
+
+    // marca apenas o que ainda não está marcado
+    for(const a of Array.from(setToday)){
+      if(pinned.has(a)) continue;
+      try{ await gasCall("toggleSharedAirPin", "fast", a); }catch(e){}
+    }
+
+    // sincroniza estado final (para refletir no balão de todos)
+    try{ await syncSharedAllTables(); }catch(e){}
+    localStorage.setItem(__FAST_AUTO_AIR_LS_KEY, todayKey);
+  }catch(e){
+    // não interrompe UI
+    console.warn("FAST auto-pin falhou:", e);
+  }
 }
 
 function __cssEscape__(s){
