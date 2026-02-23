@@ -993,7 +993,7 @@ function displayCell(colKey, rawValue, tableKey, row){
 }
 
 /* ===== GAS/URL (GitHub Pages + JSONP) ===== */
-const GAS_WEBAPP_URL = "https://script.google.com/a/macros/latam.com/s/AKfycbx1wU2tiPZC1_iW1SYiIOJe9WYnm93QpumnQlUd4UJKFiBh28T3wFfd3RGYoi_iUtQKng/exec"; // /exec do seu WebApp
+const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1wU2tiPZC1_iW1SYiIOJe9WYnm93QpumnQlUd4UJKFiBh28T3wFfd3RGYoi_iUtQKng/exec"; // /exec do seu WebApp
 
 function hasGAS(){
   return !!GAS_WEBAPP_URL;
@@ -1011,7 +1011,13 @@ function buildGASUrl(params){
 function jsonpCall(params, timeoutMs = 20000){
   return new Promise((resolve, reject)=>{
     const cbName = "__cb_" + Math.random().toString(36).slice(2);
-    const url = buildGASUrl(Object.assign({}, params || {}, { callback: cbName }));
+    const baseParams = Object.assign({}, params || {});
+    if(__PWD_OK && __PWD_VAL){
+      if(typeof baseParams.pw === "undefined" && typeof baseParams.senha === "undefined" && typeof baseParams.password === "undefined"){
+        baseParams.pw = __PWD_VAL;
+      }
+    }
+    const url = buildGASUrl(Object.assign({}, baseParams, { callback: cbName }));
 
     let done = false;
     const timer = setTimeout(()=>{
@@ -2327,6 +2333,16 @@ function initCtxMenuHandlers(){
 
 /* ===== SENHA FIXA (PASSWORD!A2) ===== */
 let __PWD_OK = false;
+const __PWD_OK_KEY = "AOG_PWD_OK_V1";
+const __PWD_VAL_KEY = "AOG_PWD_VAL_V1";
+let __PWD_VAL = "";
+
+// carrega senha salva (se existir)
+try{
+  __PWD_OK = (localStorage.getItem(__PWD_OK_KEY) === "1");
+  __PWD_VAL = String(localStorage.getItem(__PWD_VAL_KEY) || "");
+  if(!__PWD_VAL) __PWD_OK = false;
+}catch(e){}
 
 function pwdShow(msg){
   const ov = document.getElementById("pwdOverlay");
@@ -2342,13 +2358,15 @@ function pwdHide(){
   if(ov) ov.style.display = "none";
 }
 function pwdClear(){
+  try{ localStorage.removeItem(__PWD_OK_KEY); localStorage.removeItem(__PWD_VAL_KEY); }catch(e){}
+
   const inp = document.getElementById("pwdInput");
   const err = document.getElementById("pwdErr");
   if(inp) inp.value = "";
   if(err) err.textContent = "";
   try{ if(inp) inp.focus(); }catch(e){}
 }
-async async function pwdSubmit(){
+async function pwdSubmit(){
   const inp = document.getElementById("pwdInput");
   const err = document.getElementById("pwdErr");
   const pw = inp ? String(inp.value || "").trim() : "";
@@ -2360,6 +2378,8 @@ async async function pwdSubmit(){
     const out = await gasCall("authPassword", pw);
     if(out && out.ok === true){
       __PWD_OK = true;
+      __PWD_VAL = pw;
+      try{ localStorage.setItem(__PWD_OK_KEY,'1'); localStorage.setItem(__PWD_VAL_KEY, pw); }catch(e){}
       pwdHide();
       return;
     }
