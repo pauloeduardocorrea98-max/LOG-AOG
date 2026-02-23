@@ -327,6 +327,39 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 // GitHub Pages: dados vem do GAS via JSONP
 let dados = [];
 
+
+// ✅ BLOQUEIO POR DOMÍNIO (LATAM)
+// Se o GAS responder {ok:false,error:"forbidden"} ou o JSONP falhar (403/login),
+// mostramos esta tela e paramos os refresh.
+let __ACCESS_BLOCKED__ = false;
+function __showAccessBlocked__(msg){
+  if(__ACCESS_BLOCKED__) return;
+  __ACCESS_BLOCKED__ = true;
+  try{ stopAutoRefresh && stopAutoRefresh(); }catch(e){}
+  try{ if(__refreshTimeout) clearTimeout(__refreshTimeout); }catch(e){}
+  const text = msg || "Acesso permitido somente para contas Google @latam.com.";
+  const overlay = document.createElement("div");
+  overlay.id = "latamBlock";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(2,6,23,.72);display:flex;align-items:center;justify-content:center;z-index:99999;padding:18px;";
+  overlay.innerHTML = `
+    <div style="max-width:640px;width:100%;background:#0b1d33;border:1px solid #334155;border-radius:16px;padding:18px 18px 14px;color:#e5e7eb;box-shadow:0 18px 40px rgba(0,0,0,.35)">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:18px">🔒</div>
+        <div style="font-weight:800;font-size:16px;color:#38bdf8">Acesso restrito</div>
+      </div>
+      <div style="margin-top:10px;font-size:13px;line-height:1.4;color:#e5e7eb">
+        ${text.replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:#94a3b8">
+        Entre com sua conta Google corporativa e tente novamente.
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+        <button type="button" class="noteBtn gray" onclick="location.reload()">Recarregar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
 const __ADMIN_MODE = (/\badmin=1\b/i.test(window.location.search) || localStorage.getItem("ADMIN_MODE")==="1");
 
 const SHARED_TABLE_KEYS = ["aog","war","fast","cargo","cargas","tools"];
@@ -1066,8 +1099,19 @@ function jsonpCall(params, timeoutMs = 20000){
       try{ if(script && script.parentNode) script.parentNode.removeChild(script); }catch(e){}
     }
 
-    window[cbName] = (data)=>{
+    
+window[cbName] = (data)=>{
       if(done) return;
+      // ✅ Se GAS respondeu bloqueio por domínio
+      try{
+        if(data && data.ok === false && String(data.error||"").toLowerCase() === "forbidden"){
+          __showAccessBlocked__(data.message || "Acesso permitido somente para contas Google @latam.com.");
+          done = true;
+          cleanup();
+          reject(new Error("forbidden"));
+          return;
+        }
+      }catch(e){}
       done = true;
       cleanup();
       resolve(data);
@@ -1076,10 +1120,13 @@ function jsonpCall(params, timeoutMs = 20000){
     const script = document.createElement("script");
     script.src = url;
     script.async = true;
-    script.onerror = ()=>{
+    
+script.onerror = ()=>{
       if(done) return;
       done = true;
       cleanup();
+      // Normalmente acontece quando o WebApp está restrito ao domínio e o usuário não tem acesso/logou.
+      __showAccessBlocked__("Você não tem permissão para acessar este dashboard. Use uma conta Google @latam.com (ou solicite acesso).");
       reject(new Error("erro ao carregar script JSONP"));
     };
     document.head.appendChild(script);
