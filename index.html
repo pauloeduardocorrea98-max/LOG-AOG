@@ -202,7 +202,9 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
     <button onclick="openTab('war',this)">⚔️ War Room</button>
     <button onclick="openTab('fast',this)">⚡ Fast Pass</button>
     <button onclick="openTab('cargo',this)">📦 Cargo Heroes</button>
+    <button onclick="openTab('acompanhamento',this)">📍 Acompanhamento</button>
     <button onclick="openTab('cargas',this)">🚚 Cargas</button>
+    <button onclick="openTab('hotlist',this)">🔥 Hot List</button>
     <button onclick="openTab('tools',this)">🛠️ Ferramentas</button>
     <button onclick="openTab('links',this)">🔗 Links Úteis</button>
     <button onclick="openTab('avisos',this)">📢 Avisos da Gestão</button>
@@ -269,14 +271,28 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
     <div class="tableWrap"><table id="tbl-cargo"></table></div>
   </div>
 
-  <div id="cargas" class="section">
+<div id="acompanhamento" class="section">
+    <h1>Acompanhamento</h1>
+    <div id="air-acompanhamento"></div>
+    <div id="prio-acompanhamento"></div>
+    <div class="tableWrap"><table id="tbl-acompanhamento"></table></div>
+  </div>
+
+<div id="cargas" class="section">
     <h1>Cargas</h1>
     <div id="air-cargas"></div>
     <div id="prio-cargas"></div>
     <div class="tableWrap"><table id="tbl-cargas"></table></div>
   </div>
 
-  <div id="tools" class="section">
+<div id="hotlist" class="section">
+    <h1>Hot List</h1>
+    <div id="air-hotlist"></div>
+    <div id="prio-hotlist"></div>
+    <div class="tableWrap"><table id="tbl-hotlist"></table></div>
+  </div>
+
+<div id="tools" class="section">
     <h1>Ferramentas</h1>
     <div id="air-tools"></div>
     <div id="prio-tools"></div>
@@ -371,7 +387,7 @@ function __showAccessBlocked__(msg){
 
 const __ADMIN_MODE = (/\badmin=1\b/i.test(window.location.search) || localStorage.getItem("ADMIN_MODE")==="1");
 
-const SHARED_TABLE_KEYS = ["aog","war","fast","cargo","cargas","tools"];
+const SHARED_TABLE_KEYS = ["aog","war","fast","cargo","cargas","hotlist","acompanhamento","tools"];
 function isSharedTable(tableKey){
   return SHARED_TABLE_KEYS.includes(String(tableKey||"").toLowerCase());
 }
@@ -411,11 +427,11 @@ function updateStatusVisibility(){
   st.style.display = show ? "block" : "none";
 }
 
-const __dirty = { aog:true, war:true, fast:true, cargo:true, cargas:true, tools:true, links:true, turno:true, avisos:true };
+const __dirty = { aog:true, war:true, fast:true, cargo:true, cargas:true, hotlist:true, acompanhamento:true, tools:true, links:true, turno:true, avisos:true };
 function markDirty(key){ if(Object.prototype.hasOwnProperty.call(__dirty, key)) __dirty[key] = true; }
 function clearDirty(key){ if(Object.prototype.hasOwnProperty.call(__dirty, key)) __dirty[key] = false; }
 function markAllTablesDirty(){
-  markDirty("aog"); markDirty("war"); markDirty("fast"); markDirty("cargo"); markDirty("cargas"); markDirty("tools");
+  markDirty("aog"); markDirty("war"); markDirty("fast"); markDirty("cargo"); markDirty("cargas"); markDirty("hotlist"); markDirty("acompanhamento"); markDirty("tools");
 }
 
 function openTab(id,btn){
@@ -664,10 +680,10 @@ const COL_LABELS = {
 function colLabel(col){ return COL_LABELS[col] || col; }
 
 
-const tableKeysBySection = { aog:"aog", war:"war", fast:"fast", cargo:"cargo", cargas:"cargas", tools:"tools" };
-const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
+const tableKeysBySection = { aog:"aog", war:"war", fast:"fast", cargo:"cargo", acompanhamento:"acompanhamento", cargas:"cargas", hotlist:"hotlist", tools:"tools" };
+const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, acompanhamento:{}, cargas:{}, hotlist:{}, tools:{} };
 
-const __filterDraftByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
+const __filterDraftByTable = { aog:{}, war:{}, fast:{}, cargo:{}, acompanhamento:{}, cargas:{}, hotlist:{}, tools:{} };
 function setFilterDraft(tableKey, col, value){
   const v = String(value || "");
   if(!__filterDraftByTable[tableKey]) __filterDraftByTable[tableKey] = {};
@@ -707,14 +723,19 @@ document.addEventListener("keydown", (ev)=>{
 const prioStoreKey = {
   aog:  "AOG_PRIOS_AOG_V1",  war:  "AOG_PRIOS_WAR_V1",
   fast: "AOG_PRIOS_FAST_V1", cargo:"AOG_PRIOS_CARGO_V1",
-  cargas:"AOG_PRIOS_CARGAS_V1", tools:"AOG_PRIOS_TOOLS_V1"
+  acompanhamento:"AOG_PRIOS_ACOMPANHAMENTO_V1",
+  cargas:"AOG_PRIOS_CARGAS_V1",
+  hotlist:"AOG_PRIOS_HOTLIST_V1",
+  tools:"AOG_PRIOS_TOOLS_V1"
 };
 let priosByTable = {
   aog:  new Set(JSON.parse(localStorage.getItem(prioStoreKey.aog)  || "[]")),
   war:  new Set(JSON.parse(localStorage.getItem(prioStoreKey.war)  || "[]")),
   fast: new Set(JSON.parse(localStorage.getItem(prioStoreKey.fast) || "[]")),
   cargo:new Set(JSON.parse(localStorage.getItem(prioStoreKey.cargo)|| "[]")),
+  acompanhamento:new Set(JSON.parse(localStorage.getItem(prioStoreKey.acompanhamento)|| "[]")),
   cargas:new Set(JSON.parse(localStorage.getItem(prioStoreKey.cargas)|| "[]")),
+  hotlist:new Set(JSON.parse(localStorage.getItem(prioStoreKey.hotlist)|| "[]")),
   tools:new Set(JSON.parse(localStorage.getItem(prioStoreKey.tools)|| "[]"))
 };
 function rowId(r){
@@ -735,29 +756,35 @@ function __prioHas__(tableKey, rid){
 
 const AIR_STORE_KEY = {
   aog:"AOG_AIR_AOG_V1", war:"AOG_AIR_WAR_V1", fast:"AOG_AIR_FAST_V1",
-  cargo:"AOG_AIR_CARGO_V1", cargas:"AOG_AIR_CARGAS_V1", tools:"AOG_AIR_TOOLS_V1"
+  cargo:"AOG_AIR_CARGO_V1",
+  acompanhamento:"AOG_AIR_ACOMPANHAMENTO_V1",
+  cargas:"AOG_AIR_CARGAS_V1",
+  hotlist:"AOG_AIR_HOTLIST_V1",
+  tools:"AOG_AIR_TOOLS_V1"
 };
 let airPinnedByTable = {
   aog:   new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.aog)   || "[]")),
   war:   new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.war)   || "[]")),
   fast:  new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.fast)  || "[]")),
   cargo: new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.cargo) || "[]")),
+  acompanhamento:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.acompanhamento)|| "[]")),
   cargas:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.cargas)|| "[]")),
+  hotlist:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.hotlist)|| "[]")),
   tools: new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.tools) || "[]"))
 };
-const airFocusByTable = { aog:null, war:null, fast:null, cargo:null, cargas:null, tools:null };
+const airFocusByTable = { aog:null, war:null, fast:null, cargo:null, acompanhamento:null, cargas:null, hotlist:null, tools:null };
 function saveAirPinned(tableKey){
   try{ localStorage.setItem(AIR_STORE_KEY[tableKey], JSON.stringify(Array.from(airPinnedByTable[tableKey]))); }catch(e){}
 }
 
-let __cacheByTable = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
+let __cacheByTable = { aog:[], war:[], fast:[], cargo:[], acompanhamento:[], cargas:[], hotlist:[], tools:[] };
 let __cacheLastUpdate = null;
 let __dataVersion = 0;
 
-let __sortedBaseByTable = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
+let __sortedBaseByTable = { aog:[], war:[], fast:[], cargo:[], acompanhamento:[], cargas:[], hotlist:[], tools:[] };
 let __sortedBaseVersion = -1;
 
-let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
+let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
   // ✅ 1) Ordena por DIA de Data_da_solicitacao (mais recente primeiro) — ignora hora
@@ -800,17 +827,19 @@ function buildSortedBaseCache(){
     war:   (__cacheByTable.war||[]).slice().sort(__compareBaseOrder__),
     fast:  (__cacheByTable.fast||[]).slice().sort(__compareBaseOrder__),
     cargo: (__cacheByTable.cargo||[]).slice().sort(__compareBaseOrder__),
+    acompanhamento:(__cacheByTable.acompanhamento||[]).slice().sort(__compareBaseOrder__),
     cargas:(__cacheByTable.cargas||[]).slice().sort(__compareBaseOrder__),
+    hotlist:(__cacheByTable.hotlist||[]).slice().sort(__compareBaseOrder__),
     tools: (__cacheByTable.tools||[]).slice().sort(__compareBaseOrder__)
   };
   __sortedBaseVersion = __dataVersion;
 }
 
 function prepareDataCache(){
-  const out = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
+  const out = { aog:[], war:[], fast:[], cargo:[], acompanhamento:[], cargas:[], hotlist:[], tools:[] };
   let maxDt = null;
 
-  __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
+  __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
 
   const arr = Array.isArray(dados) ? dados : [];
   for(let i=0;i<arr.length;i++){
@@ -830,7 +859,13 @@ function prepareDataCache(){
     out.cargo.push(r);
     __pushAirId__("cargo", r);
 
+    // ✅ NOVA ABA: Acompanhamento (mesma regra do Cargo Heroes)
+    out.acompanhamento.push(r);
+    __pushAirId__("acompanhamento", r);
+
     if(isCargasRow(r)){ out.cargas.push(r); __pushAirId__("cargas", r); }
+    // ✅ NOVA ABA: Hot List (mesma regra de Cargas)
+    if(isCargasRow(r)){ out.hotlist.push(r); __pushAirId__("hotlist", r); }
     if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r); }
 
     const c = String((r && r.Criticidade) || "").toUpperCase();
@@ -904,8 +939,8 @@ function getActiveFilters(tableKey){
   return active;
 }
 
-const __filterCompiledCache = { aog:null, war:null, fast:null, cargo:null, cargas:null, tools:null };
-const __filterRowsCache = { aog:null, war:null, fast:null, cargo:null, cargas:null, tools:null };
+const __filterCompiledCache = { aog:null, war:null, fast:null, cargo:null, acompanhamento:null, cargas:null, hotlist:null, tools:null };
+const __filterRowsCache = { aog:null, war:null, fast:null, cargo:null, acompanhamento:null, cargas:null, hotlist:null, tools:null };
 
 function buildFiltersSignatureCore(tableKey){
   const f = filtersByTable[tableKey] || {};
@@ -1627,7 +1662,7 @@ function countIdsForAircraft(tableKey, aircraft){
 }
 
 function renderAircraftBox(tableKey){
-  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", cargas:"air-cargas", tools:"air-tools" }[tableKey];
+  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools" }[tableKey];
   const wrap = document.getElementById(wrapId);
   if(!wrap) return;
   const set = airPinnedByTable[tableKey];
@@ -1674,7 +1709,7 @@ function renderAircraftBox(tableKey){
 }
 
 function renderPrios(tableKey){
-  const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", cargas:"prio-cargas", tools:"prio-tools" }[tableKey];
+  const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", acompanhamento:"prio-acompanhamento", cargas:"prio-cargas", hotlist:"prio-hotlist", tools:"prio-tools" }[tableKey];
   const wrap = document.getElementById(wrapId);
   if(!wrap) return;
   const set = priosByTable[tableKey];
@@ -1736,7 +1771,11 @@ function renderPrios(tableKey){
 /* ===== PAGINAÇÃO ===== */
 const PAGER_STORE_KEY = {
   aog:"AOG_PAGER_AOG_V1", war:"AOG_PAGER_WAR_V1", fast:"AOG_PAGER_FAST_V1",
-  cargo:"AOG_PAGER_CARGO_V1", cargas:"AOG_PAGER_CARGAS_V1", tools:"AOG_PAGER_TOOLS_V1"
+  cargo:"AOG_PAGER_CARGO_V1",
+  acompanhamento:"AOG_PAGER_ACOMPANHAMENTO_V1",
+  cargas:"AOG_PAGER_CARGAS_V1",
+  hotlist:"AOG_PAGER_HOTLIST_V1",
+  tools:"AOG_PAGER_TOOLS_V1"
 };
 function loadPager(tableKey){
   try{
@@ -1750,7 +1789,11 @@ function savePager(tableKey){
 }
 const pagerByTable = {
   aog:loadPager("aog"), war:loadPager("war"), fast:loadPager("fast"),
-  cargo:loadPager("cargo"), cargas:loadPager("cargas"), tools:loadPager("tools")
+  cargo:loadPager("cargo"),
+  acompanhamento:loadPager("acompanhamento"),
+  cargas:loadPager("cargas"),
+  hotlist:loadPager("hotlist"),
+  tools:loadPager("tools")
 };
 function clampPage(tableKey, totalRows){
   const pg = pagerByTable[tableKey];
