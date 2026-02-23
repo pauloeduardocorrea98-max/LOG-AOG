@@ -172,6 +172,27 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .ctxApply{ height:34px; padding:0 12px; border:none; border-radius:10px; background:#0ea5e9; color:#fff; cursor:pointer; font-size:13px; }
 .ctxApply:hover{ filter:brightness(.95); }
 .ctxHint{ margin-top:8px; font-size:12px; color:#64748b; }
+
+/* ===== Modal Senha ===== */
+.pwdOverlay{
+  position:fixed; inset:0; background:rgba(2,6,23,.65);
+  display:none; align-items:center; justify-content:center; z-index:99999;
+}
+.pwdCard{
+  width:min(560px, calc(100vw - 40px));
+  background:#0f172a; border:1px solid #334155; border-radius:16px;
+  padding:18px; color:#e5e7eb; box-shadow:0 18px 40px rgba(0,0,0,.35);
+}
+.pwdTitle{ font-weight:800; color:#38bdf8; font-size:16px; display:flex; align-items:center; gap:10px; }
+.pwdRow{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.pwdInput{
+  flex:1; min-width:240px;
+  padding:12px; border-radius:12px; border:1px solid #334155;
+  background:#0b1d33; color:#e5e7eb; outline:none;
+}
+.pwdInput:focus{ border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.18); }
+.pwdErr{ margin-top:10px; color:#f87171; font-size:12px; min-height:16px; }
+
 </style>
 </head>
 
@@ -300,6 +321,23 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
     </div>
 
     <div class="box sharedList" id="avisosList"></div>
+  </div>
+</div>
+
+
+<!-- ===== MODAL SENHA (PASSWORD!A2) ===== -->
+<div class="pwdOverlay" id="pwdOverlay">
+  <div class="pwdCard">
+    <div class="pwdTitle">🔒 Acesso protegido</div>
+    <div style="margin-top:6px; font-size:12px; color:#94a3b8;">
+      Digite a senha atual para abrir o dashboard.
+    </div>
+    <div class="pwdRow">
+      <input id="pwdInput" class="pwdInput" type="password" placeholder="Senha">
+      <button class="noteBtn" type="button" onclick="pwdSubmit()">Entrar</button>
+      <button class="noteBtn gray" type="button" onclick="pwdClear()">Limpar</button>
+    </div>
+    <div class="pwdErr" id="pwdErr"></div>
   </div>
 </div>
 
@@ -1024,6 +1062,12 @@ function gasCall(fnName, ...args){
   // Force update (roda atualizarAOG)
   if(fn === "forceUpdate" || fn === "atualizarAOG" || fn === "runForceUpdate") {
     return jsonpCall({ forceUpdate: 1 });
+  }
+
+
+  // Auth (senha fixa em PASSWORD!A2)
+  if(fn === "authPassword" || fn === "validatePassword" || fn === "authSenha") {
+    return jsonpCall({ auth: 1, pw: args[0] || "" });
   }
 
   // Presença
@@ -2281,85 +2325,72 @@ function initCtxMenuHandlers(){
   }, true);
 })();
 
+/* ===== SENHA FIXA (PASSWORD!A2) ===== */
+let __PWD_OK = false;
 
-/* =========================
-   🔐 SENHA DO DIA (Gate)
-   ========================= */
-function __showPwdModal__(msg){
-  const m = document.getElementById("pwdModal");
-  const e = document.getElementById("pwdErr");
-  if(m) m.style.display = "flex";
-  if(e){
-    if(msg){ e.style.display="block"; e.textContent = msg; }
-    else{ e.style.display="none"; e.textContent=""; }
-  }
-  const d = document.getElementById("pwdDate");
-  if(d) d.textContent = new Date().toISOString().slice(0,10);
-}
-function __hidePwdModal__(){
-  const m = document.getElementById("pwdModal");
-  if(m) m.style.display = "none";
-  const e = document.getElementById("pwdErr");
-  if(e){ e.style.display="none"; e.textContent=""; }
-}
-function __bindPwdUiOnce__(){
-  if(window.__PWD_UI_BINDED__) return;
-  window.__PWD_UI_BINDED__ = true;
-
+function pwdShow(msg){
+  const ov = document.getElementById("pwdOverlay");
+  const err = document.getElementById("pwdErr");
   const inp = document.getElementById("pwdInput");
-  const btn = document.getElementById("pwdEnterBtn");
-  const clr = document.getElementById("pwdClearBtn");
-
-  function go(){
-    const v = inp ? inp.value : "";
-    __tryPwd__(v);
+  if(err) err.textContent = msg || "";
+  if(inp) inp.value = "";
+  if(ov) ov.style.display = "flex";
+  try{ if(inp) inp.focus(); }catch(e){}
+}
+function pwdHide(){
+  const ov = document.getElementById("pwdOverlay");
+  if(ov) ov.style.display = "none";
+}
+function pwdClear(){
+  const inp = document.getElementById("pwdInput");
+  const err = document.getElementById("pwdErr");
+  if(inp) inp.value = "";
+  if(err) err.textContent = "";
+  try{ if(inp) inp.focus(); }catch(e){}
+}
+async function pwdSubmit(){
+  const inp = document.getElementById("pwdInput");
+  const err = document.getElementById("pwdErr");
+  const pw = inp ? String(inp.value || "").trim() : "";
+  if(!pw){
+    if(err) err.textContent = "Senha obrigatória.";
+    return;
   }
-  if(btn) btn.addEventListener("click", go);
-  if(inp) inp.addEventListener("keydown", (ev)=>{ if(ev.key === "Enter") go(); });
-  if(clr) clr.addEventListener("click", ()=>{
-    try{ localStorage.removeItem("PWD_LAST"); }catch(e){}
-    if(inp) inp.value="";
-    __showPwdModal__("");
+  try{
+    const out = await gasCall("authPassword", pw);
+    if(out && out.ok === true){
+      __PWD_OK = true;
+      pwdHide();
+      return;
+    }
+    if(err) err.textContent = (out && out.error) ? String(out.error) : "Senha inválida.";
+  }catch(e){
+    if(err) err.textContent = "Falha ao validar senha (verifique o deploy /exec).";
+  }
+}
+
+function requirePassword(){
+  return new Promise((resolve)=>{
+    __PWD_OK = false;
+    pwdShow("");
+    // Enter no input
+    const inp = document.getElementById("pwdInput");
+    if(inp && !inp.__pwdBound){
+      inp.__pwdBound = true;
+      inp.addEventListener("keydown", (ev)=>{
+        if(ev.key === "Enter"){ ev.preventDefault(); pwdSubmit(); }
+      });
+    }
+    const timer = setInterval(()=>{
+      if(__PWD_OK){
+        clearInterval(timer);
+        resolve(true);
+      }
+    }, 120);
   });
 }
 
-async function __tryPwd__(pw){
-  const s = String(pw||"").trim();
-  if(!s){ __showPwdModal__("Senha obrigatória."); return false; }
-
-  try{
-    const resp = await jsonpCall({ auth: 1, pw: s }, 20000);
-    if(resp && resp.ok === true){
-      try{ localStorage.setItem("PWD_LAST", s); }catch(e){}
-      __hidePwdModal__();
-      return true;
-    }
-    const err = resp && resp.error ? String(resp.error) : "Senha inválida.";
-    __showPwdModal__(err);
-    return false;
-  }catch(e){
-    __showPwdModal__("Sem resposta do servidor (auth). Verifique o deploy /exec e acesso 'Anyone'.");
-    return false;
-  }
-}
-
-async function __ensurePasswordGate__(){
-  __bindPwdUiOnce__();
-  // tenta validar automaticamente com a última senha salva
-  let last = "";
-  try{ last = localStorage.getItem("PWD_LAST") || ""; }catch(e){}
-  if(last){
-    const ok = await __tryPwd__(last);
-    if(ok) return true;
-  }
-  __showPwdModal__("");
-  return false;
-}
-
 (async function init(){
-  // 🔐 Gate: exige senha do dia antes de qualquer chamada ao GAS
-  try{ const okGate = await __ensurePasswordGate__(); if(!okGate) return; }catch(e){ __showPwdModal__('Falha no gate.'); return; }
-
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
     if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
@@ -2368,6 +2399,9 @@ async function __ensurePasswordGate__(){
     const st = document.getElementById("status");
     if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno no script.");
   });
+
+  // 🔒 trava o app até validar a senha (PASSWORD!A2)
+  await requirePassword();
 
   __lastUpdateDate = computeLastUpdateFromData();
   __lastSuccessAt = new Date();
@@ -2434,40 +2468,6 @@ async function __ensurePasswordGate__(){
   updateStatusVisibility();
 })();
 </script>
-
-
-<!-- 🔐 SENHA DO DIA (GitHub Pages) -->
-<div id="pwdModal" style="
-  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-  background:rgba(2,6,23,.65); z-index:99999; padding:18px;">
-  <div style="
-    width:min(640px, 92vw);
-    background:#0b1d33;
-    border:1px solid #334155;
-    border-radius:16px;
-    padding:16px 18px;
-    box-shadow:0 18px 40px rgba(15,23,42,.35);
-    color:#e5e7eb;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-      <div style="font-size:18px">🔒</div>
-      <div style="font-weight:800;color:#38bdf8">Acesso protegido</div>
-      <div id="pwdDate" style="margin-left:auto;font-size:12px;color:#94a3b8"></div>
-    </div>
-    <div style="font-size:13px;color:#cbd5e1;margin-bottom:12px;">
-      Digite a <b>senha do dia</b> para abrir o dashboard.
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-      <input id="pwdInput" type="password" autocomplete="current-password"
-        placeholder="Senha do dia"
-        style="flex:1;min-width:260px;padding:12px 12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#e5e7eb;outline:none;">
-      <button id="pwdEnterBtn" type="button"
-        style="padding:10px 14px;border:none;border-radius:12px;background:#0ea5e9;color:#fff;cursor:pointer;">Entrar</button>
-      <button id="pwdClearBtn" type="button"
-        style="padding:10px 14px;border:none;border-radius:12px;background:#334155;color:#fff;cursor:pointer;">Limpar</button>
-    </div>
-    <div id="pwdErr" style="margin-top:10px;font-size:12px;color:#f87171;display:none;"></div>
-  </div>
-</div>
 
 </body>
 </html>
