@@ -146,6 +146,15 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .itemBody{ flex:1; min-height:22px; padding:2px 0; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
 .itemBody[contenteditable="true"]{ outline:2px solid rgba(56,189,248,.45); border-radius:8px; padding:6px; background:#f8fafc; }
 .iconBtn{ border:none;background:none;cursor:pointer; font-size:14px; line-height:1; }
+.trashIcon{
+  display:inline-block;
+  width:18px;height:18px;
+  vertical-align:middle;
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:contain;
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22currentColor%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpolyline%20points=%223%206%205%206%2021%206%22/%3E%3Cpath%20d=%22M19%206l-1%2014a2%202%200%200%201-2%202H8a2%202%200%200%201-2-2L5%206%22/%3E%3Cpath%20d=%22M10%2011v6%22/%3E%3Cpath%20d=%22M14%2011v6%22/%3E%3Cpath%20d=%22M9%206V4a1%201%200%200%201%201-1h4a1%201%200%200%201%201%201v2%22/%3E%3C/svg%3E");
+}
 .markedBy{ margin-top:6px; font-size:12px; color:#64748b; }
 
 .obsArea{
@@ -1269,6 +1278,146 @@ async function syncSharedAllTables(){
 }
 
 /* =========================================================
+   ✅ FAST PASS — AUTO-MARCAR AERONAVES DO DIA (a cada 15min)
+   - Só na aba FAST
+   - Marca automaticamente as aeronaves que aparecem na data de HOJE
+   - Não remove marcações manuais: gerencia só o que ele mesmo marcou
+   ========================================================= */
+const FAST_AUTO_PIN_INTERVAL_MS = 15 * 60 * 1000;
+const FAST_AUTO_PIN_STORAGE_KEY = "FAST_AUTO_PIN_MANAGED_V1";
+let __fastAutoPinInFlight = false;
+
+function __todayKey__(){
+  // chave do dia no fuso do navegador (suficiente para o uso do time)
+  // formato: yyyy-mm-dd
+  const d = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function __fastAutoLoadManaged__(){
+  try{
+    const raw = localStorage.getItem(FAST_AUTO_PIN_STORAGE_KEY);
+    if(!raw) return { date:"", pins:[] };
+    const obj = JSON.parse(raw);
+    if(!obj || typeof obj !== "object") return { date:"", pins:[] };
+    if(!Array.isArray(obj.pins)) obj.pins = [];
+    obj.date = String(obj.date || "");
+    return obj;
+  }catch(e){ return { date:"", pins:[] }; }
+}
+
+function __fastAutoSaveManaged__(dateKey, pins){
+  try{
+    localStorage.setItem(FAST_AUTO_PIN_STORAGE_KEY, JSON.stringify({ date:String(dateKey||""), pins:Array.from(pins||[]) }));
+  }catch(e){}
+}
+
+function __getFastAircraftSetForToday__(){
+  const today = __todayKey__();
+  const rows = getBaseRows("fast") || [];
+  const set = new Set();
+  for(const r of rows){
+    const dt = parseMaybeDate(r && r[DATE_COL]);
+    if(!dt) continue;
+    const k = UtilitiesFormatDateKey_(dt); // yyyy-mm-dd no fuso local
+    if(k !== today) continue;
+    const a = cleanVal(r && r[AIR_COL]);
+    if(a) set.add(a);
+  }
+  return { today, aircraftSet: set };
+}
+
+// helper: gera yyyy-mm-dd a partir de Date (local)
+function UtilitiesFormatDateKey_(dt){
+  try{
+    const d = (dt && Object.prototype.toString.call(dt)==="[object Date]") ? dt : new Date(dt);
+    if(isNaN(d.getTime())) return "";
+    const pad = n => String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }catch(e){ return ""; }
+}
+
+// garante que uma aeronave fique "pinada" no compartilhado (sem toggle duplo)
+async function __ensureSharedAirPinned__(aircraft){
+  const a = cleanVal(aircraft);
+  if(!a) return false;
+
+  // precisa do estado compartilhado atualizado para evitar toggle errado
+  try{ if(!__sharedAirState) await syncSharedAllTables(); }catch(e){}
+
+  const pins = (airPinnedByTable.fast instanceof Set) ? airPinnedByTable.fast : new Set();
+  if(pins.has(a)) return false;
+
+  await toggleAirShared("fast", a);
+  return true;
+}
+
+// remove somente o que foi auto-marcado anteriormente
+async function __removeManagedPinsIfNeeded__(managedPins, desiredPins){
+  const currentPins = (airPinnedByTable.fast instanceof Set) ? airPinnedByTable.fast : new Set();
+  const toRemove = [];
+  for(const a of managedPins){
+    if(!a) continue;
+    if(!desiredPins.has(a) && currentPins.has(a)) toRemove.push(a);
+  }
+  for(const a of toRemove){
+    try{ await toggleAirShared("fast", a); }catch(e){}
+  }
+}
+
+// roda agora (com proteção de concorrência)
+async function runFastAutoPinNow(reason){
+  if(__fastAutoPinInFlight) return;
+  __fastAutoPinInFlight = true;
+
+  try{
+    // precisa ter dados carregados
+    if(!Array.isArray(dados) || dados.length === 0){
+      __fastAutoPinInFlight = false;
+      return;
+    }
+
+    // garante caches prontos
+    try{ prepareDataCache(); }catch(e){}
+
+    const { today, aircraftSet } = __getFastAircraftSetForToday__();
+    const managed = __fastAutoLoadManaged__();
+
+    // se virou o dia, limpa o que foi gerenciado ontem (sem mexer no manual)
+    if(managed.date && managed.date !== today){
+      try{ await __removeManagedPinsIfNeeded__(new Set(managed.pins||[]), new Set()); }catch(e){}
+      managed.date = "";
+      managed.pins = [];
+    }
+
+    // remove pins gerenciados que não são mais do dia
+    try{ await __removeManagedPinsIfNeeded__(new Set(managed.pins||[]), aircraftSet); }catch(e){}
+
+    // garante pins do dia
+    const newlyManaged = new Set(managed.pins || []);
+    for(const a of aircraftSet){
+      try{
+        const changed = await __ensureSharedAirPinned__(a);
+        if(changed) newlyManaged.add(a);
+      }catch(e){}
+    }
+
+    __fastAutoSaveManaged__(today, Array.from(newlyManaged));
+
+    // se estiver na aba FAST, re-render para mostrar as aeronaves no topo
+    const active = document.querySelector(".section.active");
+    if(active && active.id === "fast"){
+      markDirty("fast");
+      renderAircraftBox("fast");
+      clearDirty("fast");
+    }
+  }finally{
+    __fastAutoPinInFlight = false;
+  }
+}
+
+/* =========================================================
    ✅ AUTO-MARCAR AERONAVES DO DIA (SOMENTE FAST PASS)
    - Ao abrir a aba FAST, marca automaticamente (⚠️ compartilhado)
      as aeronaves que possuem Data_da_solicitacao = HOJE.
@@ -2299,7 +2448,7 @@ function renderSharedList(kind){
 
     row.innerHTML = `
       <input type="checkbox" ${it.done ? "checked" : ""} onchange="toggleDone('${kind}','${escapeHtml(it.id)}')">
-      <button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')">🗑️</button>`;
+      <button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')"><span class="trashIcon" aria-hidden="true"></span></button>`;
     row.appendChild(body);
 
     if(it.by && it.t){
@@ -2555,7 +2704,13 @@ function initCtxMenuHandlers(){
     try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){}
   }, 30000); // 30 segundos — só dados colaborativos leves
 
-  updateStatusVisibility();
+  
+  // FAST: auto-marcar aeronaves do dia a cada 15min (mesmo se a aba não estiver aberta)
+  setInterval(()=>{ try{ runFastAutoPinNow("timer"); }catch(e){} }, FAST_AUTO_PIN_INTERVAL_MS);
+  // roda uma vez logo após o primeiro refresh
+  setTimeout(()=>{ try{ runFastAutoPinNow("boot"); }catch(e){} }, 5000);
+
+updateStatusVisibility();
 })();
 </script>
 
