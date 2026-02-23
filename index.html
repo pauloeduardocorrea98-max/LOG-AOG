@@ -303,26 +303,6 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   </div>
 </div>
 
-
-<!-- ✅ SENHA DO DIA (bloqueio simples) -->
-<div id="pwdGate" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.75);z-index:99999;">
-  <div style="width:min(560px,92vw);background:#0b1d33;border:1px solid #334155;border-radius:16px;padding:18px 18px 14px;box-shadow:0 30px 80px rgba(0,0,0,.35);">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <div style="font-size:18px">🔐</div>
-      <div style="font-weight:800;color:#38bdf8">Acesso protegido</div>
-      <div style="margin-left:auto;font-size:12px;color:#94a3b8" id="pwdGateHint"></div>
-    </div>
-    <div style="font-size:13px;color:#e5e7eb;margin-bottom:12px">Digite a <b>senha do dia</b> para abrir o dashboard.</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-      <input id="pwdInput" type="password" autocomplete="one-time-code" placeholder="Senha do dia"
-        style="flex:1;min-width:220px;padding:12px 12px;border:1px solid #334155;border-radius:12px;background:#0f172a;color:#e5e7eb;outline:none;">
-      <button class="noteBtn" type="button" onclick="pwdTryLogin()" style="padding:10px 14px;border-radius:12px">Entrar</button>
-      <button class="noteBtn gray" type="button" onclick="pwdClear()" style="padding:10px 14px;border-radius:12px">Limpar</button>
-    </div>
-    <div id="pwdErr" style="margin-top:10px;font-size:12px;color:#f87171;min-height:16px"></div>
-  </div>
-</div>
-
 <div id="ctxMenu" class="ctxMenu">
   <div class="ctxTitle">Formatação (selecione o texto → botão direito → ajustar → Aplicar)</div>
   <div class="ctxRow">
@@ -1026,90 +1006,6 @@ function jsonpCall(params, timeoutMs = 20000){
       reject(new Error("erro ao carregar script JSONP"));
     };
     document.head.appendChild(script);
-  });
-}
-
-
-/* ===== SENHA DO DIA (GitHub Pages) ===== */
-const __PWD_STORE_KEY = "AOG_PWD_OK_DAY_V1";
-
-function __todayKey__(){
-  const d = new Date();
-  const pad = n => String(n).padStart(2,"0");
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
-
-function pwdShow(){
-  const g = document.getElementById("pwdGate");
-  if(g) g.style.display = "flex";
-  const err = document.getElementById("pwdErr");
-  if(err) err.textContent = "";
-  const inp = document.getElementById("pwdInput");
-  if(inp){ inp.value = ""; setTimeout(()=>inp.focus(), 30); }
-  const hint = document.getElementById("pwdGateHint");
-  if(hint) hint.textContent = __todayKey__();
-}
-
-function pwdHide(){
-  const g = document.getElementById("pwdGate");
-  if(g) g.style.display = "none";
-}
-
-function pwdClear(){
-  const inp = document.getElementById("pwdInput");
-  if(inp) inp.value = "";
-  const err = document.getElementById("pwdErr");
-  if(err) err.textContent = "";
-  try{ localStorage.removeItem(__PWD_STORE_KEY); }catch(e){}
-}
-
-async function pwdTryLogin(){
-  const inp = document.getElementById("pwdInput");
-  const pw = inp ? String(inp.value||"").trim() : "";
-  const err = document.getElementById("pwdErr");
-  if(!pw){ if(err) err.textContent = "Digite a senha do dia."; return; }
-
-  try{
-    // chama GAS: ?auth=1&pw=...&callback=...
-    const res = await jsonpCall({ auth: 1, pw });
-    if(res && res.ok){
-      try{ localStorage.setItem(__PWD_STORE_KEY, __todayKey__()); }catch(e){}
-      pwdHide();
-      // dispara refresh imediato após liberar
-      try{ refreshData(); }catch(e){}
-      return;
-    }
-    if(err) err.textContent = "Senha inválida.";
-  }catch(e){
-    if(err) err.textContent = "Não foi possível validar agora. Tente novamente.";
-  }
-}
-
-function requireSenhaDoDia(){
-  // se já validou hoje, não pede de novo
-  try{
-    const okDay = localStorage.getItem(__PWD_STORE_KEY) || "";
-    if(okDay && okDay === __todayKey__()) return Promise.resolve(true);
-  }catch(e){}
-  pwdShow();
-
-  return new Promise((resolve)=>{
-    // Enter no input = entrar
-    const inp = document.getElementById("pwdInput");
-    const handler = (ev)=>{
-      if(ev.key === "Enter"){ ev.preventDefault(); pwdTryLogin().then(()=>{}); }
-    };
-    if(inp && !inp.__pwdBound){ inp.__pwdBound = true; inp.addEventListener("keydown", handler); }
-
-    // resolve quando gate sumir (login ok)
-    const t = setInterval(()=>{
-      const g = document.getElementById("pwdGate");
-      const showing = g && g.style.display !== "none";
-      if(!showing){
-        clearInterval(t);
-        resolve(true);
-      }
-    }, 200);
   });
 }
 
@@ -2201,7 +2097,7 @@ function renderSharedList(kind){
 
     row.innerHTML = `
       <input type="checkbox" ${it.done ? "checked" : ""} onchange="toggleDone('${kind}','${escapeHtml(it.id)}')">
-      <button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="display:block"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg></button>`;
+      <button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')">🗑️</button>`;
     row.appendChild(body);
 
     if(it.by && it.t){
@@ -2385,8 +2281,85 @@ function initCtxMenuHandlers(){
   }, true);
 })();
 
+
+/* =========================
+   🔐 SENHA DO DIA (Gate)
+   ========================= */
+function __showPwdModal__(msg){
+  const m = document.getElementById("pwdModal");
+  const e = document.getElementById("pwdErr");
+  if(m) m.style.display = "flex";
+  if(e){
+    if(msg){ e.style.display="block"; e.textContent = msg; }
+    else{ e.style.display="none"; e.textContent=""; }
+  }
+  const d = document.getElementById("pwdDate");
+  if(d) d.textContent = new Date().toISOString().slice(0,10);
+}
+function __hidePwdModal__(){
+  const m = document.getElementById("pwdModal");
+  if(m) m.style.display = "none";
+  const e = document.getElementById("pwdErr");
+  if(e){ e.style.display="none"; e.textContent=""; }
+}
+function __bindPwdUiOnce__(){
+  if(window.__PWD_UI_BINDED__) return;
+  window.__PWD_UI_BINDED__ = true;
+
+  const inp = document.getElementById("pwdInput");
+  const btn = document.getElementById("pwdEnterBtn");
+  const clr = document.getElementById("pwdClearBtn");
+
+  function go(){
+    const v = inp ? inp.value : "";
+    __tryPwd__(v);
+  }
+  if(btn) btn.addEventListener("click", go);
+  if(inp) inp.addEventListener("keydown", (ev)=>{ if(ev.key === "Enter") go(); });
+  if(clr) clr.addEventListener("click", ()=>{
+    try{ localStorage.removeItem("PWD_LAST"); }catch(e){}
+    if(inp) inp.value="";
+    __showPwdModal__("");
+  });
+}
+
+async function __tryPwd__(pw){
+  const s = String(pw||"").trim();
+  if(!s){ __showPwdModal__("Senha obrigatória."); return false; }
+
+  try{
+    const resp = await jsonpCall({ auth: 1, pw: s }, 20000);
+    if(resp && resp.ok === true){
+      try{ localStorage.setItem("PWD_LAST", s); }catch(e){}
+      __hidePwdModal__();
+      return true;
+    }
+    const err = resp && resp.error ? String(resp.error) : "Senha inválida.";
+    __showPwdModal__(err);
+    return false;
+  }catch(e){
+    __showPwdModal__("Sem resposta do servidor (auth). Verifique o deploy /exec e acesso 'Anyone'.");
+    return false;
+  }
+}
+
+async function __ensurePasswordGate__(){
+  __bindPwdUiOnce__();
+  // tenta validar automaticamente com a última senha salva
+  let last = "";
+  try{ last = localStorage.getItem("PWD_LAST") || ""; }catch(e){}
+  if(last){
+    const ok = await __tryPwd__(last);
+    if(ok) return true;
+  }
+  __showPwdModal__("");
+  return false;
+}
+
 (async function init(){
-  await requireSenhaDoDia();
+  // 🔐 Gate: exige senha do dia antes de qualquer chamada ao GAS
+  try{ const okGate = await __ensurePasswordGate__(); if(!okGate) return; }catch(e){ __showPwdModal__('Falha no gate.'); return; }
+
   window.addEventListener("unhandledrejection", ()=>{
     const st = document.getElementById("status");
     if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
@@ -2461,6 +2434,40 @@ function initCtxMenuHandlers(){
   updateStatusVisibility();
 })();
 </script>
+
+
+<!-- 🔐 SENHA DO DIA (GitHub Pages) -->
+<div id="pwdModal" style="
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background:rgba(2,6,23,.65); z-index:99999; padding:18px;">
+  <div style="
+    width:min(640px, 92vw);
+    background:#0b1d33;
+    border:1px solid #334155;
+    border-radius:16px;
+    padding:16px 18px;
+    box-shadow:0 18px 40px rgba(15,23,42,.35);
+    color:#e5e7eb;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="font-size:18px">🔒</div>
+      <div style="font-weight:800;color:#38bdf8">Acesso protegido</div>
+      <div id="pwdDate" style="margin-left:auto;font-size:12px;color:#94a3b8"></div>
+    </div>
+    <div style="font-size:13px;color:#cbd5e1;margin-bottom:12px;">
+      Digite a <b>senha do dia</b> para abrir o dashboard.
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <input id="pwdInput" type="password" autocomplete="current-password"
+        placeholder="Senha do dia"
+        style="flex:1;min-width:260px;padding:12px 12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#e5e7eb;outline:none;">
+      <button id="pwdEnterBtn" type="button"
+        style="padding:10px 14px;border:none;border-radius:12px;background:#0ea5e9;color:#fff;cursor:pointer;">Entrar</button>
+      <button id="pwdClearBtn" type="button"
+        style="padding:10px 14px;border:none;border-radius:12px;background:#334155;color:#fff;cursor:pointer;">Limpar</button>
+    </div>
+    <div id="pwdErr" style="margin-top:10px;font-size:12px;color:#f87171;display:none;"></div>
+  </div>
+</div>
 
 </body>
 </html>
