@@ -146,6 +146,15 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .itemBody{ flex:1; min-height:22px; padding:2px 0; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
 .itemBody[contenteditable="true"]{ outline:2px solid rgba(56,189,248,.45); border-radius:8px; padding:6px; background:#f8fafc; }
 .iconBtn{ border:none;background:none;cursor:pointer; font-size:14px; line-height:1; }
+.trashIcon{
+  display:inline-block;
+  width:18px;height:18px;
+  vertical-align:middle;
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:contain;
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22currentColor%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpolyline%20points=%223%206%205%206%2021%206%22/%3E%3Cpath%20d=%22M19%206l-1%2014a2%202%200%200%201-2%202H8a2%202%200%200%201-2-2L5%206%22/%3E%3Cpath%20d=%22M10%2011v6%22/%3E%3Cpath%20d=%22M14%2011v6%22/%3E%3Cpath%20d=%22M9%206V4a1%201%200%200%201%201-1h4a1%201%200%200%201%201%201v2%22/%3E%3C/svg%3E");
+}
 .markedBy{ margin-top:6px; font-size:12px; color:#64748b; }
 
 .obsArea{
@@ -193,7 +202,9 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
     <button onclick="openTab('war',this)">⚔️ War Room</button>
     <button onclick="openTab('fast',this)">⚡ Fast Pass</button>
     <button onclick="openTab('cargo',this)">📦 Cargo Heroes</button>
+    <button onclick="openTab('acompanhamento',this)">📍 Acompanhamento</button>
     <button onclick="openTab('cargas',this)">🚚 Cargas</button>
+    <button onclick="openTab('hotlist',this)">🔥 Hot List</button>
     <button onclick="openTab('tools',this)">🛠️ Ferramentas</button>
     <button onclick="openTab('links',this)">🔗 Links Úteis</button>
     <button onclick="openTab('avisos',this)">📢 Avisos da Gestão</button>
@@ -260,14 +271,28 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
     <div class="tableWrap"><table id="tbl-cargo"></table></div>
   </div>
 
-  <div id="cargas" class="section">
+<div id="acompanhamento" class="section">
+    <h1>Acompanhamento</h1>
+    <div id="air-acompanhamento"></div>
+    <div id="prio-acompanhamento"></div>
+    <div class="tableWrap"><table id="tbl-acompanhamento"></table></div>
+  </div>
+
+<div id="cargas" class="section">
     <h1>Cargas</h1>
     <div id="air-cargas"></div>
     <div id="prio-cargas"></div>
     <div class="tableWrap"><table id="tbl-cargas"></table></div>
   </div>
 
-  <div id="tools" class="section">
+<div id="hotlist" class="section">
+    <h1>Hot List</h1>
+    <div id="air-hotlist"></div>
+    <div id="prio-hotlist"></div>
+    <div class="tableWrap"><table id="tbl-hotlist"></table></div>
+  </div>
+
+<div id="tools" class="section">
     <h1>Ferramentas</h1>
     <div id="air-tools"></div>
     <div id="prio-tools"></div>
@@ -324,15 +349,45 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 </div>
 
 <script>
-/* =========================================================
-   DADOS (GAS via JSONP) + UI
-   ========================================================= */
-
+// GitHub Pages: dados vem do GAS via JSONP
 let dados = [];
+
+
+// ✅ BLOQUEIO POR DOMÍNIO (LATAM)
+// Se o GAS responder {ok:false,error:"forbidden"} ou o JSONP falhar (403/login),
+// mostramos esta tela e paramos os refresh.
+let __ACCESS_BLOCKED__ = false;
+function __showAccessBlocked__(msg){
+  if(__ACCESS_BLOCKED__) return;
+  __ACCESS_BLOCKED__ = true;
+  try{ stopAutoRefresh && stopAutoRefresh(); }catch(e){}
+  try{ if(__refreshTimeout) clearTimeout(__refreshTimeout); }catch(e){}
+  const text = msg || "Acesso permitido somente para contas Google @latam.com.";
+  const overlay = document.createElement("div");
+  overlay.id = "latamBlock";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(2,6,23,.72);display:flex;align-items:center;justify-content:center;z-index:99999;padding:18px;";
+  overlay.innerHTML = `
+    <div style="max-width:640px;width:100%;background:#0b1d33;border:1px solid #334155;border-radius:16px;padding:18px 18px 14px;color:#e5e7eb;box-shadow:0 18px 40px rgba(0,0,0,.35)">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:18px">🔒</div>
+        <div style="font-weight:800;font-size:16px;color:#38bdf8">Acesso restrito</div>
+      </div>
+      <div style="margin-top:10px;font-size:13px;line-height:1.4;color:#e5e7eb">
+        ${text.replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:#94a3b8">
+        Entre com sua conta Google corporativa e tente novamente.
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+        <button type="button" class="noteBtn gray" onclick="location.reload()">Recarregar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
 
 const __ADMIN_MODE = (/\badmin=1\b/i.test(window.location.search) || localStorage.getItem("ADMIN_MODE")==="1");
 
-const SHARED_TABLE_KEYS = ["aog","war","fast","cargo","cargas","tools"];
+const SHARED_TABLE_KEYS = ["aog","war","fast","cargo","cargas","hotlist","acompanhamento","tools"];
 function isSharedTable(tableKey){
   return SHARED_TABLE_KEYS.includes(String(tableKey||"").toLowerCase());
 }
@@ -372,11 +427,11 @@ function updateStatusVisibility(){
   st.style.display = show ? "block" : "none";
 }
 
-const __dirty = { aog:true, war:true, fast:true, cargo:true, cargas:true, tools:true, links:true, turno:true, avisos:true };
+const __dirty = { aog:true, war:true, fast:true, cargo:true, cargas:true, hotlist:true, acompanhamento:true, tools:true, links:true, turno:true, avisos:true };
 function markDirty(key){ if(Object.prototype.hasOwnProperty.call(__dirty, key)) __dirty[key] = true; }
 function clearDirty(key){ if(Object.prototype.hasOwnProperty.call(__dirty, key)) __dirty[key] = false; }
 function markAllTablesDirty(){
-  markDirty("aog"); markDirty("war"); markDirty("fast"); markDirty("cargo"); markDirty("cargas"); markDirty("tools");
+  markDirty("aog"); markDirty("war"); markDirty("fast"); markDirty("cargo"); markDirty("cargas"); markDirty("hotlist"); markDirty("acompanhamento"); markDirty("tools");
 }
 
 function openTab(id,btn){
@@ -398,6 +453,13 @@ function openTab(id,btn){
         clearDirty(tk);
       }else{
         try{ updateObsVisibleForTable(tk); }catch(e){}
+      }
+
+      // ✅ FAST PASS: ao abrir a aba, auto-marca as aeronaves de HOJE no balão (⚠️)
+      if(String(id||"").toLowerCase() === "fast"){
+        __autoPinFastTodayAircraft__()
+          .then(()=>{ try{ renderAircraftBox("fast"); }catch(e){} })
+          .catch(()=>{});
       }
     }else{
       if(id === "links"){
@@ -423,11 +485,14 @@ function cleanVal(v){ return String(v ?? "").trim(); }
 
 function parseMaybeDate(v){
   if(!v) return null;
+  // ✅ robusto: remove quebras de linha / espaços invisíveis que podem vir do Sheets
   let s = String(v).trim();
   s = s.replace(/[\u2028\u2029\r\n]+/g, " ").trim();
+  // tenta parse direto
   let d = new Date(s);
   if(!isNaN(d.getTime())) return d;
 
+  // fallback: se for ISO quebrado por espaços, remove espaços e tenta de novo
   if((s.includes("T") || /^\d{4}-\d{2}-\d{2}/.test(s)) && /\s/.test(s)){
     const s2 = s.replace(/\s+/g, "");
     const d2 = new Date(s2);
@@ -464,6 +529,7 @@ function fmtTimeOnly(dt){
   const pad = n => String(n).padStart(2,"0");
   return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 }
+
 function fmtTimeHM(dt){
   if(!dt) return "";
   const pad = n => String(n).padStart(2,"0");
@@ -533,6 +599,15 @@ function isFerramentaRow(r){
   return isFerramentaStatus(r ? r[STATUS_COL] : "");
 }
 
+// Ordem pedida (dentro da mesma DATA):
+// 1 Em Fila de Atendimento
+// 2 Aguardando separação
+// 3 Pronto para envio
+// 4 Log 1 Transito
+// 5 Mtl Stock Zero
+// 6 Comprar
+// 7 Outras / Mtl Divergente
+// 8 Na Base / Recebido no destino
 const __STATUS_ORDER = [
   ["emfiladeatendimento"],
   ["aguardandoseparacao"],
@@ -550,7 +625,7 @@ function statusPriorityRank(statusRaw){
   for(let i=0;i<__STATUS_ORDER.length;i++){
     const keys = __STATUS_ORDER[i];
     for(let k=0;k<keys.length;k++){
-      if(s.includes(keys[k])) return i;
+      if(s.includes(keys[k])) return i; // menor = mais prioritário
     }
   }
   return 50;
@@ -578,6 +653,7 @@ const cols = [
   "Material_ID",
   "Status_material_ferramenta",
   "Numero_de_solicitacao",
+  "Base",
   "Data_da_solicitacao",
   "Barcode",
   "Aeronave",
@@ -595,6 +671,7 @@ const cols = [
 
 const COL_LABELS = {
   "Numero_de_solicitacao": "Solicitação",
+  "Base": "Base",
   "Data_da_solicitacao": "Data",
   "Descricao_logistica": "Log",
   "Data_de_embarque_logistica": "Data de Embarque",
@@ -602,10 +679,11 @@ const COL_LABELS = {
 };
 function colLabel(col){ return COL_LABELS[col] || col; }
 
-const tableKeysBySection = { aog:"aog", war:"war", fast:"fast", cargo:"cargo", cargas:"cargas", tools:"tools" };
-const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
 
-const __filterDraftByTable = { aog:{}, war:{}, fast:{}, cargo:{}, cargas:{}, tools:{} };
+const tableKeysBySection = { aog:"aog", war:"war", fast:"fast", cargo:"cargo", acompanhamento:"acompanhamento", cargas:"cargas", hotlist:"hotlist", tools:"tools" };
+const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, acompanhamento:{}, cargas:{}, hotlist:{}, tools:{} };
+
+const __filterDraftByTable = { aog:{}, war:{}, fast:{}, cargo:{}, acompanhamento:{}, cargas:{}, hotlist:{}, tools:{} };
 function setFilterDraft(tableKey, col, value){
   const v = String(value || "");
   if(!__filterDraftByTable[tableKey]) __filterDraftByTable[tableKey] = {};
@@ -642,21 +720,22 @@ document.addEventListener("keydown", (ev)=>{
   }
 });
 
-/* =========================================================
-   PRIORIDADE + AERONAVE (com compartilhamento)
-   ========================================================= */
-
 const prioStoreKey = {
   aog:  "AOG_PRIOS_AOG_V1",  war:  "AOG_PRIOS_WAR_V1",
   fast: "AOG_PRIOS_FAST_V1", cargo:"AOG_PRIOS_CARGO_V1",
-  cargas:"AOG_PRIOS_CARGAS_V1", tools:"AOG_PRIOS_TOOLS_V1"
+  acompanhamento:"AOG_PRIOS_ACOMPANHAMENTO_V1",
+  cargas:"AOG_PRIOS_CARGAS_V1",
+  hotlist:"AOG_PRIOS_HOTLIST_V1",
+  tools:"AOG_PRIOS_TOOLS_V1"
 };
 let priosByTable = {
   aog:  new Set(JSON.parse(localStorage.getItem(prioStoreKey.aog)  || "[]")),
   war:  new Set(JSON.parse(localStorage.getItem(prioStoreKey.war)  || "[]")),
   fast: new Set(JSON.parse(localStorage.getItem(prioStoreKey.fast) || "[]")),
   cargo:new Set(JSON.parse(localStorage.getItem(prioStoreKey.cargo)|| "[]")),
+  acompanhamento:new Set(JSON.parse(localStorage.getItem(prioStoreKey.acompanhamento)|| "[]")),
   cargas:new Set(JSON.parse(localStorage.getItem(prioStoreKey.cargas)|| "[]")),
+  hotlist:new Set(JSON.parse(localStorage.getItem(prioStoreKey.hotlist)|| "[]")),
   tools:new Set(JSON.parse(localStorage.getItem(prioStoreKey.tools)|| "[]"))
 };
 function rowId(r){
@@ -677,31 +756,38 @@ function __prioHas__(tableKey, rid){
 
 const AIR_STORE_KEY = {
   aog:"AOG_AIR_AOG_V1", war:"AOG_AIR_WAR_V1", fast:"AOG_AIR_FAST_V1",
-  cargo:"AOG_AIR_CARGO_V1", cargas:"AOG_AIR_CARGAS_V1", tools:"AOG_AIR_TOOLS_V1"
+  cargo:"AOG_AIR_CARGO_V1",
+  acompanhamento:"AOG_AIR_ACOMPANHAMENTO_V1",
+  cargas:"AOG_AIR_CARGAS_V1",
+  hotlist:"AOG_AIR_HOTLIST_V1",
+  tools:"AOG_AIR_TOOLS_V1"
 };
 let airPinnedByTable = {
   aog:   new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.aog)   || "[]")),
   war:   new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.war)   || "[]")),
   fast:  new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.fast)  || "[]")),
   cargo: new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.cargo) || "[]")),
+  acompanhamento:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.acompanhamento)|| "[]")),
   cargas:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.cargas)|| "[]")),
+  hotlist:new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.hotlist)|| "[]")),
   tools: new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.tools) || "[]"))
 };
-const airFocusByTable = { aog:null, war:null, fast:null, cargo:null, cargas:null, tools:null };
+const airFocusByTable = { aog:null, war:null, fast:null, cargo:null, acompanhamento:null, cargas:null, hotlist:null, tools:null };
 function saveAirPinned(tableKey){
   try{ localStorage.setItem(AIR_STORE_KEY[tableKey], JSON.stringify(Array.from(airPinnedByTable[tableKey]))); }catch(e){}
 }
 
-let __cacheByTable = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
+let __cacheByTable = { aog:[], war:[], fast:[], cargo:[], acompanhamento:[], cargas:[], hotlist:[], tools:[] };
 let __cacheLastUpdate = null;
 let __dataVersion = 0;
 
-let __sortedBaseByTable = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
+let __sortedBaseByTable = { aog:[], war:[], fast:[], cargo:[], acompanhamento:[], cargas:[], hotlist:[], tools:[] };
 let __sortedBaseVersion = -1;
 
-let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
+let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
+  // ✅ 1) Ordena por DIA de Data_da_solicitacao (mais recente primeiro) — ignora hora
   const da = (a && a.__dateDayTs != null) ? a.__dateDayTs : (function(){
     const d = parseMaybeDate(a ? a[DATE_COL] : null);
     if(!d){ if(a) a.__dateDayTs = 0; return 0; }
@@ -718,10 +804,12 @@ function __compareBaseOrder__(a,b){
   })();
   if(da !== db) return db - da;
 
+  // ✅ 2) Dentro do mesmo dia, aplica a ordem de Status (Em Fila... → ... → Na Base)
   const ra = (a && a.__stRank != null) ? a.__stRank : statusPriorityRank(a ? a[STATUS_COL] : "");
   const rb = (b && b.__stRank != null) ? b.__stRank : statusPriorityRank(b ? b[STATUS_COL] : "");
   if(ra !== rb) return ra - rb;
 
+  // ✅ 3) Mantém os desempates originais
   const ida = (a && a.__midStr != null) ? a.__midStr : String((a && a.Material_ID) ?? "");
   const idb = (b && b.__midStr != null) ? b.__midStr : String((b && b.Material_ID) ?? "");
   if(ida !== idb) return ida.localeCompare(idb);
@@ -731,6 +819,7 @@ function __compareBaseOrder__(a,b){
   return sa.localeCompare(sb);
 }
 
+
 function buildSortedBaseCache(){
   if(__sortedBaseVersion === __dataVersion) return;
   __sortedBaseByTable = {
@@ -738,23 +827,19 @@ function buildSortedBaseCache(){
     war:   (__cacheByTable.war||[]).slice().sort(__compareBaseOrder__),
     fast:  (__cacheByTable.fast||[]).slice().sort(__compareBaseOrder__),
     cargo: (__cacheByTable.cargo||[]).slice().sort(__compareBaseOrder__),
+    acompanhamento:(__cacheByTable.acompanhamento||[]).slice().sort(__compareBaseOrder__),
     cargas:(__cacheByTable.cargas||[]).slice().sort(__compareBaseOrder__),
+    hotlist:(__cacheByTable.hotlist||[]).slice().sort(__compareBaseOrder__),
     tools: (__cacheByTable.tools||[]).slice().sort(__compareBaseOrder__)
   };
   __sortedBaseVersion = __dataVersion;
 }
 
-/* =========================================================
-   ✅ ALTERAÇÃO PEDIDA (SIMPLES):
-   - Antes: FAST pegava LIMOPS (Criticidade contém "LIMOPS")
-   - Agora: FAST pega somente FAST PASS (Criticidade contém "FAST PASS"/"FASTPASS"/"FAST")
-   ========================================================= */
-
 function prepareDataCache(){
-  const out = { aog:[], war:[], fast:[], cargo:[], cargas:[], tools:[] };
+  const out = { aog:[], war:[], fast:[], cargo:[], acompanhamento:[], cargas:[], hotlist:[], tools:[] };
   let maxDt = null;
 
-  __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), cargas:new Map(), tools:new Map() };
+  __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
 
   const arr = Array.isArray(dados) ? dados : [];
   for(let i=0;i<arr.length;i++){
@@ -774,18 +859,20 @@ function prepareDataCache(){
     out.cargo.push(r);
     __pushAirId__("cargo", r);
 
+    // ✅ NOVA ABA: Acompanhamento (mesma regra do Cargo Heroes)
+    out.acompanhamento.push(r);
+    __pushAirId__("acompanhamento", r);
+
     if(isCargasRow(r)){ out.cargas.push(r); __pushAirId__("cargas", r); }
+    // ✅ NOVA ABA: Hot List (mesma regra de Cargas)
+    if(isCargasRow(r)){ out.hotlist.push(r); __pushAirId__("hotlist", r); }
     if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r); }
 
     const c = String((r && r.Criticidade) || "").toUpperCase();
-
-    if(c.includes("WAR")) { out.war.push(r);  __pushAirId__("war", r); }
-
-    // ✅ AQUI FOI A TROCA (LIMOPS -> FAST PASS)
-    // Antes era: if(c.includes("LIMOPS")) { out.fast.push(r); __pushAirId__("fast", r); }
+    if(c.includes("WAR"))    { out.war.push(r);  __pushAirId__("war", r); }
+    // ✅ FAST agora pega somente FAST PASS (antes era LIMOPS)
     if(c.includes("FAST PASS") || c.includes("FASTPASS") || c.includes("FAST")) { out.fast.push(r); __pushAirId__("fast", r); }
-
-    if(c.includes("AOG")) { out.aog.push(r);  __pushAirId__("aog", r); }
+    if(c.includes("AOG"))    { out.aog.push(r);  __pushAirId__("aog", r); }
 
     const dt = parseMaybeDate(r && r.Data_Ultima_Atualizacao);
     if(dt && (!maxDt || dt.getTime() > maxDt.getTime())) maxDt = dt;
@@ -795,7 +882,6 @@ function prepareDataCache(){
   __cacheLastUpdate = maxDt || new Date();
   buildSortedBaseCache();
 }
-
 function __pushAirId__(tableKey, r){
   const a = cleanVal(r && r[AIR_COL]);
   if(!a) return;
@@ -854,8 +940,8 @@ function getActiveFilters(tableKey){
   return active;
 }
 
-const __filterCompiledCache = { aog:null, war:null, fast:null, cargo:null, cargas:null, tools:null };
-const __filterRowsCache = { aog:null, war:null, fast:null, cargo:null, cargas:null, tools:null };
+const __filterCompiledCache = { aog:null, war:null, fast:null, cargo:null, acompanhamento:null, cargas:null, hotlist:null, tools:null };
+const __filterRowsCache = { aog:null, war:null, fast:null, cargo:null, acompanhamento:null, cargas:null, hotlist:null, tools:null };
 
 function buildFiltersSignatureCore(tableKey){
   const f = filtersByTable[tableKey] || {};
@@ -909,11 +995,15 @@ function getFilteredBaseRows(tableKey){
 }
 
 /* =========================================================
-   OBS COMPARTILHADO (GLOBAL por ID)
+   OBS COMPARTILHADO
    ========================================================= */
 let __sharedObsState = null;
 const __obsDraftGlobal = {};
-function __obsNormId__(materialId){ return String(materialId || "").trim(); }
+
+function __obsNormId__(materialId){
+  return String(materialId || "").trim();
+}
+
 function getObsFromState(_tableKeyIgnored, materialId){
   const id = __obsNormId__(materialId);
   if(!id) return "";
@@ -922,21 +1012,25 @@ function getObsFromState(_tableKeyIgnored, materialId){
   const it = st.items[id];
   return it && it.text ? String(it.text) : "";
 }
+
 function getObsDraft(_tableKeyIgnored, materialId){
   const id = __obsNormId__(materialId);
   if(!id) return "";
   return (__obsDraftGlobal[id] != null) ? String(__obsDraftGlobal[id]) : "";
 }
+
 function getObsTextForCell(tableKey, materialId){
   const d = getObsDraft(tableKey, materialId);
   if(d !== "") return d;
   return getObsFromState(tableKey, materialId);
 }
+
 function obsInput(ev, tableKey, materialId){
   const id = __obsNormId__(materialId);
   if(!id) return;
   __obsDraftGlobal[id] = (ev && ev.target) ? ev.target.value : "";
 }
+
 async function obsKeyDown(ev, tableKey, materialId){
   if(!ev) return;
   if(ev.key !== "Enter") return;
@@ -972,6 +1066,7 @@ async function obsKeyDown(ev, tableKey, materialId){
     console.error("Erro ao salvar OBS:", e);
   }
 }
+
 function updateObsVisibleForTable(tableKey){
   const tk = String(tableKey||"").toLowerCase();
   const tbl = document.getElementById(`tbl-${tk}`);
@@ -991,12 +1086,14 @@ function updateObsVisibleForTable(tableKey){
     }catch(e){}
   }
 }
+
 function updateObsVisibleActiveTable(){
   const active = document.querySelector(".section.active");
   const tk = active ? tableKeysBySection[active.id] : null;
   if(!tk) return;
   updateObsVisibleForTable(tk);
 }
+
 async function syncSharedObs(){
   try{
     const st = await gasCall("getSharedObsState");
@@ -1021,20 +1118,22 @@ function displayCell(colKey, rawValue, tableKey, row){
   return String(rawValue ?? "");
 }
 
-/* =========================================================
-   GAS/URL (JSONP) - GitHub Pages
-   ========================================================= */
+/* ===== GAS/URL (GitHub Pages + JSONP) ===== */
 const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1wU2tiPZC1_iW1SYiIOJe9WYnm93QpumnQlUd4UJKFiBh28T3wFfd3RGYoi_iUtQKng/exec"; // /exec do seu WebApp
 
-function hasGAS(){ return !!GAS_WEBAPP_URL; }
+function hasGAS(){
+  return !!GAS_WEBAPP_URL;
+}
 
 function buildGASUrl(params){
   const u = new URL(GAS_WEBAPP_URL);
   Object.keys(params || {}).forEach(k => u.searchParams.set(k, String(params[k])));
+  // anti-cache
   u.searchParams.set("ts", String(Date.now()));
   return u.toString();
 }
 
+// JSONP (bypassa CORS)
 function jsonpCall(params, timeoutMs = 20000){
   return new Promise((resolve, reject)=>{
     const cbName = "__cb_" + Math.random().toString(36).slice(2);
@@ -1054,8 +1153,19 @@ function jsonpCall(params, timeoutMs = 20000){
       try{ if(script && script.parentNode) script.parentNode.removeChild(script); }catch(e){}
     }
 
-    window[cbName] = (data)=>{
+    
+window[cbName] = (data)=>{
       if(done) return;
+      // ✅ Se GAS respondeu bloqueio por domínio
+      try{
+        if(data && data.ok === false && String(data.error||"").toLowerCase() === "forbidden"){
+          __showAccessBlocked__(data.message || "Acesso permitido somente para contas Google @latam.com.");
+          done = true;
+          cleanup();
+          reject(new Error("forbidden"));
+          return;
+        }
+      }catch(e){}
       done = true;
       cleanup();
       resolve(data);
@@ -1064,34 +1174,41 @@ function jsonpCall(params, timeoutMs = 20000){
     const script = document.createElement("script");
     script.src = url;
     script.async = true;
-    script.onerror = ()=>{
+    
+script.onerror = ()=>{
       if(done) return;
       done = true;
       cleanup();
+      // Normalmente acontece quando o WebApp está restrito ao domínio e o usuário não tem acesso/logou.
+      __showAccessBlocked__("Você não tem permissão para acessar este dashboard. Use uma conta Google @latam.com (ou solicite acesso).");
       reject(new Error("erro ao carregar script JSONP"));
     };
     document.head.appendChild(script);
   });
 }
 
+// Mantém a interface "gasCall" do seu HTML antigo,
+// mas por baixo usa JSONP (sem google.script.run)
 function gasCall(fnName, ...args){
   if(!hasGAS()) return Promise.reject(new Error("GAS_WEBAPP_URL não configurado"));
+
   const fn = String(fnName||"").trim();
 
+  // Dados
   if(fn === "getDadosBaseAOG" || fn === "getDadosBase" || fn === "getDados") {
     return jsonpCall({ dados: 1 });
   }
-  if(fn === "getDadosChunk" || fn === "getDadosBaseChunk" || fn === "getDadosChunkBySheet") {
-    return jsonpCall({ dadosChunk: 1, sheetName: args[0] || "BASE_AOG", offset: args[1] || 0, limit: args[2] || 250 });
-  }
 
+  // Force update (roda atualizarAOG)
   if(fn === "forceUpdate" || fn === "atualizarAOG" || fn === "runForceUpdate") {
     return jsonpCall({ forceUpdate: 1 });
   }
 
+  // Presença
   if(fn === "pingPresence") return jsonpCall({ presencePing: 1 });
   if(fn === "getConnectedUsers") return jsonpCall({ presenceList: 1 });
 
+  // Estados compartilhados
   if(fn === "getSharedPrioState") return jsonpCall({ sharedPrioGet: 1 });
   if(fn === "toggleSharedPrio") {
     return jsonpCall({ sharedPrioToggle: 1, tableKey: args[0] || "", rowId: args[1] || "" });
@@ -1107,32 +1224,34 @@ function gasCall(fnName, ...args){
     return jsonpCall({ sharedObsSet: 1, tableKey: args[0] || "", materialId: args[1] || "", text: args[2] || "" });
   }
 
+  // Turno
   if(fn === "getSharedTurnoState") return jsonpCall({ sharedTurnoGet: 1 });
   if(fn === "addSharedTurnoItem") return jsonpCall({ sharedTurnoAdd: 1, html: args[0] || "" });
   if(fn === "updateSharedTurnoItem") return jsonpCall({ sharedTurnoUpdate: 1, id: args[0] || "", html: args[1] || "" });
   if(fn === "toggleSharedTurnoDone") return jsonpCall({ sharedTurnoDone: 1, id: args[0] || "" });
   if(fn === "deleteSharedTurnoItem") return jsonpCall({ sharedTurnoDelete: 1, id: args[0] || "" });
 
+  // Avisos
   if(fn === "getSharedAvisosState") return jsonpCall({ sharedAvisosGet: 1 });
   if(fn === "addSharedAvisoItem") return jsonpCall({ sharedAvisosAdd: 1, html: args[0] || "" });
   if(fn === "updateSharedAvisoItem") return jsonpCall({ sharedAvisosUpdate: 1, id: args[0] || "", html: args[1] || "" });
   if(fn === "toggleSharedAvisoDone") return jsonpCall({ sharedAvisosDone: 1, id: args[0] || "" });
   if(fn === "deleteSharedAvisoItem") return jsonpCall({ sharedAvisosDelete: 1, id: args[0] || "" });
 
+  // Links
   if(fn === "getSharedLinksState") return jsonpCall({ sharedLinksGet: 1 });
   if(fn === "addSharedLink") return jsonpCall({ sharedLinksAdd: 1, name: args[0] || "", url: args[1] || "" });
   if(fn === "deleteSharedLink" || fn === "deleteSharedLinkItem" || fn === "deleteLink") {
     return jsonpCall({ sharedLinksDelete: 1, id: args[0] || "" });
   }
 
+  // Progresso
   if(fn === "getLastProgress") return jsonpCall({ progressGet: 1 });
 
   return Promise.reject(new Error("Função não mapeada no GitHub: " + fn));
 }
 
-/* =========================================================
-   Conectados
-   ========================================================= */
+/* ===== Conectados ===== */
 function renderConnected(users){
   const box = document.getElementById("connectedBox");
   if(!box) return;
@@ -1148,6 +1267,7 @@ function renderConnected(users){
         return `<div class="item">${escapeHtml(em)}</div>`;
       })).join("");
 }
+
 async function presenceTick(){
   const watchdog = setTimeout(()=>{
     const box = document.getElementById("connectedBox");
@@ -1171,9 +1291,7 @@ async function presenceTick(){
   } finally { clearTimeout(watchdog); }
 }
 
-/* =========================================================
-   Shared PRIORIDADE / AERONAVE
-   ========================================================= */
+/* ===== Shared PRIORIDADE / AERONAVE ===== */
 let __sharedPrioState = null;
 let __sharedAirState  = null;
 
@@ -1195,6 +1313,210 @@ async function syncSharedAllTables(){
       }catch(e){}
     }
   }catch(e){}
+}
+
+/* =========================================================
+   ✅ FAST PASS — AUTO-MARCAR AERONAVES DO DIA (a cada 15min)
+   - Só na aba FAST
+   - Marca automaticamente as aeronaves que aparecem na data de HOJE
+   - Não remove marcações manuais: gerencia só o que ele mesmo marcou
+   ========================================================= */
+const FAST_AUTO_PIN_INTERVAL_MS = 15 * 60 * 1000;
+const FAST_AUTO_PIN_STORAGE_KEY = "FAST_AUTO_PIN_MANAGED_V1";
+let __fastAutoPinInFlight = false;
+
+function __todayKey__(){
+  // chave do dia no fuso do navegador (suficiente para o uso do time)
+  // formato: yyyy-mm-dd
+  const d = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function __fastAutoLoadManaged__(){
+  try{
+    const raw = localStorage.getItem(FAST_AUTO_PIN_STORAGE_KEY);
+    if(!raw) return { date:"", pins:[] };
+    const obj = JSON.parse(raw);
+    if(!obj || typeof obj !== "object") return { date:"", pins:[] };
+    if(!Array.isArray(obj.pins)) obj.pins = [];
+    obj.date = String(obj.date || "");
+    return obj;
+  }catch(e){ return { date:"", pins:[] }; }
+}
+
+function __fastAutoSaveManaged__(dateKey, pins){
+  try{
+    localStorage.setItem(FAST_AUTO_PIN_STORAGE_KEY, JSON.stringify({ date:String(dateKey||""), pins:Array.from(pins||[]) }));
+  }catch(e){}
+}
+
+function __getFastAircraftSetForToday__(){
+  const today = __todayKey__();
+  const rows = getBaseRows("fast") || [];
+  const set = new Set();
+  for(const r of rows){
+    const dt = parseMaybeDate(r && r[DATE_COL]);
+    if(!dt) continue;
+    const k = UtilitiesFormatDateKey_(dt); // yyyy-mm-dd no fuso local
+    if(k !== today) continue;
+    const a = cleanVal(r && r[AIR_COL]);
+    if(a) set.add(a);
+  }
+  return { today, aircraftSet: set };
+}
+
+// helper: gera yyyy-mm-dd a partir de Date (local)
+function UtilitiesFormatDateKey_(dt){
+  try{
+    const d = (dt && Object.prototype.toString.call(dt)==="[object Date]") ? dt : new Date(dt);
+    if(isNaN(d.getTime())) return "";
+    const pad = n => String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }catch(e){ return ""; }
+}
+
+// garante que uma aeronave fique "pinada" no compartilhado (sem toggle duplo)
+async function __ensureSharedAirPinned__(aircraft){
+  const a = cleanVal(aircraft);
+  if(!a) return false;
+
+  // precisa do estado compartilhado atualizado para evitar toggle errado
+  try{ if(!__sharedAirState) await syncSharedAllTables(); }catch(e){}
+
+  const pins = (airPinnedByTable.fast instanceof Set) ? airPinnedByTable.fast : new Set();
+  if(pins.has(a)) return false;
+
+  await toggleAirShared("fast", a);
+  return true;
+}
+
+// remove somente o que foi auto-marcado anteriormente
+async function __removeManagedPinsIfNeeded__(managedPins, desiredPins){
+  const currentPins = (airPinnedByTable.fast instanceof Set) ? airPinnedByTable.fast : new Set();
+  const toRemove = [];
+  for(const a of managedPins){
+    if(!a) continue;
+    if(!desiredPins.has(a) && currentPins.has(a)) toRemove.push(a);
+  }
+  for(const a of toRemove){
+    try{ await toggleAirShared("fast", a); }catch(e){}
+  }
+}
+
+// roda agora (com proteção de concorrência)
+async function runFastAutoPinNow(reason){
+  if(__fastAutoPinInFlight) return;
+  __fastAutoPinInFlight = true;
+
+  try{
+    // precisa ter dados carregados
+    if(!Array.isArray(dados) || dados.length === 0){
+      __fastAutoPinInFlight = false;
+      return;
+    }
+
+    // garante caches prontos
+    try{ prepareDataCache(); }catch(e){}
+
+    const { today, aircraftSet } = __getFastAircraftSetForToday__();
+    const managed = __fastAutoLoadManaged__();
+
+    // se virou o dia, limpa o que foi gerenciado ontem (sem mexer no manual)
+    if(managed.date && managed.date !== today){
+      try{ await __removeManagedPinsIfNeeded__(new Set(managed.pins||[]), new Set()); }catch(e){}
+      managed.date = "";
+      managed.pins = [];
+    }
+
+    // remove pins gerenciados que não são mais do dia
+    try{ await __removeManagedPinsIfNeeded__(new Set(managed.pins||[]), aircraftSet); }catch(e){}
+
+    // garante pins do dia
+    const newlyManaged = new Set(managed.pins || []);
+    for(const a of aircraftSet){
+      try{
+        const changed = await __ensureSharedAirPinned__(a);
+        if(changed) newlyManaged.add(a);
+      }catch(e){}
+    }
+
+    __fastAutoSaveManaged__(today, Array.from(newlyManaged));
+
+    // se estiver na aba FAST, re-render para mostrar as aeronaves no topo
+    const active = document.querySelector(".section.active");
+    if(active && active.id === "fast"){
+      markDirty("fast");
+      renderAircraftBox("fast");
+      clearDirty("fast");
+    }
+  }finally{
+    __fastAutoPinInFlight = false;
+  }
+}
+
+/* =========================================================
+   ✅ AUTO-MARCAR AERONAVES DO DIA (SOMENTE FAST PASS)
+   - Ao abrir a aba FAST, marca automaticamente (⚠️ compartilhado)
+     as aeronaves que possuem Data_da_solicitacao = HOJE.
+   - Não desmarca nada, apenas garante que as de hoje estejam no balão.
+   - Evita spam: roda no máximo 1x por dia por navegador.
+   ========================================================= */
+
+const __FAST_AUTO_AIR_LS_KEY = "FAST_AUTO_AIR_LASTDAY_V1";
+
+function __dateKeyLocal__(dt){
+  if(!dt) return "";
+  const d = (dt instanceof Date) ? dt : parseMaybeDate(dt);
+  if(!d || isNaN(d.getTime())) return "";
+  const pad = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+async function __autoPinFastTodayAircraft__(){
+  try{
+    if(!hasGAS()) return;
+
+    // roda no máximo 1x por dia por navegador
+    const todayKey = __dateKeyLocal__(new Date());
+    const lastKey = String(localStorage.getItem(__FAST_AUTO_AIR_LS_KEY) || "").trim();
+    if(lastKey === todayKey) return;
+
+    // garante estado compartilhado carregado
+    if(!__sharedAirState){
+      try{ await syncSharedAllTables(); }catch(e){}
+    }
+
+    const rows = getBaseRows("fast") || [];
+    const setToday = new Set();
+    for(let i=0;i<rows.length;i++){
+      const r = rows[i];
+      const dk = __dateKeyLocal__(r && r[DATE_COL]);
+      if(dk !== todayKey) continue;
+      const a = cleanVal(r && r[AIR_COL]);
+      if(a) setToday.add(a);
+    }
+
+    if(setToday.size === 0){
+      localStorage.setItem(__FAST_AUTO_AIR_LS_KEY, todayKey);
+      return;
+    }
+
+    const pinned = airPinnedByTable.fast || new Set();
+
+    // marca apenas o que ainda não está marcado
+    for(const a of Array.from(setToday)){
+      if(pinned.has(a)) continue;
+      try{ await gasCall("toggleSharedAirPin", "fast", a); }catch(e){}
+    }
+
+    // sincroniza estado final (para refletir no balão de todos)
+    try{ await syncSharedAllTables(); }catch(e){}
+    localStorage.setItem(__FAST_AUTO_AIR_LS_KEY, todayKey);
+  }catch(e){
+    // não interrompe UI
+    console.warn("FAST auto-pin falhou:", e);
+  }
 }
 
 function __cssEscape__(s){
@@ -1341,7 +1663,7 @@ function countIdsForAircraft(tableKey, aircraft){
 }
 
 function renderAircraftBox(tableKey){
-  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", cargas:"air-cargas", tools:"air-tools" }[tableKey];
+  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools" }[tableKey];
   const wrap = document.getElementById(wrapId);
   if(!wrap) return;
   const set = airPinnedByTable[tableKey];
@@ -1388,7 +1710,7 @@ function renderAircraftBox(tableKey){
 }
 
 function renderPrios(tableKey){
-  const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", cargas:"prio-cargas", tools:"prio-tools" }[tableKey];
+  const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", acompanhamento:"prio-acompanhamento", cargas:"prio-cargas", hotlist:"prio-hotlist", tools:"prio-tools" }[tableKey];
   const wrap = document.getElementById(wrapId);
   if(!wrap) return;
   const set = priosByTable[tableKey];
@@ -1419,6 +1741,7 @@ function renderPrios(tableKey){
     const tPOUSO = fmtTimeHM(parseMaybeDate(vPOUSO_RAW));
     const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : "";
 
+
     let marked = "";
     try{
       if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){
@@ -1446,12 +1769,14 @@ function renderPrios(tableKey){
   });
 }
 
-/* =========================================================
-   Paginação + Filtros + Resize + Tabela
-   ========================================================= */
+/* ===== PAGINAÇÃO ===== */
 const PAGER_STORE_KEY = {
   aog:"AOG_PAGER_AOG_V1", war:"AOG_PAGER_WAR_V1", fast:"AOG_PAGER_FAST_V1",
-  cargo:"AOG_PAGER_CARGO_V1", cargas:"AOG_PAGER_CARGAS_V1", tools:"AOG_PAGER_TOOLS_V1"
+  cargo:"AOG_PAGER_CARGO_V1",
+  acompanhamento:"AOG_PAGER_ACOMPANHAMENTO_V1",
+  cargas:"AOG_PAGER_CARGAS_V1",
+  hotlist:"AOG_PAGER_HOTLIST_V1",
+  tools:"AOG_PAGER_TOOLS_V1"
 };
 function loadPager(tableKey){
   try{
@@ -1465,7 +1790,11 @@ function savePager(tableKey){
 }
 const pagerByTable = {
   aog:loadPager("aog"), war:loadPager("war"), fast:loadPager("fast"),
-  cargo:loadPager("cargo"), cargas:loadPager("cargas"), tools:loadPager("tools")
+  cargo:loadPager("cargo"),
+  acompanhamento:loadPager("acompanhamento"),
+  cargas:loadPager("cargas"),
+  hotlist:loadPager("hotlist"),
+  tools:loadPager("tools")
 };
 function clampPage(tableKey, totalRows){
   const pg = pagerByTable[tableKey];
@@ -1679,9 +2008,7 @@ function renderTable(tableKey){
   try{ updateObsVisibleForTable(tableKey); }catch(e){}
 }
 
-/* =========================================================
-   STATUS / REFRESH
-   ========================================================= */
+/* ===== STATUS ===== */
 function makeStatusHtml(line1){
   return `
     <div>${line1}</div>
@@ -1711,7 +2038,11 @@ function paintUpdateInfo(){
   p1.innerText = `Atualizado = frescor do dado: ${fmtBR(__lastUpdateDate)}`;
 }
 
-const REFRESH_EVERY_MS = 150 * 1000; // 2min30s
+// =====================================================
+// ✅ MUDANÇA 1: Delay de refresh aumentado para 2min30s
+// =====================================================
+const REFRESH_EVERY_MS = 150 * 1000; // 2 minutos e 30 segundos
+
 function getAutoRefreshMs(){ return REFRESH_EVERY_MS; }
 
 let __lastFetchAt = null;
@@ -1733,7 +2064,7 @@ function scheduleNextRefresh(ms){
   __nextRefreshAt = Date.now() + delay;
   __refreshTimeout = setTimeout(async ()=>{
     try{ await refreshData(); }catch(e){ console.error("refreshData erro no timer:", e); }
-    scheduleNextRefresh(getAutoRefreshMs());
+    scheduleNextRefresh(getAutoRefreshMs()); // sempre agenda o próximo, mesmo se der erro
   }, delay);
 }
 function stopAutoRefresh(){
@@ -1783,16 +2114,31 @@ function rerenderAll(opts){
   updateStatusVisibility();
 }
 
-/* =========================================================
-   Carregar dados (full/chunk)
-   ========================================================= */
+/*
+ * ─────────────────────────────────────────────────────────────
+ * DIAGNÓSTICO DEFINITIVO:
+ *   fetch() do GAS HtmlService é BLOQUEADO por CORS.
+ *   O HTML roda em script.googleusercontent.com e não pode
+ *   chamar script.google.com via fetch — bloqueio de navegador.
+ *
+ *   ÚNICA forma confiável = google.script.run
+ *
+ *   Estratégia:
+ *   1) getDadosBaseAOG  — 1 chamada, sempre existiu, mais simples
+ *   2) getDadosChunk    — loop de chunks (requer novo deploy)
+ * ─────────────────────────────────────────────────────────────
+ */
+
 async function __gasGetDadosFull__(){
+  // Tenta getDadosBaseAOG (1 chamada direta — mais simples e confiável)
   const t0 = performance.now();
   const resp = await gasCall("getDadosBaseAOG");
   if(!Array.isArray(resp)) throw new Error("getDadosBaseAOG não retornou Array");
   return { data: resp, ms: Math.round(performance.now() - t0) };
 }
+
 async function __gasGetDadosChunked__(onProgress){
+  // Tenta getDadosChunk em loop (requer que getDadosChunk esteja deployado)
   const all = [];
   let offset = 0;
   let total = null;
@@ -1844,6 +2190,7 @@ async function refreshData(){
       return;
     }
 
+    // ── Tentativa 1: getDadosBaseAOG (simples, confiável, sempre existiu) ──
     try{
       __lastRefreshSource = "gas-full";
       const out = await __gasGetDadosFull__();
@@ -1852,9 +2199,11 @@ async function refreshData(){
     }catch(e1){
       const msg = e1 && e1.message ? e1.message : String(e1);
       erros.push("gas-full: " + msg);
+      console.warn("gas-full falhou:", msg);
       newData = null;
     }
 
+    // ── Tentativa 2: getDadosChunk em loop (requer novo deploy com getDadosChunk) ──
     if(!newData){
       try{
         __lastRefreshSource = "gas-chunk";
@@ -1872,11 +2221,13 @@ async function refreshData(){
       }catch(e2){
         const msg = e2 && e2.message ? e2.message : String(e2);
         erros.push("gas-chunk: " + msg);
+        console.warn("gas-chunk falhou:", msg);
         newData = null;
       }
     }
 
     if(!Array.isArray(newData) || newData.length === 0){
+      // Ambas tentativas falharam — mostra erro visível no banner
       __lastRefreshError = erros.length ? erros.join(" | ") : "Sem dados retornados";
       return;
     }
@@ -1916,14 +2267,14 @@ async function refreshData(){
   }
 }
 
-/* =========================================================
-   Banner de frescor
-   ========================================================= */
+
+/* ===== MARCADOR DE FRESCOR DOS DADOS ===== */
 function renderFrescorBanner(){
   const texto = document.getElementById("frescorTexto");
   const banner = document.getElementById("frescorBanner");
   if(!texto || !banner) return;
 
+  // Se há erro de refresh — mostra em vermelho com o erro real
   if(__lastRefreshError){
     banner.style.borderColor = "#ef4444";
     banner.style.background = "#1a0000";
@@ -1963,6 +2314,8 @@ function renderFrescorBanner(){
     ctr.innerText = `Próx. refresh: ${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
   } else if(ctr){ ctr.innerText = ""; }
 }
+
+// Atualiza o banner a cada segundo para o contador ser ao vivo
 setInterval(()=>{ try{ renderFrescorBanner(); }catch(e){} }, 1000);
 
 async function refreshNowUrl(){ await refreshData(); }
@@ -1974,7 +2327,8 @@ async function forceUpdateNow(){
   __lastRefreshMs = null;
   paintRefreshInfo();
   try{
-    await gasCall("forceUpdate");
+    const out = await gasCall("forceUpdate");
+    __lastRefreshMs = out && out.force ? out.force.ms : null;
     await refreshData();
   }catch(e){
     __lastRefreshError = (e && e.message) ? e.message : String(e);
@@ -1982,9 +2336,7 @@ async function forceUpdateNow(){
   }
 }
 
-/* =========================================================
-   LINKS ÚTEIS (compartilhado)
-   ========================================================= */
+/* ===== LINKS ===== */
 const LINKS_UTEIS = [];
 let __sharedLinksState = null;
 
@@ -2071,302 +2423,342 @@ async function addLinkFromInput(){
     __sharedLinksState = st || __sharedLinksState;
     inp.value = ""; inp.style.display = "none";
     renderLinksUteis();
-  }catch(e){
-    console.error("Falha ao adicionar link:", e);
-    alert("Não foi possível adicionar o link.");
-  }
+  }catch(e){}
 }
 
-/* =========================================================
-   TURNO / AVISOS (listas compartilhadas)
-   ========================================================= */
-let __sharedTurnoState = null;
+/* ===== TURNO/AVISOS ===== */
+let __sharedTurnoState  = null;
 let __sharedAvisosState = null;
 
-function getEditableHtmlFromNode(node){
-  // mantém html simples
-  return String(node && node.innerHTML ? node.innerHTML : "")
-    .replace(/<\/div>\s*<div>/g, "<br>")
-    .replace(/<div><br><\/div>/g, "<br>")
-    .replace(/<div>/g, "")
-    .replace(/<\/div>/g, "<br>");
+function sanitizeHtmlLight(html){
+  let s = String(html || "");
+  s = s.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
+  s = s.replace(/\son\w+="[^"]*"/gi, "");
+  s = s.replace(/\son\w+='[^']*'/gi, "");
+  s = s.replace(/javascript:/gi, "");
+  const allowed = ["b","strong","span","br","div"];
+  s = s.replace(/<\/?([a-z0-9]+)(\s[^>]*)?>/gi, (m, tag, attrs)=>{
+    tag = String(tag||"").toLowerCase();
+    if(!allowed.includes(tag)) return "";
+    if(tag === "span" || tag === "div"){
+      const st = (attrs||"").match(/style\s*=\s*("([^"]*)"|'([^']*)')/i);
+      if(st){
+        const val = st[2] || st[3] || "";
+        const safe = val
+          .replace(/position\s*:\s*fixed/gi,"")
+          .replace(/position\s*:\s*absolute/gi,"")
+          .replace(/z-index\s*:\s*\d+/gi,"");
+        return m.startsWith("</") ? `</${tag}>` : `<${tag} style="${escapeHtml(safe)}">`;
+      }
+      return m.startsWith("</") ? `</${tag}>` : `<${tag}>`;
+    }
+    return m.startsWith("</") ? `</${tag}>` : `<${tag}>`;
+  });
+  return s;
 }
-
-function normalizeEditorHtml(html){
-  return String(html || "")
-    .replace(/\n/g, "<br>")
-    .replace(/<br>\s*<br>\s*<br>/g, "<br><br>")
-    .trim();
-}
-
 async function syncSharedTurno(){
-  try{
-    const st = await gasCall("getSharedTurnoState");
-    __sharedTurnoState = st || __sharedTurnoState;
-    if(document.querySelector(".section.active")?.id === "turno") renderSharedList("turno");
-  }catch(e){}
+  try{ const st = await gasCall("getSharedTurnoState"); __sharedTurnoState = st || __sharedTurnoState; }catch(e){}
 }
 async function syncSharedAvisos(){
-  try{
-    const st = await gasCall("getSharedAvisosState");
-    __sharedAvisosState = st || __sharedAvisosState;
-    if(document.querySelector(".section.active")?.id === "avisos") renderSharedList("avisos");
-  }catch(e){}
+  try{ const st = await gasCall("getSharedAvisosState"); __sharedAvisosState = st || __sharedAvisosState; }catch(e){}
 }
-
 function renderSharedList(kind){
-  const isTurno = kind === "turno";
-  const wrap = document.getElementById(isTurno ? "turnoList" : "avisosList");
+  const wrap = document.getElementById(kind === "turno" ? "turnoList" : "avisosList");
   if(!wrap) return;
-
-  const st = isTurno ? __sharedTurnoState : __sharedAvisosState;
-  const items = (st && Array.isArray(st.items)) ? st.items : [];
-  const visible = items.filter(it => it && !it.deleted).slice(0, 200);
-
-  if(visible.length === 0){
-    wrap.innerHTML = `<div style="color:#64748b">—</div>`;
-    return;
-  }
-
+  const state = (kind === "turno") ? __sharedTurnoState : __sharedAvisosState;
+  const items = (state && Array.isArray(state.items)) ? state.items : [];
   wrap.innerHTML = "";
-  visible.forEach(it=>{
+
+  items.filter(it => it && !it.deleted).slice(0, 120).forEach(it=>{
     const row = document.createElement("div");
     row.className = "itemRow" + (it.done ? " done" : "");
+    row.dataset.id = it.id;
+
     const body = document.createElement("div");
     body.className = "itemBody";
-    body.innerHTML = String(it.html || "");
+    body.setAttribute("contenteditable", "true");
+    body.innerHTML = it.html || "";
 
-    const buttons = document.createElement("div");
-    buttons.style.cssText = "display:flex;gap:6px;align-items:flex-start;";
-
-    const btnDone = document.createElement("button");
-    btnDone.className = "iconBtn";
-    btnDone.type = "button";
-    btnDone.title = "Marcar como feito";
-    btnDone.innerText = it.done ? "✅" : "☐";
-    btnDone.onclick = async ()=>{
+    body.addEventListener("blur", async ()=>{
+      const html = sanitizeHtmlLight(body.innerHTML);
       try{
-        const out = await gasCall(isTurno ? "toggleSharedTurnoDone" : "toggleSharedAvisoDone", it.id);
-        if(isTurno) __sharedTurnoState = out || __sharedTurnoState;
-        else __sharedAvisosState = out || __sharedAvisosState;
-        renderSharedList(kind);
+        if(kind === "turno"){
+          const st = await gasCall("updateSharedTurnoItem", it.id, html);
+          __sharedTurnoState = st || __sharedTurnoState;
+        }else{
+          const st = await gasCall("updateSharedAvisoItem", it.id, html);
+          __sharedAvisosState = st || __sharedAvisosState;
+        }
       }catch(e){}
-    };
+    });
 
-    const btnEdit = document.createElement("button");
-    btnEdit.className = "iconBtn";
-    btnEdit.type = "button";
-    btnEdit.title = "Editar";
-    btnEdit.innerText = "✏️";
-    btnEdit.onclick = ()=>{
-      body.setAttribute("contenteditable","true");
-      body.focus();
-    };
+    row.innerHTML = `
+      <input type="checkbox" ${it.done ? "checked" : ""} onchange="toggleDone('${kind}','${escapeHtml(it.id)}')">
+      <button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')"><span class="trashIcon" aria-hidden="true"></span></button>`;
+    row.appendChild(body);
 
-    const btnSave = document.createElement("button");
-    btnSave.className = "iconBtn";
-    btnSave.type = "button";
-    btnSave.title = "Salvar edição";
-    btnSave.innerText = "💾";
-    btnSave.onclick = async ()=>{
-      try{
-        const html = normalizeEditorHtml(getEditableHtmlFromNode(body));
-        const out = await gasCall(isTurno ? "updateSharedTurnoItem" : "updateSharedAvisoItem", it.id, html);
-        body.removeAttribute("contenteditable");
-        if(isTurno) __sharedTurnoState = out || __sharedTurnoState;
-        else __sharedAvisosState = out || __sharedAvisosState;
-        renderSharedList(kind);
-      }catch(e){}
-    };
-
-    const btnDel = document.createElement("button");
-    btnDel.className = "iconBtn";
-    btnDel.type = "button";
-    btnDel.title = "Excluir";
-    btnDel.innerText = "🗑️";
-    btnDel.onclick = async ()=>{
-      if(!confirm("Excluir este item?")) return;
-      try{
-        const out = await gasCall(isTurno ? "deleteSharedTurnoItem" : "deleteSharedAvisoItem", it.id);
-        if(isTurno) __sharedTurnoState = out || __sharedTurnoState;
-        else __sharedAvisosState = out || __sharedAvisosState;
-        renderSharedList(kind);
-      }catch(e){}
-    };
-
-    const meta = document.createElement("div");
-    meta.className = "markedBy";
-    const dt = parseMaybeDate(it.t);
-    meta.innerHTML = `Criado por: <b>${escapeHtml(it.by || "desconhecido")}</b> • ${escapeHtml(dt?fmtBR(dt):(it.t||""))}`;
-
-    const bodyWrap = document.createElement("div");
-    bodyWrap.style.flex = "1";
-    bodyWrap.appendChild(body);
-    bodyWrap.appendChild(meta);
-
-    buttons.appendChild(btnDone);
-    buttons.appendChild(btnEdit);
-    buttons.appendChild(btnSave);
-    buttons.appendChild(btnDel);
-
-    row.appendChild(buttons);
-    row.appendChild(bodyWrap);
-    wrap.appendChild(row);
+    if(it.by && it.t){
+      const meta = document.createElement("div");
+      meta.className = "markedBy";
+      meta.innerHTML = `Criado por: <b>${escapeHtml(it.by)}</b> • ${escapeHtml(fmtBR(parseMaybeDate(it.t) || new Date(it.t)))}`;
+      wrap.appendChild(row);
+      wrap.appendChild(meta);
+    }else{
+      wrap.appendChild(row);
+    }
   });
 }
-
+async function toggleDone(kind, id){
+  try{
+    if(kind === "turno"){ const st = await gasCall("toggleSharedTurnoDone", id); __sharedTurnoState = st || __sharedTurnoState; }
+    else{ const st = await gasCall("toggleSharedAvisoDone", id); __sharedAvisosState = st || __sharedAvisosState; }
+    renderSharedList(kind);
+  }catch(e){}
+}
+async function deleteItem(kind, id){
+  try{
+    if(kind === "turno"){ const st = await gasCall("deleteSharedTurnoItem", id); __sharedTurnoState = st || __sharedTurnoState; }
+    else{ const st = await gasCall("deleteSharedAvisoItem", id); __sharedAvisosState = st || __sharedAvisosState; }
+    renderSharedList(kind);
+  }catch(e){}
+}
+function getRichHtmlFromInput(kind){
+  const el = document.getElementById(kind === "turno" ? "turnoInput" : "avisoInput");
+  if(!el) return "";
+  return sanitizeHtmlLight(el.innerHTML);
+}
+function clearRichInput(kind){
+  const el = document.getElementById(kind === "turno" ? "turnoInput" : "avisoInput");
+  if(el) el.innerHTML = "";
+}
 async function addTurno(){
-  const el = document.getElementById("turnoInput");
-  if(!el) return;
-  const html = normalizeEditorHtml(getEditableHtmlFromNode(el));
-  if(!html) return;
+  const html = getRichHtmlFromInput("turno");
+  if(!html || !html.replace(/<br\s*\/?>/gi,"").trim()) return;
   try{
-    const out = await gasCall("addSharedTurnoItem", html);
-    __sharedTurnoState = out || __sharedTurnoState;
-    el.innerHTML = "";
+    const st = await gasCall("addSharedTurnoItem", html);
+    __sharedTurnoState = st || __sharedTurnoState;
+    clearRichInput("turno");
     renderSharedList("turno");
-  }catch(e){
-    console.error("Falha addTurno:", e);
-  }
+  }catch(e){}
 }
-
 async function addAviso(){
-  const el = document.getElementById("avisoInput");
-  if(!el) return;
-  const html = normalizeEditorHtml(getEditableHtmlFromNode(el));
-  if(!html) return;
+  const html = getRichHtmlFromInput("avisos");
+  if(!html || !html.replace(/<br\s*\/?>/gi,"").trim()) return;
   try{
-    const out = await gasCall("addSharedAvisoItem", html);
-    __sharedAvisosState = out || __sharedAvisosState;
-    el.innerHTML = "";
+    const st = await gasCall("addSharedAvisoItem", `<div>📢 ${html}</div>`);
+    __sharedAvisosState = st || __sharedAvisosState;
+    clearRichInput("avisos");
     renderSharedList("avisos");
-  }catch(e){
-    console.error("Falha addAviso:", e);
-  }
+  }catch(e){}
 }
 
-/* =========================================================
-   Context menu formatação (para contenteditable)
-   ========================================================= */
-const ctxMenu = document.getElementById("ctxMenu");
-const ctxBold = document.getElementById("ctxBold");
-const ctxFont = document.getElementById("ctxFont");
-const ctxColor = document.getElementById("ctxColor");
-const ctxApply = document.getElementById("ctxApply");
-
-let __ctxSelection = null;
-
-function hideCtxMenu(){
-  if(!ctxMenu) return;
-  ctxMenu.style.display = "none";
+/* ===== Context menu ===== */
+function getSelectionRangeSafe(){
+  const sel = window.getSelection();
+  if(!sel || sel.rangeCount === 0) return null;
+  const r = sel.getRangeAt(0);
+  if(!r || r.collapsed) return null;
+  return r;
 }
-document.addEventListener("click", ()=>{ hideCtxMenu(); });
-
-document.addEventListener("contextmenu", (ev)=>{
-  const target = ev.target;
-  if(!target) return;
-  const isEditable = !!(target.closest && target.closest(".noteInput, .itemBody[contenteditable='true']"));
-  if(!isEditable) return;
-
-  ev.preventDefault();
-
+function restoreRange(rng){
+  if(!rng) return false;
+  const sel = window.getSelection();
+  if(!sel) return false;
+  sel.removeAllRanges(); sel.addRange(rng);
+  return true;
+}
+function wrapSelectionWithSpan(styleText){
+  const sel = window.getSelection();
+  if(!sel || sel.rangeCount === 0) return false;
+  const range = sel.getRangeAt(0);
+  if(range.collapsed) return false;
+  const span = document.createElement("span");
+  span.setAttribute("style", styleText);
+  try{ range.surroundContents(span); }
+  catch(e){ const frag = range.extractContents(); span.appendChild(frag); range.insertNode(span); }
+  sel.removeAllRanges();
+  const r2 = document.createRange();
+  r2.selectNodeContents(span);
+  sel.addRange(r2);
+  return true;
+}
+let __ctxMenuOpen = false;
+let __ctxStoredRange = null;
+const __ctxPending = { bold: false, fontPx: 12, color: "#0f172a" };
+function ctxEl(){ return document.getElementById("ctxMenu"); }
+function ctxHide(){ const m = ctxEl(); if(m) m.style.display = "none"; __ctxMenuOpen = false; __ctxStoredRange = null; }
+function ctxShow(x,y){
+  const m = ctxEl();
+  if(!m) return;
+  const pad = 10, w = m.offsetWidth || 300, h = m.offsetHeight || 90;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = Math.min(x, vw - w - pad), top = Math.min(y, vh - h - pad);
+  if(left < pad) left = pad; if(top < pad) top = pad;
+  m.style.left = left + "px"; m.style.top = top + "px"; m.style.display = "block";
+  __ctxMenuOpen = true;
+}
+function isSelectionInsideAllowedArea(){
   try{
     const sel = window.getSelection();
-    if(sel && sel.rangeCount){
-      __ctxSelection = sel.getRangeAt(0);
-    }
-  }catch(e){ __ctxSelection = null; }
-
-  if(ctxMenu){
-    ctxMenu.style.left = ev.clientX + "px";
-    ctxMenu.style.top = ev.clientY + "px";
-    ctxMenu.style.display = "block";
-  }
-});
-
-function restoreSelection(){
-  try{
-    if(!__ctxSelection) return false;
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(__ctxSelection);
-    return true;
+    if(!sel || sel.rangeCount === 0) return false;
+    const node = sel.anchorNode;
+    if(!node) return false;
+    const el = (node.nodeType === 1) ? node : node.parentElement;
+    if(!el) return false;
+    const turno = document.getElementById("turno");
+    const avisos = document.getElementById("avisos");
+    if(turno && turno.contains(el)) return true;
+    if(avisos && avisos.contains(el)) return true;
+    return false;
   }catch(e){ return false; }
 }
+function initCtxMenuHandlers(){
+  const boldBtn = document.getElementById("ctxBold");
+  const fontSel = document.getElementById("ctxFont");
+  const colorIn = document.getElementById("ctxColor");
+  const applyBtn = document.getElementById("ctxApply");
 
-ctxBold && ctxBold.addEventListener("click", ()=>{
-  ctxBold.classList.toggle("on");
-});
-ctxApply && ctxApply.addEventListener("click", ()=>{
-  if(!restoreSelection()) return;
-  const boldOn = ctxBold && ctxBold.classList.contains("on");
-  const size = ctxFont ? String(ctxFont.value || "12") : "12";
-  const color = ctxColor ? String(ctxColor.value || "#0f172a") : "#0f172a";
-
-  try{
-    document.execCommand("styleWithCSS", false, true);
-  }catch(e){}
-
-  if(boldOn){
-    try{ document.execCommand("bold"); }catch(e){}
+  if(boldBtn) boldBtn.onclick = (e)=>{ e.preventDefault(); __ctxPending.bold = !__ctxPending.bold; boldBtn.classList.toggle("on", __ctxPending.bold); };
+  if(fontSel) fontSel.onchange = ()=>{ __ctxPending.fontPx = Number(fontSel.value || 12); };
+  if(colorIn) colorIn.oninput = ()=>{ __ctxPending.color = String(colorIn.value || "#0f172a"); };
+  if(applyBtn){
+    applyBtn.onclick = (e)=>{
+      e.preventDefault();
+      if(!__ctxStoredRange) return;
+      restoreRange(__ctxStoredRange);
+      const styles = [];
+      if(__ctxPending.bold) styles.push("font-weight:700");
+      if(__ctxPending.fontPx) styles.push(`font-size:${__ctxPending.fontPx}px`);
+      if(__ctxPending.color) styles.push(`color:${__ctxPending.color}`);
+      if(styles.length) wrapSelectionWithSpan(styles.join(";"));
+      ctxHide();
+    };
   }
 
-  try{ document.execCommand("foreColor", false, color); }catch(e){}
-  try{ document.execCommand("fontSize", false, "3"); }catch(e){} // base
-  // Ajusta o tamanho real via span
-  try{
-    const spans = document.querySelectorAll('span[style*="font-size"]');
-    spans.forEach(s=>{ /* noop */ });
-  }catch(e){}
+  document.addEventListener("click", (e)=>{ if(!__ctxMenuOpen) return; const m = ctxEl(); if(m && (e.target === m || m.contains(e.target))) return; ctxHide(); });
+  document.addEventListener("scroll", ()=>{ if(__ctxMenuOpen) ctxHide(); }, true);
+  document.addEventListener("keydown", (e)=>{ if(e.key === "Escape" && __ctxMenuOpen) ctxHide(); });
 
-  // Força tamanho com wrap (mais confiável)
-  try{
-    const sel = window.getSelection();
-    if(sel && sel.rangeCount){
-      const range = sel.getRangeAt(0);
-      if(!range.collapsed){
-        const span = document.createElement("span");
-        span.style.fontSize = size + "px";
-        span.style.color = color;
-        if(boldOn) span.style.fontWeight = "700";
-        range.surroundContents(span);
-      }
+  document.addEventListener("contextmenu", (e)=>{
+    const rng = getSelectionRangeSafe();
+    if(!rng) return;
+    if(!isSelectionInsideAllowedArea()) return;
+    __ctxStoredRange = rng.cloneRange();
+    e.preventDefault();
+    const bb = document.getElementById("ctxBold");
+    if(bb) bb.classList.toggle("on", __ctxPending.bold);
+    const fs = document.getElementById("ctxFont");
+    if(fs) fs.value = String(__ctxPending.fontPx || 12);
+    const cc = document.getElementById("ctxColor");
+    if(cc) cc.value = String(__ctxPending.color || "#0f172a");
+    ctxShow(e.clientX, e.clientY);
+  }, true);
+}
+
+(function bindSafeClickHandlers(){
+  if(window.__SAFE_CLICK_BINDED__) return;
+  window.__SAFE_CLICK_BINDED__ = true;
+  document.addEventListener("click", (e)=>{
+    const bell = e.target && e.target.closest ? e.target.closest("button.bellBtn") : null;
+    if(bell){
+      e.preventDefault(); e.stopImmediatePropagation();
+      const tk = bell.getAttribute("data-table");
+      const rid = bell.getAttribute("data-rid");
+      if(tk && rid) togglePrio(tk, rid);
+      return;
     }
-  }catch(e){
-    // fallback: ignora
-  }
+    const air = e.target && e.target.closest ? e.target.closest("button.airWarnBtn") : null;
+    if(air){
+      e.preventDefault(); e.stopImmediatePropagation();
+      const tk = air.getAttribute("data-table");
+      const a  = air.getAttribute("data-air");
+      if(tk && a) toggleAirPinned(tk, a);
+      return;
+    }
+  }, true);
+})();
 
-  hideCtxMenu();
-});
+(async function init(){
+  window.addEventListener("unhandledrejection", ()=>{
+    const st = document.getElementById("status");
+    if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada).");
+  });
+  window.addEventListener("error", ()=>{
+    const st = document.getElementById("status");
+    if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno no script.");
+  });
 
-/* =========================================================
-   BOOT
-   ========================================================= */
-(async function boot(){
-  try{
-    updateStatusVisibility();
+  __lastUpdateDate = computeLastUpdateFromData();
+  __lastSuccessAt = new Date();
+  __lastFetchAt   = new Date();
 
-    // presença
-    presenceTick();
-    setInterval(()=>{ presenceTick(); }, 20 * 1000);
+  if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("✅ Inicializando...");
 
-    // sync shared states
+  prepareDataCache();
+
+  try{ await presenceTick(); }catch(e){}
+
+  if(hasGAS()){
     try{ await syncSharedAllTables(); }catch(e){}
     try{ await syncSharedObs(); }catch(e){}
     try{ await syncSharedTurno(); }catch(e){}
     try{ await syncSharedAvisos(); }catch(e){}
     try{ await syncSharedLinks(); }catch(e){}
-
-    // primeiro refresh
-    await refreshData();
-
-    // agenda refresh
-    scheduleNextRefresh(getAutoRefreshMs());
-
-  }catch(e){
-    console.error("boot error:", e);
+  }else{
+    renderConnected([]);
   }
+
+  renderLinksUteis();
+  renderSharedList("turno");
+  renderSharedList("avisos");
+
+  rerenderAll({ onlyActive: true });
+
+  setInterval(paintUpdateInfo, 1000);
+  setInterval(paintRefreshInfo, 1000);
+  setInterval(__tryRerenderPending__, 700);
+  document.addEventListener("focusout", ()=>{ setTimeout(__tryRerenderPending__, 150); }, true);
+
+  scheduleNextRefresh(getAutoRefreshMs());
+  setTimeout(()=>{ refreshData(); }, 1500);
+
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshData(); });
+  window.addEventListener("focus", ()=>{ refreshData(); });
+
+  initCtxMenuHandlers();
+
+  // =====================================================
+  // ✅ MUDANÇA 3: Dois setIntervals separados:
+  //   - Colaborativo (presença, OBS, turno, avisos): 30s
+  //     → Dados que mudam rápido entre usuários
+  //   - Dados da planilha: controlado pelo scheduleNextRefresh (2min30s)
+  // =====================================================
+
+  // Sync colaborativo leve (30s) — não busca planilha, só estado compartilhado
+  setInterval(async ()=>{
+    try{ await presenceTick(); }catch(e){}
+    if(hasGAS()){
+      try{ await syncSharedAllTables(); }catch(e){}
+      try{ await syncSharedObs(); }catch(e){}
+      try{ await syncSharedTurno(); }catch(e){}
+      try{ await syncSharedAvisos(); }catch(e){}
+      try{ await syncSharedLinks(); }catch(e){}
+    }
+    renderSharedList("turno");
+    renderSharedList("avisos");
+    renderLinksUteis();
+    try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){}
+  }, 30000); // 30 segundos — só dados colaborativos leves
+
+  
+  // FAST: auto-marcar aeronaves do dia a cada 15min (mesmo se a aba não estiver aberta)
+  setInterval(()=>{ try{ runFastAutoPinNow("timer"); }catch(e){} }, FAST_AUTO_PIN_INTERVAL_MS);
+  // roda uma vez logo após o primeiro refresh
+  setTimeout(()=>{ try{ runFastAutoPinNow("boot"); }catch(e){} }, 5000);
+
+updateStatusVisibility();
 })();
 </script>
+
 </body>
 </html>
