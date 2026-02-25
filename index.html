@@ -216,7 +216,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
     <button onclick="openTab('war',this)">⚔️ War Room</button>
     <button onclick="openTab('fast',this)">⚡ Fast Pass</button>
     <button onclick="openTab('cargo',this)">📦 Cargo Heroes</button>
-    <button onclick="openTab(\'mro\',this)">🧰 MRO</button>
+    <button onclick="openTab('mro',this)">🧰 MRO</button>
     <button onclick="openTab('acompanhamento',this)">📍 Acompanhamento</button>
     <button onclick="openTab('cargas',this)">🚚 Cargas</button>
     <button onclick="openTab('hotlist',this)">🔥 Hot List</button>
@@ -699,7 +699,7 @@ function colLabel(col){ return COL_LABELS[col] || col; }
 
 
 const tableKeysBySection = { aog:"aog", war:"war", fast:"fast", cargo:"cargo", mro:"mro", acompanhamento:"acompanhamento", cargas:"cargas", hotlist:"hotlist", tools:"tools" };
-const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, acompanhamento:{}, cargas:{}, hotlist:{}, tools:{} };
+const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, acompanhamento:{}, cargas:{}, hotlist:{}, mro:{}, tools:{} };
 
 const __filterDraftByTable = { aog:{}, war:{}, fast:{}, cargo:{}, mro:{}, acompanhamento:{}, cargas:{}, hotlist:{}, tools:{} };
 function setFilterDraft(tableKey, col, value){
