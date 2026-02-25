@@ -109,6 +109,20 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .status-default{ background:#f8fafc; border-color:#e5e7eb; color:#334155; } .status-default .statusDot{ background:#64748b; }
 
 .airCell{ display:flex; align-items:center; gap:8px; }
+.solCell{ display:flex; align-items:center; gap:8px; }
+.solBtn{ border:none; background:#a78bfa; color:#111827; border-radius:8px; padding:4px 8px; cursor:pointer; font-size:12px; line-height:1; }
+.solBtn:hover{ filter:brightness(.95); }
+.solBox{ background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px; margin:10px 0 12px; color:#0f172a; }
+.solBox h3{ margin:0 0 8px; font-size:13px; color:#0f172a; }
+.solGrid{ display:flex; flex-wrap:wrap; gap:8px; }
+.solCard{ position:relative; background:#eef2ff; border:1px solid #c7d2fe; border-radius:12px; padding:10px; min-width:220px; max-width:520px; }
+.solCardTitle{ font-weight:800; font-size:12px; color:#3730a3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.solCardMeta{ margin-top:6px; font-size:12px; color:#4338ca; }
+.solCardX{ position:absolute; top:6px; left:6px; border:none; background:#111827; color:#fff; border-radius:999px; width:18px; height:18px; cursor:pointer; font-size:12px; line-height:18px; padding:0; display:flex; align-items:center; justify-content:center; }
+.solCardActions{ margin-top:8px; display:flex; gap:8px; align-items:center; }
+.solFilterPill{ border:none; cursor:pointer; padding:6px 10px; border-radius:999px; font-size:12px; background:#0ea5e9; color:#fff; }
+.solFilterPill.on{ background:#10b981; }
+
 .airWarnBtn{ border:none; background:#f59e0b; color:#111827; border-radius:8px; padding:4px 8px; cursor:pointer; font-size:12px; line-height:1; }
 .airWarnBtn:hover{ filter:brightness(.95); }
 
@@ -246,6 +260,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   <div id="aog" class="section">
     <h1>AOG</h1>
     <div id="air-aog"></div>
+    <div id="sol-aog"></div>
     <div id="prio-aog"></div>
     <div class="tableWrap"><table id="tbl-aog"></table></div>
   </div>
@@ -253,6 +268,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   <div id="war" class="section">
     <h1>War Room</h1>
     <div id="air-war"></div>
+    <div id="sol-war"></div>
     <div id="prio-war"></div>
     <div class="tableWrap"><table id="tbl-war"></table></div>
   </div>
@@ -260,6 +276,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   <div id="fast" class="section">
     <h1>Fast Pass</h1>
     <div id="air-fast"></div>
+    <div id="sol-fast"></div>
     <div id="prio-fast"></div>
     <div class="tableWrap"><table id="tbl-fast"></table></div>
   </div>
@@ -267,6 +284,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   <div id="cargo" class="section">
     <h1>Cargo Heroes</h1>
     <div id="air-cargo"></div>
+    <div id="sol-cargo"></div>
     <div id="prio-cargo"></div>
     <div class="tableWrap"><table id="tbl-cargo"></table></div>
   </div>
@@ -274,6 +292,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 <div id="acompanhamento" class="section">
     <h1>Acompanhamento</h1>
     <div id="air-acompanhamento"></div>
+    <div id="sol-acompanhamento"></div>
     <div id="prio-acompanhamento"></div>
     <div class="tableWrap"><table id="tbl-acompanhamento"></table></div>
   </div>
@@ -281,6 +300,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 <div id="cargas" class="section">
     <h1>Cargas</h1>
     <div id="air-cargas"></div>
+    <div id="sol-cargas"></div>
     <div id="prio-cargas"></div>
     <div class="tableWrap"><table id="tbl-cargas"></table></div>
   </div>
@@ -288,6 +308,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 <div id="hotlist" class="section">
     <h1>Hot List</h1>
     <div id="air-hotlist"></div>
+    <div id="sol-hotlist"></div>
     <div id="prio-hotlist"></div>
     <div class="tableWrap"><table id="tbl-hotlist"></table></div>
   </div>
@@ -295,6 +316,7 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 <div id="tools" class="section">
     <h1>Ferramentas</h1>
     <div id="air-tools"></div>
+    <div id="sol-tools"></div>
     <div id="prio-tools"></div>
     <div class="tableWrap"><table id="tbl-tools"></table></div>
   </div>
@@ -569,6 +591,7 @@ const EMB_COL = "Data_de_embarque_logistica";
 const LAND_COL = "Data_do_pouso_logistica";
 const STATUS_COL = "Status_material_ferramenta";
 const AIR_COL = "Aeronave";
+const SOL_COL = "Numero_de_solicitacao";
 const TYPE_COL = "Tipo";
 
 function hasCargasKeyword(text){
@@ -773,6 +796,38 @@ let airPinnedByTable = {
   tools: new Set(JSON.parse(localStorage.getItem(AIR_STORE_KEY.tools) || "[]"))
 };
 const airFocusByTable = { aog:null, war:null, fast:null, cargo:null, acompanhamento:null, cargas:null, hotlist:null, tools:null };
+/* =========================================================
+   SOLICITAÇÃO (pino + filtro por Solicitação)
+   - Mesmo conceito da Aeronave:
+     • botão 📌 na coluna Solicitação
+     • "balões" no topo com contagem de Material_ID
+     • botão "Filtrar" que aplica filtro para aquela Solicitação
+   ========================================================= */
+const SOL_STORE_KEY = {
+  aog:"AOG_SOL_AOG_V1", war:"AOG_SOL_WAR_V1", fast:"AOG_SOL_FAST_V1",
+  cargo:"AOG_SOL_CARGO_V1", acompanhamento:"AOG_SOL_ACOMP_V1",
+  cargas:"AOG_SOL_CARGAS_V1", hotlist:"AOG_SOL_HOTLIST_V1", tools:"AOG_SOL_TOOLS_V1"
+};
+let solPinnedByTable = {
+  aog:   new Set(JSON.parse(localStorage.getItem(SOL_STORE_KEY.aog)   || "[]")),
+  war:   new Set(JSON.parse(localStorage.getItem(SOL_STORE_KEY.war)   || "[]")),
+  fast:  new Set(JSON.parse(localStorage.getItem(SOL_STORE_KEY.fast)  || "[]")),
+  cargo: new Set(JSON.parse(localStorage.getItem(SOL_STORE_KEY.cargo) || "[]")),
+  acompanhamento:new Set(JSON.parse(localStorage.getItem(SOL_STORE_KEY.acompanhamento) || "[]")),
+  cargas:new Set(JSON.parse(localStorage.getItem(SOL_STORE_KEY.cargas)|| "[]")),
+  hotlist:new Set(JSON.parse(localStorage.getItem(SOL_STORE_KEY.hotlist)|| "[]")),
+  tools: new Set(JSON.parse(localStorage.getItem(SOL_STORE_KEY.tools) || "[]"))
+};
+const solFocusByTable = { aog:null, war:null, fast:null, cargo:null, acompanhamento:null, cargas:null, hotlist:null, tools:null };
+function saveSolPinned(tableKey){
+  try{ localStorage.setItem(SOL_STORE_KEY[tableKey], JSON.stringify(Array.from(solPinnedByTable[tableKey]))); }catch(e){}
+}
+function __solHas__(tableKey, sol){
+  const set = solPinnedByTable[tableKey] || new Set();
+  const raw = String(sol || "");
+  const t = raw.trim();
+  return set.has(raw) || (t && set.has(t));
+}
 function saveAirPinned(tableKey){
   try{ localStorage.setItem(AIR_STORE_KEY[tableKey], JSON.stringify(Array.from(airPinnedByTable[tableKey]))); }catch(e){}
 }
@@ -785,6 +840,10 @@ let __sortedBaseByTable = { aog:[], war:[], fast:[], cargo:[], acompanhamento:[]
 let __sortedBaseVersion = -1;
 
 let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
+
+  __solIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
+
+let __solIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
   // ✅ 1) Ordena por DIA de Data_da_solicitacao (mais recente primeiro) — ignora hora
@@ -841,6 +900,8 @@ function prepareDataCache(){
 
   __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
 
+  __solIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
+
   const arr = Array.isArray(dados) ? dados : [];
   for(let i=0;i<arr.length;i++){
     const r = arr[i];
@@ -858,21 +919,28 @@ function prepareDataCache(){
 
     out.cargo.push(r);
     __pushAirId__("cargo", r);
+    __pushSolId__("cargo", r);
 
     // ✅ NOVA ABA: Acompanhamento (mesma regra do Cargo Heroes)
     out.acompanhamento.push(r);
     __pushAirId__("acompanhamento", r);
+    __pushSolId__("acompanhamento", r);
 
-    if(isCargasRow(r)){ out.cargas.push(r); __pushAirId__("cargas", r); }
+    if(isCargasRow(r)){ out.cargas.push(r); __pushAirId__("cargas", r);
+    __pushSolId__("cargas", r); }
     // ✅ NOVA ABA: Hot List (mesma regra de Cargas)
-    if(isCargasRow(r)){ out.hotlist.push(r); __pushAirId__("hotlist", r); }
-    if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r); }
+    if(isCargasRow(r)){ out.hotlist.push(r); __pushAirId__("hotlist", r);
+    __pushSolId__("hotlist", r); }
+    if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r);
+    __pushSolId__("tools", r); }
 
     const c = String((r && r.Criticidade) || "").toUpperCase();
-    if(c.includes("WAR"))    { out.war.push(r);  __pushAirId__("war", r); }
-    // ✅ FAST agora pega somente FAST PASS (antes era LIMOPS)
-    if(c.includes("FAST PASS") || c.includes("FASTPASS") || c.includes("FAST")) { out.fast.push(r); __pushAirId__("fast", r); }
-    if(c.includes("AOG"))    { out.aog.push(r);  __pushAirId__("aog", r); }
+    if(c.includes("WAR"))    { out.war.push(r);  __pushAirId__("war", r);
+    __pushSolId__("war", r); }
+    if(c.includes("LIMOPS")) { out.fast.push(r); __pushAirId__("fast", r);
+    __pushSolId__("fast", r); }
+    if(c.includes("AOG"))    { out.aog.push(r);  __pushAirId__("aog", r);
+    __pushSolId__("aog", r); }
 
     const dt = parseMaybeDate(r && r.Data_Ultima_Atualizacao);
     if(dt && (!maxDt || dt.getTime() > maxDt.getTime())) maxDt = dt;
@@ -890,6 +958,17 @@ function __pushAirId__(tableKey, r){
   if(!mp) return;
   let set = mp.get(a);
   if(!set){ set = new Set(); mp.set(a,set); }
+  if(mid) set.add(mid);
+}
+
+function __pushSolId__(tableKey, r){
+  const sol = cleanVal(r && r[SOL_COL]);
+  if(!sol) return;
+  const mid = cleanVal(r && r.Material_ID);
+  const mp = __solIdSetByTable[tableKey];
+  if(!mp) return;
+  let set = mp.get(sol);
+  if(!set){ set = new Set(); mp.set(sol,set); }
   if(mid) set.add(mid);
 }
 
@@ -949,7 +1028,7 @@ function buildFiltersSignatureCore(tableKey){
   return keys.map(k => k + "=" + String(f[k]).trim().toLowerCase()).join("&");
 }
 function buildCombinedFilterSignature(tableKey){
-  return buildFiltersSignatureCore(tableKey) + "|AF=" + (airFocusByTable[tableKey] ? normalizeText(airFocusByTable[tableKey]) : "");
+  return buildFiltersSignatureCore(tableKey) + "|AF=" + (airFocusByTable[tableKey] ? normalizeText(airFocusByTable[tableKey]) : "") + "|SF=" + (solFocusByTable[tableKey] ? normalizeText(solFocusByTable[tableKey]) : "");
 }
 function invalidateFilterCache(tableKey){
   __filterCompiledCache[tableKey] = null;
@@ -990,7 +1069,14 @@ function getFilteredBaseRows(tableKey){
     rows = rows.filter(r => normalizeText(cleanVal(r[AIR_COL])) === nf);
   }
 
-  __filterRowsCache[tableKey] = { signature: sig, dataVersion: __dataVersion, rows };
+  
+
+  const solFocus = solFocusByTable[tableKey];
+  if(solFocus){
+    const ns = normalizeText(solFocus);
+    rows = rows.filter(r => normalizeText(cleanVal(r[SOL_COL])) === ns);
+  }
+__filterRowsCache[tableKey] = { signature: sig, dataVersion: __dataVersion, rows };
   return rows;
 }
 
@@ -1662,6 +1748,121 @@ function countIdsForAircraft(tableKey, aircraft){
   return set ? set.size : 0;
 }
 
+function toggleSolPinned(tableKey, sol){
+  const tk = String(tableKey||"").toLowerCase();
+  const s = cleanVal(sol);
+  if(!s) return;
+  const set = solPinnedByTable[tk];
+  if(set.has(s)) set.delete(s); else set.add(s);
+  saveSolPinned(tk);
+  renderSolBox(tk);
+}
+
+function setSolFocus(tableKey, sol){
+  const tk = String(tableKey||"").toLowerCase();
+  const s = cleanVal(sol);
+  if(!s) return;
+
+  clearFilters(tk);
+  airFocusByTable[tk] = null; // evita dupla âncora
+  solFocusByTable[tk] = s;
+
+  const tbl = document.getElementById(`tbl-${tk}`);
+  if(tbl){
+    const inputs = tbl.querySelectorAll("input.filter");
+    const idx = cols.indexOf(SOL_COL);
+    if(idx >= 0 && inputs && inputs.length){
+      const inp = inputs[idx];
+      if(inp){ inp.value = s; filtersByTable[tk][SOL_COL] = s.toLowerCase(); }
+    }
+  }
+
+  invalidateFilterCache(tk);
+  markDirty(tk); renderTable(tk); clearDirty(tk);
+  renderAircraftBox(tk);
+  renderSolBox(tk);
+}
+
+function clearSolFocus(tableKey){
+  const tk = String(tableKey||"").toLowerCase();
+  const current = solFocusByTable[tk];
+  solFocusByTable[tk] = null;
+
+  const f = filtersByTable[tk] || {};
+  const v = String(f[SOL_COL] || "").trim().toLowerCase();
+  if(current && v && normalizeText(v) === normalizeText(current)) delete filtersByTable[tk][SOL_COL];
+
+  const tbl = document.getElementById(`tbl-${tk}`);
+  if(tbl){
+    const inputs = tbl.querySelectorAll("input.filter");
+    const idx = cols.indexOf(SOL_COL);
+    if(idx >= 0 && inputs && inputs.length){ const inp = inputs[idx]; if(inp) inp.value = ""; }
+  }
+
+  invalidateFilterCache(tk);
+  markDirty(tk); renderTable(tk); clearDirty(tk);
+  renderAircraftBox(tk);
+  renderSolBox(tk);
+}
+
+function solCardXAction(tableKey, sol){
+  const tk = String(tableKey||"").toLowerCase();
+  const s = cleanVal(sol);
+  if(!s) return;
+  if(solFocusByTable[tk] && normalizeText(solFocusByTable[tk]) === normalizeText(s)){ clearSolFocus(tk); return; }
+  const set = solPinnedByTable[tk];
+  if(set.has(s)) set.delete(s);
+  saveSolPinned(tk);
+  renderSolBox(tk);
+}
+
+function countIdsForSol(tableKey, sol){
+  const tk = String(tableKey||"").toLowerCase();
+  const s = cleanVal(sol);
+  if(!s) return 0;
+  const mp = __solIdSetByTable[tk];
+  if(!mp) return 0;
+  const set = mp.get(s);
+  return set ? set.size : 0;
+}
+
+function renderSolBox(tableKey){
+  const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools" }[tableKey];
+  const wrap = document.getElementById(wrapId);
+  if(!wrap) return;
+
+  const set = solPinnedByTable[tableKey];
+  if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+
+  const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  wrap.innerHTML = `<div class="solBox"><h3>📌 Solicitações destacadas</h3><div class="solGrid" id="solGrid-${tableKey}"></div></div>`;
+  const grid = document.getElementById(`solGrid-${tableKey}`);
+  if(!grid) return;
+  const focus = solFocusByTable[tableKey] ? String(solFocusByTable[tableKey]) : "";
+
+  items.slice(0, 80).forEach(s=>{
+    const count = countIdsForSol(tableKey, s);
+    const isFocused = focus && normalizeText(focus) === normalizeText(s);
+    const clickFn = isFocused ? `clearSolFocus('${tableKey}')` : `setSolFocus('${tableKey}','${escapeHtml(s)}')`;
+
+    const card = document.createElement("div");
+    card.className = "solCard";
+    card.innerHTML = `
+      <button class="solCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}"
+        onclick="solCardXAction('${tableKey}','${escapeHtml(s)}')">×</button>
+      <div class="solCardTitle">🧾 ${escapeHtml(s)}</div>
+      <div class="solCardMeta">Material_IDs: <b>${count}</b></div>
+      <div class="solCardActions">
+        <button class="solFilterPill ${isFocused ? "on" : ""}" type="button"
+          title="Filtrar esta aba por esta Solicitação"
+          onclick="${clickFn}">
+          ${isFocused ? "Filtrando" : "Filtrar"}
+        </button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
 function renderAircraftBox(tableKey){
   const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools" }[tableKey];
   const wrap = document.getElementById(wrapId);
@@ -1963,6 +2164,20 @@ function renderTable(tableKey){
         const displayed = displayCell(c, r[c], tableKey, r);
 
         if(c === STATUS_COL) return `<td>${statusTagHtml(displayed)}</td>`;
+              if(c === SOL_COL){
+                const s = cleanVal(displayed);
+                if(!s) return `<td>${escapeHtml(displayed)}</td>`;
+                return `<td><div class="solCell">
+                  <span>${escapeHtml(s)}</span>
+                  <button class="solBtn" type="button"
+                    data-table="${escapeHtml(tableKey)}"
+                    data-sol="${escapeHtml(s)}"
+                    title="Destacar Solicitação (mostra Material_IDs e permite filtrar)"
+                    onclick="toggleSolPinned('${tableKey}','${escapeHtml(s)}'); try{ window.scrollTo({top:0,behavior:'smooth'});}catch(e){}">📌</button>
+                </div></td>`;
+              }
+
+
 
         if(c === AIR_COL){
           const a = cleanVal(displayed);
@@ -2096,11 +2311,11 @@ function rerenderAll(opts){
   if(onlyActive){
     const active = document.querySelector(".section.active");
     const tk = active ? tableKeysBySection[active.id] : null;
-    if(tk){ renderAircraftBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); }
+    if(tk){ renderAircraftBox(tk); renderSolBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); }
     renderLinksUteis();
   }else{
     for(const tk of SHARED_TABLE_KEYS){
-      renderAircraftBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk);
+      renderAircraftBox(tk); renderSolBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk);
     }
     renderLinksUteis();
   }
