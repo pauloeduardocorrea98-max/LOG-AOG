@@ -937,8 +937,7 @@ function prepareDataCache(){
     const c = String((r && r.Criticidade) || "").toUpperCase();
     if(c.includes("WAR"))    { out.war.push(r);  __pushAirId__("war", r);
     __pushSolId__("war", r); }
-    if(c.includes("LIMOPS")) { out.fast.push(r); __pushAirId__("fast", r);
-    __pushSolId__("fast", r); }
+    if(c.includes("FAST PASS") || c.includes("FASTPASS") || c.includes("FAST")) { out.fast.push(r); __pushAirId__("fast", r); __pushSolId__("fast", r); }
     if(c.includes("AOG"))    { out.aog.push(r);  __pushAirId__("aog", r);
     __pushSolId__("aog", r); }
 
@@ -1230,6 +1229,8 @@ function jsonpCall(params, timeoutMs = 20000){
       if(done) return;
       done = true;
       cleanup();
+
+    let script = null;
       reject(new Error("timeout JSONP"));
     }, Math.max(3000, timeoutMs|0));
 
@@ -1257,7 +1258,7 @@ window[cbName] = (data)=>{
       resolve(data);
     };
 
-    const script = document.createElement("script");
+    script = document.createElement("script");
     script.src = url;
     script.async = true;
     
