@@ -389,33 +389,18 @@ let dados = [];
 // Se o GAS responder {ok:false,error:"forbidden"} ou o JSONP falhar (403/login),
 // mostramos esta tela e paramos os refresh.
 let __ACCESS_BLOCKED__ = false;
+let __accessBlockedUntil = 0;
+// ✅ Não bloqueia a operação: apenas sinaliza erro e tenta novamente automaticamente.
 function __showAccessBlocked__(msg){
-  if(__ACCESS_BLOCKED__) return;
+  const reason = msg || "Acesso bloqueado (Google). Tentando novamente automaticamente…";
   __ACCESS_BLOCKED__ = true;
-  try{ stopAutoRefresh && stopAutoRefresh(); }catch(e){}
-  try{ if(__refreshTimeout) clearTimeout(__refreshTimeout); }catch(e){}
-  const text = msg || "Acesso permitido somente para contas Google @latam.com.";
-  const overlay = document.createElement("div");
-  overlay.id = "latamBlock";
-  overlay.style.cssText = "position:fixed;inset:0;background:rgba(2,6,23,.72);display:flex;align-items:center;justify-content:center;z-index:99999;padding:18px;";
-  overlay.innerHTML = `
-    <div style="max-width:640px;width:100%;background:#0b1d33;border:1px solid #334155;border-radius:16px;padding:18px 18px 14px;color:#e5e7eb;box-shadow:0 18px 40px rgba(0,0,0,.35)">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="font-size:18px">🔒</div>
-        <div style="font-weight:800;font-size:16px;color:#38bdf8">Acesso restrito</div>
-      </div>
-      <div style="margin-top:10px;font-size:13px;line-height:1.4;color:#e5e7eb">
-        ${text.replace(/</g,"&lt;").replace(/>/g,"&gt;")}
-      </div>
-      <div style="margin-top:10px;font-size:12px;color:#94a3b8">
-        Entre com sua conta Google corporativa e tente novamente.
-      </div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
-        <button type="button" class="noteBtn gray" onclick="location.reload()">Recarregar</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
+  // backoff de 5 minutos pra evitar loop agressivo em caso de rate limit/permissão
+  __accessBlockedUntil = Date.now() + (5 * 60 * 1000);
+  __lastRefreshError = reason;
+  try{ paintRefreshInfo(); }catch(e){}
+  try{ renderFrescorBanner(); }catch(e){}
 }
+
 
 const __ADMIN_MODE = (/\badmin=1\b/i.test(window.location.search) || localStorage.getItem("ADMIN_MODE")==="1");
 
@@ -854,8 +839,8 @@ let __dataVersion = 0;
 let __sortedBaseByTable = { aog:[], war:[], fast:[], cargo:[], mro:[], acompanhamento:[], cargas:[], hotlist:[], tools:[] };
 let __sortedBaseVersion = -1;
 
-let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), mro:new Map(), mro:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
-let __solIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), mro:new Map(), mro:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
+let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), mro:new Map(), cargas:new Map(), hotlist:new Map(), acompanhamento:new Map(), tools:new Map() };
+let __solIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), mro:new Map(), cargas:new Map(), hotlist:new Map(), acompanhamento:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
   // ✅ 1) Ordena por DIA de Data_da_solicitacao (mais recente primeiro) — ignora hora
@@ -1284,8 +1269,7 @@ script.onerror = ()=>{
       if(done) return;
       done = true;
       cleanup();
-      // Normalmente acontece quando o WebApp está restrito ao domínio e o usuário não tem acesso/logou.
-      __showAccessBlocked__("Você não tem permissão para acessar este dashboard. Use uma conta Google @latam.com (ou solicite acesso).");
+      // Pode ser rede/timeout/Google indisponível/permissão. Não bloqueia a operação nem pede F5.
       reject(new Error("erro ao carregar script JSONP"));
     };
     document.head.appendChild(script);
@@ -1846,7 +1830,7 @@ function countIdsForSol(tableKey, sol){
 }
 
 function renderSolBox(tableKey){
-  const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools" }[tableKey];
+  const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", mro:"sol-mro", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools" }[tableKey];
   const wrap = document.getElementById(wrapId);
   if(!wrap) return;
 
@@ -1883,7 +1867,7 @@ function renderSolBox(tableKey){
 }
 
 function renderAircraftBox(tableKey){
-  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools" }[tableKey];
+  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", mro:"air-mro", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools" }[tableKey];
   const wrap = document.getElementById(wrapId);
   if(!wrap) return;
   const set = airPinnedByTable[tableKey];
@@ -1930,7 +1914,7 @@ function renderAircraftBox(tableKey){
 }
 
 function renderPrios(tableKey){
-  const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", acompanhamento:"prio-acompanhamento", cargas:"prio-cargas", hotlist:"prio-hotlist", tools:"prio-tools" }[tableKey];
+  const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", mro:"prio-mro", acompanhamento:"prio-acompanhamento", cargas:"prio-cargas", hotlist:"prio-hotlist", tools:"prio-tools" }[tableKey];
   const wrap = document.getElementById(wrapId);
   if(!wrap) return;
   const set = priosByTable[tableKey];
@@ -2409,6 +2393,16 @@ async function __gasGetDadosChunked__(onProgress){
 
 async function refreshData(){
   if(__refreshInFlight) return;
+  // ✅ Se houve "acesso bloqueado"/rate-limit, aguarda o backoff sem pedir F5
+  if(__ACCESS_BLOCKED__ && Date.now() < __accessBlockedUntil){
+    __lastRefreshError = __lastRefreshError || "Acesso bloqueado (Google). Tentando novamente automaticamente…";
+    try{ paintRefreshInfo(); }catch(e){}
+    try{ renderFrescorBanner(); }catch(e){}
+    return;
+  }
+  if(__ACCESS_BLOCKED__ && Date.now() >= __accessBlockedUntil){
+    __ACCESS_BLOCKED__ = false;
+  }
   __refreshInFlight = true;
   __lastFetchAt = new Date();
   __lastRefreshError = "";
