@@ -280,6 +280,38 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   outline-offset:2px;
 }
 
+
+/* ✅ Date picker flutuante (filtro de DATA) */
+.datePopup{
+  position:fixed;
+  z-index:10050;
+  background:#ffffff;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:8px;
+  box-shadow:0 18px 40px rgba(15, 23, 42, .18);
+  display:none;
+}
+.datePopup .dateHead{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin-bottom:6px; color:#0f172a; font-size:12px;
+}
+.datePopup .dateBtn{
+  border:none; background:#111827; color:#fff; border-radius:999px;
+  width:22px; height:22px; cursor:pointer; line-height:22px;
+}
+.datePopup input[type="date"]{
+  width:220px;
+  padding:8px;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  outline:none;
+}
+.datePopup input[type="date"]:focus{
+  border-color:#38bdf8;
+  box-shadow:0 0 0 3px rgba(56,189,248,.18);
+}
+
 </style>
 </head>
 
@@ -677,6 +709,130 @@ function buildFilterToken(input){
 }
 
 const DATE_COL = "Data_da_solicitacao";
+
+/* =========================================================
+   ✅ Date picker (filtro de DATA)
+   - Ao focar no filtro de Data/Embarque/Pouso, mostra calendário
+   - Usuário ainda pode digitar manualmente no input
+   - Selecionar no calendário escreve dd/MM/yyyy no campo
+   ========================================================= */
+let __datePopupEl = null;
+let __datePopupInput = null;
+let __datePopupTarget = null;
+
+function __pad2__(n){ return String(n).padStart(2,"0"); }
+function __fmtDateBR__(d){
+  try{ return `${__pad2__(d.getDate())}/${__pad2__(d.getMonth()+1)}/${d.getFullYear()}`; }
+  catch(e){ return ""; }
+}
+function __brToIso__(br){
+  const s = String(br||"").trim();
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(!m) return "";
+  return `${m[3]}-${m[2]}-${m[1]}`;
+}
+function __isoToBr__(iso){
+  const s = String(iso||"").trim();
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m) return "";
+  return `${m[3]}/${m[2]}/${m[1]}`.replace(/\//g,"/"); // mantém dd/MM/yyyy
+}
+function __isoToBr2__(iso){
+  const s = String(iso||"").trim();
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m) return "";
+  return `${m[3]}/${m[2]}/${m[1]}`; // dd/MM/yyyy
+}
+function __ensureDatePopup__(){
+  if(__datePopupEl) return;
+  const box = document.createElement("div");
+  box.className = "datePopup";
+  box.id = "datePopup";
+  box.innerHTML = `
+    <div class="dateHead">
+      <div><b>Calendário</b></div>
+      <button class="dateBtn" type="button" title="Fechar">×</button>
+    </div>
+    <input id="datePopupInput" type="date" />
+  `;
+  document.body.appendChild(box);
+  __datePopupEl = box;
+  __datePopupInput = document.getElementById("datePopupInput");
+
+  const btn = box.querySelector(".dateBtn");
+  if(btn) btn.onclick = ()=>{ hideDatePickerFilter(); };
+
+  // Não deixar clique dentro fechar
+  box.addEventListener("mousedown", (e)=>{ e.stopPropagation(); }, true);
+
+  // Fecha ao clicar fora
+  document.addEventListener("mousedown", ()=>{ hideDatePickerFilter(); }, true);
+
+  // Aplica ao escolher data
+  if(__datePopupInput){
+    __datePopupInput.addEventListener("change", ()=>{
+      if(!__datePopupTarget) return;
+      const iso = String(__datePopupInput.value || "");
+      if(!iso) return;
+      const br = __isoToBr2__(iso);
+      __datePopupTarget.value = br;
+      try{
+        // dispara oninput pra atualizar draft
+        __datePopupTarget.dispatchEvent(new Event("input", { bubbles:true }));
+      }catch(e){}
+      // não aplica automaticamente: ENTER ainda aplica (como você já usa)
+      hideDatePickerFilter();
+    });
+  }
+
+  // Reposiciona ao scroll/resize (se estiver aberto)
+  window.addEventListener("scroll", ()=>{ if(__datePopupEl && __datePopupEl.style.display==="block") __repositionDatePopup__(); }, true);
+  window.addEventListener("resize", ()=>{ if(__datePopupEl && __datePopupEl.style.display==="block") __repositionDatePopup__(); }, true);
+}
+
+function __repositionDatePopup__(){
+  try{
+    if(!__datePopupEl || !__datePopupTarget) return;
+    const r = __datePopupTarget.getBoundingClientRect();
+    const pad = 6;
+    const w = 240;
+    const h = 88;
+    let left = Math.min(r.left, window.innerWidth - w - pad);
+    let top = Math.min(r.bottom + 6, window.innerHeight - h - pad);
+    if(left < pad) left = pad;
+    if(top < pad) top = pad;
+    __datePopupEl.style.left = left + "px";
+    __datePopupEl.style.top  = top  + "px";
+  }catch(e){}
+}
+
+function showDatePickerFilter(ev, tableKey, colKey){
+  try{
+    // Só para colunas de data
+    const c = String(colKey||"");
+    if(!(c === DATE_COL || c === EMB_COL || c === LAND_COL)) return;
+
+    __ensureDatePopup__();
+    const el = ev && ev.target ? ev.target : null;
+    if(!el) return;
+
+    __datePopupTarget = el;
+
+    // seta valor do calendário a partir do que estiver digitado (dd/MM/yyyy)
+    const iso = __brToIso__(String(el.value||"").trim());
+    if(__datePopupInput) __datePopupInput.value = iso || "";
+
+    __repositionDatePopup__();
+    __datePopupEl.style.display = "block";
+  }catch(e){}
+}
+function hideDatePickerFilter(){
+  try{
+    if(__datePopupEl) __datePopupEl.style.display = "none";
+    __datePopupTarget = null;
+  }catch(e){}
+}
+
 const EMB_COL = "Data_de_embarque_logistica";
 const LAND_COL = "Data_do_pouso_logistica";
 const STATUS_COL = "Status_material_ferramenta";
@@ -2238,7 +2394,9 @@ function renderTable(tableKey){
       placeholder="filtrar... (ENTER aplica)"
       value="${escapeHtml(getFilterInputValue(tableKey, c))}"
       oninput="setFilterDraft('${tableKey}','${c}',this.value)"
-      onkeydown="if(event.key==='Enter'){applyFilter('${tableKey}','${c}',this.value)}">
+      onkeydown="if(event.key==='Enter'){applyFilter('${tableKey}','${c}',this.value)}"
+      ${(c===DATE_COL || c===EMB_COL || c===LAND_COL) ? `onfocus="showDatePickerFilter(event,\'${tableKey}\',\'${c}\')"` : ""}
+>
     </th>`).join("");
   html += `</tr></thead>`;
 
