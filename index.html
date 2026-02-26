@@ -2408,7 +2408,7 @@ function renderTable(tableKey){
       value="${escapeHtml(getFilterInputValue(tableKey, c))}"
       oninput="setFilterDraft('${tableKey}','${c}',this.value)"
       onkeydown="if(event.key==='Enter'){applyFilter('${tableKey}','${c}',this.value)}"
-      ${(c===DATE_COL || c===EMB_COL || c===LAND_COL) ? `onfocus="showDatePickerFilter(event,\'${tableKey}\',\'${c}\')"` : ""}
+      ${(c===DATE_COL || c===EMB_COL || c===LAND_COL) ? `onfocus="showDatePickerFilter(event,'${tableKey}','${c}')"` : ""}
 >
     </th>`).join("");
   html += `</tr></thead>`;
