@@ -195,6 +195,86 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 .ctxApply{ height:34px; padding:0 12px; border:none; border-radius:10px; background:#0ea5e9; color:#fff; cursor:pointer; font-size:13px; }
 .ctxApply:hover{ filter:brightness(.95); }
 .ctxHint{ margin-top:8px; font-size:12px; color:#64748b; }
+
+/* ===== LINKS: QUADRO (KANBAN) ===== */
+.linkBoard{
+  display:flex; gap:12px; flex-wrap:wrap;
+  margin-top:12px;
+}
+.linkCol{
+  flex:1; min-width:260px;
+  background:#0b1d33;
+  border:1px solid #334155;
+  border-radius:12px;
+  padding:10px;
+}
+.linkColHead{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; margin-bottom:10px;
+  color:#e5e7eb;
+}
+.linkColTitle{
+  font-weight:800; font-size:13px; color:#38bdf8;
+}
+.linkColCount{
+  font-size:12px; color:#94a3b8;
+}
+.linkDropZone{
+  min-height:120px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.linkCard{
+  background:#ffffff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:10px;
+  color:#0f172a;
+  box-shadow:0 6px 14px rgba(15,23,42,.08);
+  cursor:grab;
+}
+.linkCard:active{ cursor:grabbing; }
+.linkCard.dragging{ opacity:.55; }
+.linkCardTop{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.linkCardName{
+  font-weight:800; font-size:12px; color:#0f172a;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:220px;
+}
+.linkCardSite{
+  font-size:11px; color:#64748b;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:220px;
+  margin-top:4px;
+}
+.linkCardActions{
+  display:flex; gap:6px; align-items:center;
+}
+.linkTinyBtn{
+  border:none; background:#0ea5e9; color:#fff;
+  border-radius:8px; padding:6px 8px;
+  cursor:pointer; font-size:12px; line-height:1;
+}
+.linkTinyBtn.gray{ background:#334155; }
+.linkTinyBtn:hover{ filter:brightness(.95); }
+.linkNote{
+  margin-top:8px;
+  width:100%; min-height:56px;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:8px;
+  font-size:12px;
+  resize:vertical;
+  outline:none;
+  white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word;
+}
+.linkNote:focus{ border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.18); }
+.linkCol.dragOver{
+  outline:2px dashed rgba(56,189,248,.8);
+  outline-offset:2px;
+}
+
 </style>
 </head>
 
@@ -344,6 +424,15 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
           onkeydown="if(event.key==='Enter'){addLinkFromInput();}">
       </div>
     </div>
+      <!-- ✅ NOVO: QUADRO PARA CLASSIFICAR LINKS (ARRASTAR E SOLTAR) -->
+      <div class="box" style="margin-top:12px;background:#0f172a;border-color:#334155;color:#e5e7eb">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="font-weight:800;color:#38bdf8">🧩 Classificação de Links</div>
+          <div style="font-size:12px;color:#94a3b8">Arraste os balões para as colunas • Notas ficam salvas no seu navegador</div>
+        </div>
+        <div class="linkBoard" id="linkBoard"></div>
+      </div>
+
   </div>
 
   <div id="avisos" class="section">
@@ -2565,6 +2654,210 @@ async function forceUpdateNow(){
     paintRefreshInfo();
   }
 }
+
+
+/* =========================================================
+   ✅ LINKS: QUADRO (KANBAN) — CLASSIFICAÇÃO LOCAL (SEM BACKEND)
+   - Mantém os links compartilhados do GAS, mas a organização
+     (coluna + nota) fica salva no navegador (localStorage).
+   - Arrastar e soltar entre colunas.
+   ========================================================= */
+const __LINK_BOARD_KEY = "AOG_LINK_BOARD_V1";
+const __LINK_COLS = [
+  { key:"transportadora", title:"Transportadora" },
+  { key:"operacional",    title:"Operacional" },
+  { key:"analise",        title:"Análise" },
+  { key:"sem",            title:"Sem categoria" }
+];
+
+let __linkBoardState = null; // { items: { [id]: { col, note } } }
+
+function __safeJsonParse__(raw, fallback){
+  try{ return JSON.parse(raw); }catch(e){ return fallback; }
+}
+function __loadLinkBoardState__(){
+  if(__linkBoardState) return __linkBoardState;
+  const raw = localStorage.getItem(__LINK_BOARD_KEY);
+  const st = __safeJsonParse__(raw, null);
+  const safe = (st && typeof st === "object") ? st : { items: {} };
+  if(!safe.items || typeof safe.items !== "object") safe.items = {};
+  __linkBoardState = safe;
+  return __linkBoardState;
+}
+function __saveLinkBoardState__(){
+  try{
+    if(!__linkBoardState) return;
+    localStorage.setItem(__LINK_BOARD_KEY, JSON.stringify(__linkBoardState));
+  }catch(e){}
+}
+function __linkIdForStatic__(url){
+  const s = String(url||"");
+  let h = 0;
+  for(let i=0;i<s.length;i++){ h = ((h<<5)-h) + s.charCodeAt(i); h |= 0; }
+  return "static_" + String(Math.abs(h));
+}
+function __getLinkMeta__(id){
+  const st = __loadLinkBoardState__();
+  const rid = String(id||"").trim();
+  if(!rid) return { col:"sem", note:"" };
+  if(!st.items[rid]) st.items[rid] = { col:"sem", note:"" };
+  const it = st.items[rid] || { col:"sem", note:"" };
+  if(!it.col) it.col = "sem";
+  if(typeof it.note !== "string") it.note = String(it.note||"");
+  return it;
+}
+function __setLinkCol__(id, colKey){
+  const st = __loadLinkBoardState__();
+  const rid = String(id||"").trim();
+  if(!rid) return;
+  if(!st.items[rid]) st.items[rid] = { col:"sem", note:"" };
+  st.items[rid].col = String(colKey||"sem");
+  __saveLinkBoardState__();
+}
+function __setLinkNote__(id, note){
+  const st = __loadLinkBoardState__();
+  const rid = String(id||"").trim();
+  if(!rid) return;
+  if(!st.items[rid]) st.items[rid] = { col:"sem", note:"" };
+  st.items[rid].note = String(note||"");
+  __saveLinkBoardState__();
+}
+
+function __buildAllLinksForBoard__(){
+  const list = [];
+
+  (Array.isArray(LINKS_UTEIS) ? LINKS_UTEIS : []).forEach(url=>{
+    const id = __linkIdForStatic__(url);
+    list.push({ id, name: friendlySiteName(url), url, isStatic:true });
+  });
+
+  const shared = (__sharedLinksState && Array.isArray(__sharedLinksState.items)) ? __sharedLinksState.items : [];
+  shared.filter(it => it && !it.deleted && it.url).forEach(it=>{
+    const nm = (it.name && String(it.name).trim()) ? String(it.name).trim() : friendlySiteName(it.url);
+    list.push({ id: String(it.id||""), name: nm, url: String(it.url||""), isStatic:false });
+  });
+
+  const seen = {};
+  const out = [];
+  for(const it of list){
+    const k = String(it.id||"").trim();
+    if(!k || seen[k]) continue;
+    seen[k] = true;
+    out.push(it);
+  }
+  return out;
+}
+
+function __renderLinkBoard__(){
+  const board = document.getElementById("linkBoard");
+  if(!board) return;
+
+  const all = __buildAllLinksForBoard__();
+  const cols = __LINK_COLS.slice();
+  const byCol = {};
+  cols.forEach(c=> byCol[c.key] = []);
+  all.forEach(it=>{
+    const meta = __getLinkMeta__(it.id);
+    const ck = (meta && meta.col) ? meta.col : "sem";
+    if(!byCol[ck]) byCol[ck] = [];
+    byCol[ck].push(it);
+  });
+
+  Object.keys(byCol).forEach(k=>{
+    byCol[k].sort((a,b)=> String(a.name||"").localeCompare(String(b.name||"")));
+  });
+
+  board.innerHTML = cols.map(c=>`
+    <div class="linkCol" id="linkCol-${c.key}" data-col="${c.key}">
+      <div class="linkColHead">
+        <div class="linkColTitle">${escapeHtml(c.title)}</div>
+        <div class="linkColCount">${(byCol[c.key]||[]).length}</div>
+      </div>
+      <div class="linkDropZone" id="linkDrop-${c.key}" data-col="${c.key}"></div>
+    </div>
+  `).join("");
+
+  cols.forEach(c=>{
+    const zone = document.getElementById(`linkDrop-${c.key}`);
+    if(!zone) return;
+
+    zone.addEventListener("dragover", (ev)=>{
+      ev.preventDefault();
+      const colEl = document.getElementById(`linkCol-${c.key}`);
+      if(colEl) colEl.classList.add("dragOver");
+    });
+    zone.addEventListener("dragleave", ()=>{
+      const colEl = document.getElementById(`linkCol-${c.key}`);
+      if(colEl) colEl.classList.remove("dragOver");
+    });
+    zone.addEventListener("drop", (ev)=>{
+      ev.preventDefault();
+      const colEl = document.getElementById(`linkCol-${c.key}`);
+      if(colEl) colEl.classList.remove("dragOver");
+      const rid = String(ev.dataTransfer.getData("text/plain") || "").trim();
+      if(!rid) return;
+      __setLinkCol__(rid, c.key);
+      __renderLinkBoard__();
+    });
+
+    const items = byCol[c.key] || [];
+    items.forEach(it=>{
+      const meta = __getLinkMeta__(it.id);
+      const card = document.createElement("div");
+      card.className = "linkCard";
+      card.setAttribute("draggable","true");
+      card.dataset.id = String(it.id||"");
+
+      const openUrl = String(it.url||"").replace(/'/g, "%27");
+      card.innerHTML = `
+        <div class="linkCardTop">
+          <div style="min-width:0;flex:1">
+            <div class="linkCardName" title="${escapeHtml(it.name||"")}">${escapeHtml(it.name||"")}</div>
+            <div class="linkCardSite" title="${escapeHtml(it.url||"")}">${escapeHtml(friendlySiteName(it.url||""))}</div>
+          </div>
+          <div class="linkCardActions">
+            <button class="linkTinyBtn gray" type="button" title="Abrir link" onclick="window.open('${escapeHtml(it.url||"")}','_blank','noopener');">↗</button>
+            ${it.isStatic ? "" : `<button class="linkTinyBtn" type="button" title="Excluir link" onclick="deleteSharedLinkById_('${escapeHtml(it.id)}','${escapeHtml(it.name||"")}','${escapeHtml(it.url||"")}')">×</button>`}
+          </div>
+        </div>
+        <textarea class="linkNote" placeholder="Anotações / detalhes..." data-id="${escapeHtml(it.id)}">${escapeHtml(meta.note||"")}</textarea>
+      `;
+
+      card.addEventListener("dragstart", (ev)=>{
+        card.classList.add("dragging");
+        ev.dataTransfer.setData("text/plain", String(it.id||""));
+        ev.dataTransfer.effectAllowed = "move";
+      });
+      card.addEventListener("dragend", ()=>{ card.classList.remove("dragging"); });
+
+      const ta = card.querySelector("textarea.linkNote");
+      if(ta){
+        let t = null;
+        ta.addEventListener("input", ()=>{
+          const v = ta.value;
+          if(t) clearTimeout(t);
+          t = setTimeout(()=>{ __setLinkNote__(it.id, v); }, 350);
+        });
+      }
+
+      zone.appendChild(card);
+    });
+  });
+}
+
+// Hook: mantém renderLinksUteis original e adiciona o quadro
+(function __hookLinksBoardRender__(){
+  if(window.__LINK_BOARD_HOOKED__) return;
+  window.__LINK_BOARD_HOOKED__ = true;
+
+  const __origRenderLinksUteis = (typeof renderLinksUteis === "function") ? renderLinksUteis : null;
+
+  window.renderLinksUteis = function(){
+    try{ if(__origRenderLinksUteis) __origRenderLinksUteis(); }catch(e){}
+    try{ __renderLinkBoard__(); }catch(e){}
+  };
+})();
+
 
 /* ===== LINKS ===== */
 const LINKS_UTEIS = [];
