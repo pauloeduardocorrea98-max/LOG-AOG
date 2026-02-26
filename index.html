@@ -719,6 +719,8 @@ const DATE_COL = "Data_da_solicitacao";
 let __datePopupEl = null;
 let __datePopupInput = null;
 let __datePopupTarget = null;
+let __datePopupTableKey = null;
+let __datePopupColKey = null;
 
 function __pad2__(n){ return String(n).padStart(2,"0"); }
 function __fmtDateBR__(d){
@@ -774,13 +776,21 @@ function __ensureDatePopup__(){
       if(!__datePopupTarget) return;
       const iso = String(__datePopupInput.value || "");
       if(!iso) return;
+
       const br = __isoToBr2__(iso);
       __datePopupTarget.value = br;
+
+      // ✅ mantém digitação manual possível, mas ao escolher no calendário:
+      // 1) atualiza o draft (oninput)
+      try{ __datePopupTarget.dispatchEvent(new Event("input", { bubbles:true })); }catch(e){}
+
+      // 2) aplica o filtro imediatamente (sem precisar apertar ENTER)
       try{
-        // dispara oninput pra atualizar draft
-        __datePopupTarget.dispatchEvent(new Event("input", { bubbles:true }));
+        const tk = String(__datePopupTableKey || "").toLowerCase();
+        const col = String(__datePopupColKey || "");
+        if(tk && col) applyFilter(tk, col, br);
       }catch(e){}
-      // não aplica automaticamente: ENTER ainda aplica (como você já usa)
+
       hideDatePickerFilter();
     });
   }
@@ -817,6 +827,9 @@ function showDatePickerFilter(ev, tableKey, colKey){
     if(!el) return;
 
     __datePopupTarget = el;
+
+    __datePopupTableKey = String(tableKey||"").toLowerCase();
+    __datePopupColKey = String(colKey||"");
 
     // seta valor do calendário a partir do que estiver digitado (dd/MM/yyyy)
     const iso = __brToIso__(String(el.value||"").trim());
