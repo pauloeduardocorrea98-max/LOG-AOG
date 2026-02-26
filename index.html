@@ -281,36 +281,24 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
 }
 
 
-/* ✅ Date picker flutuante (filtro de DATA) */
-.datePopup{
-  position:fixed;
-  z-index:10050;
-  background:#ffffff;
-  border:1px solid #e5e7eb;
-  border-radius:10px;
-  padding:8px;
-  box-shadow:0 18px 40px rgba(15, 23, 42, .18);
-  display:none;
-}
-.datePopup .dateHead{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  margin-bottom:6px; color:#0f172a; font-size:12px;
-}
-.datePopup .dateBtn{
-  border:none; background:#111827; color:#fff; border-radius:999px;
-  width:22px; height:22px; cursor:pointer; line-height:22px;
-}
-.datePopup input[type="date"]{
-  width:220px;
-  padding:8px;
-  border:1px solid #e5e7eb;
-  border-radius:10px;
-  outline:none;
-}
-.datePopup input[type="date"]:focus{
-  border-color:#38bdf8;
-  box-shadow:0 0 0 3px rgba(56,189,248,.18);
-}
+
+
+/* ✅ Calendário interativo (grid) para filtros de DATA */
+.datePopup{ position:fixed; z-index:10050; background:#ffffff; border:1px solid #e5e7eb; border-radius:12px;
+  padding:10px; box-shadow:0 18px 40px rgba(15, 23, 42, .18); display:none; width:270px; color:#0f172a; }
+.datePopup .dateHead{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+.datePopup .dateHead .ttl{ font-size:12px; color:#334155; }
+.datePopup .dateNav{ display:flex; gap:6px; align-items:center; }
+.datePopup .dateBtn{ border:none; background:#111827; color:#fff; border-radius:999px; width:26px; height:26px; cursor:pointer; line-height:26px; }
+.datePopup .dateYM{ font-weight:800; font-size:13px; color:#0f172a; min-width:120px; text-align:center; }
+.datePopup .dateGrid{ display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; }
+.datePopup .dow{ font-size:11px; color:#64748b; text-align:center; padding:2px 0; }
+.datePopup .day{ border:1px solid #e5e7eb; background:#f8fafc; border-radius:10px; padding:6px 0;
+  font-size:12px; cursor:pointer; text-align:center; }
+.datePopup .day:hover{ filter:brightness(.98); box-shadow:0 0 0 3px rgba(56,189,248,.18); border-color:#38bdf8; }
+.datePopup .day.muted{ opacity:.35; cursor:default; }
+.datePopup .day.today{ border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.14); }
+.datePopup .day.sel{ border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.18); background:#ecfeff; }
 
 </style>
 </head>
@@ -710,92 +698,94 @@ function buildFilterToken(input){
 
 const DATE_COL = "Data_da_solicitacao";
 
+}
+
+const EMB_COL = "Data_de_embarque_logistica";
+const LAND_COL = "Data_do_pouso_logistica";
+
 /* =========================================================
-   ✅ Date picker (filtro de DATA)
-   - Ao focar no filtro de Data/Embarque/Pouso, mostra calendário
+   ✅ Calendário interativo (grid) — filtro de DATA
+   - Abre ao focar no filtro de Data/Embarque/Pouso
    - Usuário ainda pode digitar manualmente no input
-   - Selecionar no calendário escreve dd/MM/yyyy no campo
+   - Clique em um dia => preenche dd/MM/yyyy e aplica o filtro na hora
    ========================================================= */
 let __datePopupEl = null;
-let __datePopupInput = null;
 let __datePopupTarget = null;
 let __datePopupTableKey = null;
 let __datePopupColKey = null;
 
+let __calYear = null;
+let __calMonth = null; // 0-11
+let __calSelectedIso = ""; // yyyy-mm-dd
+
 function __pad2__(n){ return String(n).padStart(2,"0"); }
-function __fmtDateBR__(d){
-  try{ return `${__pad2__(d.getDate())}/${__pad2__(d.getMonth()+1)}/${d.getFullYear()}`; }
-  catch(e){ return ""; }
+function __isoFromYMD__(y,m0,d){ return `${y}-${__pad2__(m0+1)}-${__pad2__(d)}`; }
+function __brFromIso__(iso){
+  const m = String(iso||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m) return "";
+  return `${m[3]}/${m[2]}/${m[1]}`.replace(/\//g,"/"); // dd/MM/yyyy (mantém)
 }
-function __brToIso__(br){
+function __brFromIso2__(iso){
+  const m = String(iso||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m) return "";
+  return `${m[3]}/${m[2]}/${m[1]}`; // dd/MM/yyyy
+}
+function __isoFromBr__(br){
   const s = String(br||"").trim();
   const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
   if(!m) return "";
   return `${m[3]}-${m[2]}-${m[1]}`;
 }
-function __isoToBr__(iso){
-  const s = String(iso||"").trim();
-  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if(!m) return "";
-  return `${m[3]}/${m[2]}/${m[1]}`.replace(/\//g,"/"); // mantém dd/MM/yyyy
+function __monthNamePt__(m0){
+  const names = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  return names[m0] || "";
 }
-function __isoToBr2__(iso){
-  const s = String(iso||"").trim();
-  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if(!m) return "";
-  return `${m[3]}/${m[2]}/${m[1]}`; // dd/MM/yyyy
-}
+
 function __ensureDatePopup__(){
   if(__datePopupEl) return;
+
   const box = document.createElement("div");
   box.className = "datePopup";
   box.id = "datePopup";
   box.innerHTML = `
     <div class="dateHead">
-      <div><b>Calendário</b></div>
-      <button class="dateBtn" type="button" title="Fechar">×</button>
+      <div class="ttl"><b>Calendário</b></div>
+      <div class="dateNav">
+        <button class="dateBtn" type="button" id="calPrev" title="Mês anterior">‹</button>
+        <div class="dateYM" id="calYM">—</div>
+        <button class="dateBtn" type="button" id="calNext" title="Próximo mês">›</button>
+        <button class="dateBtn" type="button" id="calClose" title="Fechar">×</button>
+      </div>
     </div>
-    <input id="datePopupInput" type="date" />
+    <div class="dateGrid" id="calGrid"></div>
   `;
   document.body.appendChild(box);
   __datePopupEl = box;
-  __datePopupInput = document.getElementById("datePopupInput");
 
-  const btn = box.querySelector(".dateBtn");
-  if(btn) btn.onclick = ()=>{ hideDatePickerFilter(); };
-
-  // Não deixar clique dentro fechar
+  // Não fechar ao clicar dentro
   box.addEventListener("mousedown", (e)=>{ e.stopPropagation(); }, true);
 
   // Fecha ao clicar fora
   document.addEventListener("mousedown", ()=>{ hideDatePickerFilter(); }, true);
 
-  // Aplica ao escolher data
-  if(__datePopupInput){
-    __datePopupInput.addEventListener("change", ()=>{
-      if(!__datePopupTarget) return;
-      const iso = String(__datePopupInput.value || "");
-      if(!iso) return;
+  const prev = document.getElementById("calPrev");
+  const next = document.getElementById("calNext");
+  const close = document.getElementById("calClose");
+  if(close) close.onclick = ()=> hideDatePickerFilter();
 
-      const br = __isoToBr2__(iso);
-      __datePopupTarget.value = br;
+  if(prev) prev.onclick = ()=>{
+    if(__calYear == null || __calMonth == null) return;
+    __calMonth -= 1;
+    if(__calMonth < 0){ __calMonth = 11; __calYear -= 1; }
+    __renderCalendarGrid__();
+  };
+  if(next) next.onclick = ()=>{
+    if(__calYear == null || __calMonth == null) return;
+    __calMonth += 1;
+    if(__calMonth > 11){ __calMonth = 0; __calYear += 1; }
+    __renderCalendarGrid__();
+  };
 
-      // ✅ mantém digitação manual possível, mas ao escolher no calendário:
-      // 1) atualiza o draft (oninput)
-      try{ __datePopupTarget.dispatchEvent(new Event("input", { bubbles:true })); }catch(e){}
-
-      // 2) aplica o filtro imediatamente (sem precisar apertar ENTER)
-      try{
-        const tk = String(__datePopupTableKey || "").toLowerCase();
-        const col = String(__datePopupColKey || "");
-        if(tk && col) applyFilter(tk, col, br);
-      }catch(e){}
-
-      hideDatePickerFilter();
-    });
-  }
-
-  // Reposiciona ao scroll/resize (se estiver aberto)
   window.addEventListener("scroll", ()=>{ if(__datePopupEl && __datePopupEl.style.display==="block") __repositionDatePopup__(); }, true);
   window.addEventListener("resize", ()=>{ if(__datePopupEl && __datePopupEl.style.display==="block") __repositionDatePopup__(); }, true);
 }
@@ -804,9 +794,9 @@ function __repositionDatePopup__(){
   try{
     if(!__datePopupEl || !__datePopupTarget) return;
     const r = __datePopupTarget.getBoundingClientRect();
-    const pad = 6;
-    const w = 240;
-    const h = 88;
+    const pad = 8;
+    const w = 270;
+    const h = 320;
     let left = Math.min(r.left, window.innerWidth - w - pad);
     let top = Math.min(r.bottom + 6, window.innerHeight - h - pad);
     if(left < pad) left = pad;
@@ -816,9 +806,68 @@ function __repositionDatePopup__(){
   }catch(e){}
 }
 
+function __renderCalendarGrid__(){
+  try{
+    const grid = document.getElementById("calGrid");
+    const ym = document.getElementById("calYM");
+    if(!grid || !ym || __calYear == null || __calMonth == null) return;
+
+    ym.textContent = `${__monthNamePt__(__calMonth)} ${__calYear}`;
+
+    // cabeçalho dias da semana
+    const dows = ["D","S","T","Q","Q","S","S"];
+    let html = dows.map(d=>`<div class="dow">${d}</div>`).join("");
+
+    const first = new Date(__calYear, __calMonth, 1);
+    const startDow = first.getDay(); // 0=Dom
+
+    const daysInMonth = new Date(__calYear, __calMonth+1, 0).getDate();
+    const today = new Date();
+    const todayIso = __isoFromYMD__(today.getFullYear(), today.getMonth(), today.getDate());
+
+    // espaços antes do dia 1
+    for(let i=0;i<startDow;i++){
+      html += `<div class="day muted"> </div>`;
+    }
+
+    for(let d=1; d<=daysInMonth; d++){
+      const iso = __isoFromYMD__(__calYear, __calMonth, d);
+      const isToday = (iso === todayIso);
+      const isSel = (__calSelectedIso && iso === __calSelectedIso);
+      html += `<div class="day ${isToday ? "today" : ""} ${isSel ? "sel" : ""}" data-iso="${iso}">${d}</div>`;
+    }
+
+    grid.innerHTML = html;
+
+    // binds clique dia
+    const cells = grid.querySelectorAll(".day[data-iso]");
+    cells.forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const iso = el.getAttribute("data-iso");
+        if(!iso) return;
+        __calSelectedIso = iso;
+
+        const br = __brFromIso2__(iso);
+        if(__datePopupTarget){
+          __datePopupTarget.value = br;
+          try{ __datePopupTarget.dispatchEvent(new Event("input", { bubbles:true })); }catch(e){}
+        }
+
+        // aplica imediatamente
+        try{
+          const tk = String(__datePopupTableKey || "").toLowerCase();
+          const col = String(__datePopupColKey || "");
+          if(tk && col) applyFilter(tk, col, br);
+        }catch(e){}
+
+        hideDatePickerFilter();
+      });
+    });
+  }catch(e){}
+}
+
 function showDatePickerFilter(ev, tableKey, colKey){
   try{
-    // Só para colunas de data
     const c = String(colKey||"");
     if(!(c === DATE_COL || c === EMB_COL || c === LAND_COL)) return;
 
@@ -827,27 +876,31 @@ function showDatePickerFilter(ev, tableKey, colKey){
     if(!el) return;
 
     __datePopupTarget = el;
-
     __datePopupTableKey = String(tableKey||"").toLowerCase();
     __datePopupColKey = String(colKey||"");
 
-    // seta valor do calendário a partir do que estiver digitado (dd/MM/yyyy)
-    const iso = __brToIso__(String(el.value||"").trim());
-    if(__datePopupInput) __datePopupInput.value = iso || "";
+    // define mês/ano inicial (do valor digitado ou do hoje)
+    const isoFromField = __isoFromBr__(String(el.value||"").trim());
+    const base = isoFromField ? new Date(isoFromField + "T00:00:00") : new Date();
+    __calYear = base.getFullYear();
+    __calMonth = base.getMonth();
+    __calSelectedIso = isoFromField || "";
 
     __repositionDatePopup__();
     __datePopupEl.style.display = "block";
+    __renderCalendarGrid__();
   }catch(e){}
 }
+
 function hideDatePickerFilter(){
   try{
     if(__datePopupEl) __datePopupEl.style.display = "none";
     __datePopupTarget = null;
+    __datePopupTableKey = null;
+    __datePopupColKey = null;
   }catch(e){}
 }
 
-const EMB_COL = "Data_de_embarque_logistica";
-const LAND_COL = "Data_do_pouso_logistica";
 const STATUS_COL = "Status_material_ferramenta";
 const AIR_COL = "Aeronave";
 const SOL_COL = "Numero_de_solicitacao";
