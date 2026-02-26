@@ -280,60 +280,6 @@ th{ background:#f1f5f9; position:sticky; top:0; z-index:2; }
   outline-offset:2px;
 }
 
-
-/* ===== DATE PICKER (FILTRO POR CALENDÁRIO) ===== */
-.datePickerPop{
-  position:fixed; z-index:9998; display:none;
-  background:#ffffff; color:#0f172a;
-  border:1px solid #e5e7eb; border-radius:12px;
-  box-shadow:0 18px 40px rgba(15, 23, 42, .18);
-  width:260px;
-}
-.datePickerHead{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:10px 10px 6px 10px;
-  border-bottom:1px solid #e5e7eb;
-}
-.datePickerTitle{
-  font-weight:800; font-size:13px; color:#0f172a;
-}
-.datePickerNav{
-  display:flex; gap:6px; align-items:center;
-}
-.datePickerBtn{
-  height:28px; width:28px;
-  border:1px solid #e5e7eb; background:#f8fafc;
-  border-radius:8px; cursor:pointer;
-}
-.datePickerBtn:hover{ filter:brightness(.98); }
-.datePickerBody{ padding:10px; }
-.datePickerDow{
-  display:grid; grid-template-columns:repeat(7, 1fr);
-  gap:6px; font-size:11px; color:#64748b; margin-bottom:8px;
-}
-.datePickerGrid{
-  display:grid; grid-template-columns:repeat(7, 1fr);
-  gap:6px;
-}
-.datePickerDay{
-  height:30px; border:1px solid #e5e7eb; background:#fff;
-  border-radius:8px; cursor:pointer;
-  font-size:12px;
-}
-.datePickerDay:hover{ background:#eff6ff; border-color:#93c5fd; }
-.datePickerDay.muted{ color:#94a3b8; background:#f8fafc; }
-.datePickerDay.sel{ background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
-.datePickerFoot{
-  display:flex; gap:8px; align-items:center; justify-content:space-between;
-  padding:0 10px 10px 10px;
-}
-.datePickerFoot .mini{
-  border:none; background:#334155; color:#fff;
-  border-radius:10px; padding:8px 10px; cursor:pointer; font-size:12px;
-}
-.datePickerFoot .mini.primary{ background:#0ea5e9; }
-.datePickerFoot .mini:hover{ filter:brightness(.95); }
-
 </style>
 </head>
 
@@ -738,229 +684,6 @@ const AIR_COL = "Aeronave";
 const SOL_COL = "Numero_de_solicitacao";
 const TYPE_COL = "Tipo";
 
-/* =========================================================
-   DATE PICKER (filtro por calendário)
-   - Clicar no campo de filtro de data abre um calendário (dias do mês)
-   - Clicar em um dia -> preenche dd/MM/yyyy e aplica o filtro na hora
-   - Usuário ainda pode digitar manualmente e apertar ENTER
-   ========================================================= */
-const __DP__ = {
-  open:false, tableKey:"", colKey:"", anchor:null,
-  year:null, month:null, // month: 0..11
-  selected:null
-};
-
-function __dpEnsureEl__(){
-  let el = document.getElementById("datePickerPop");
-  if(el) return el;
-  el = document.createElement("div");
-  el.id = "datePickerPop";
-  el.className = "datePickerPop";
-  el.innerHTML = `
-    <div class="datePickerHead">
-      <div class="datePickerTitle" id="dpTitle">Calendário</div>
-      <div class="datePickerNav">
-        <button class="datePickerBtn" type="button" id="dpPrev" title="Mês anterior">‹</button>
-        <button class="datePickerBtn" type="button" id="dpNext" title="Próximo mês">›</button>
-        <button class="datePickerBtn" type="button" id="dpClose" title="Fechar">×</button>
-      </div>
-    </div>
-    <div class="datePickerBody">
-      <div class="datePickerDow">
-        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-      </div>
-      <div class="datePickerGrid" id="dpGrid"></div>
-    </div>
-    <div class="datePickerFoot">
-      <button class="mini" type="button" id="dpClear">Limpar</button>
-      <button class="mini primary" type="button" id="dpToday">Hoje</button>
-    </div>
-  `;
-  document.body.appendChild(el);
-
-  // handlers
-  el.querySelector("#dpPrev").addEventListener("click", ()=>{ __dpShiftMonth__(-1); });
-  el.querySelector("#dpNext").addEventListener("click", ()=>{ __dpShiftMonth__(+1); });
-  el.querySelector("#dpClose").addEventListener("click", ()=>{ closeDatePicker(); });
-  el.querySelector("#dpClear").addEventListener("click", ()=>{ __dpClearAndApply__(); });
-  el.querySelector("#dpToday").addEventListener("click", ()=>{ __dpPickDate__(new Date()); });
-
-  // click fora fecha
-  document.addEventListener("mousedown", (ev)=>{
-    if(!__DP__.open) return;
-    const pop = document.getElementById("datePickerPop");
-    if(!pop) return;
-    if(pop.contains(ev.target)) return;
-    if(__DP__.anchor && (__DP__.anchor === ev.target || __DP__.anchor.contains(ev.target))) return;
-    closeDatePicker();
-  }, true);
-
-  // ESC fecha
-  document.addEventListener("keydown", (ev)=>{
-    if(!__DP__.open) return;
-    if(ev.key === "Escape") closeDatePicker();
-  });
-
-  return el;
-}
-
-function __dpMonthName__(y,m){
-  try{
-    const d = new Date(y, m, 1);
-    return d.toLocaleDateString("pt-BR", { month:"long", year:"numeric" });
-  }catch(e){
-    return `${m+1}/${y}`;
-  }
-}
-
-function __dpParseBR__(s){
-  const t = String(s||"").trim();
-  const m = t.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if(!m) return null;
-  const dd = Number(m[1]), mm = Number(m[2]), yy = Number(m[3]);
-  const d = new Date(yy, mm-1, dd);
-  if(isNaN(d.getTime())) return null;
-  return d;
-}
-function __dpFmtBR__(d){
-  const pad = n => String(n).padStart(2,"0");
-  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
-}
-
-function openDatePicker(ev, tableKey, colKey){
-  try{
-    if(ev && ev.preventDefault) ev.preventDefault();
-    if(ev && ev.stopPropagation) ev.stopPropagation();
-  }catch(e){}
-
-  const anchor = ev && ev.target ? ev.target : null;
-  if(!anchor) return;
-
-  const pop = __dpEnsureEl__();
-
-  __DP__.open = true;
-  __DP__.tableKey = String(tableKey||"").toLowerCase();
-  __DP__.colKey = String(colKey||"");
-  __DP__.anchor = anchor;
-
-  // mês/ano base
-  const cur = __dpParseBR__(anchor.value);
-  const base = cur || new Date();
-  __DP__.year = base.getFullYear();
-  __DP__.month = base.getMonth();
-  __DP__.selected = cur ? cur : null;
-
-  // posiciona
-  const r = anchor.getBoundingClientRect();
-  const vw = window.innerWidth, vh = window.innerHeight;
-  const w = 260, h = 310;
-  let left = Math.min(r.left, vw - w - 10);
-  let top  = Math.min(r.bottom + 6, vh - h - 10);
-  if(left < 10) left = 10;
-  if(top < 10) top = 10;
-  pop.style.left = left + "px";
-  pop.style.top  = top + "px";
-  pop.style.display = "block";
-
-  __dpRender__();
-}
-
-function closeDatePicker(){
-  __DP__.open = false;
-  __DP__.anchor = null;
-  const pop = document.getElementById("datePickerPop");
-  if(pop) pop.style.display = "none";
-}
-
-function __dpShiftMonth__(delta){
-  let y = Number(__DP__.year || new Date().getFullYear());
-  let m = Number(__DP__.month || 0) + Number(delta||0);
-  while(m < 0){ m += 12; y -= 1; }
-  while(m > 11){ m -= 12; y += 1; }
-  __DP__.year = y; __DP__.month = m;
-  __dpRender__();
-}
-
-function __dpRender__(){
-  const pop = document.getElementById("datePickerPop");
-  if(!pop) return;
-  const title = pop.querySelector("#dpTitle");
-  if(title) title.textContent = __dpMonthName__(__DP__.year, __DP__.month);
-
-  const grid = pop.querySelector("#dpGrid");
-  if(!grid) return;
-  grid.innerHTML = "";
-
-  const y = __DP__.year, m = __DP__.month;
-  const first = new Date(y, m, 1);
-  const firstDow = first.getDay(); // 0=Dom
-  const daysInMonth = new Date(y, m+1, 0).getDate();
-
-  // dias do mês anterior para preencher a primeira semana
-  const prevDays = new Date(y, m, 0).getDate();
-  const totalCells = 42; // 6 semanas
-  const sel = __DP__.selected ? __dpFmtBR__(__DP__.selected) : "";
-
-  for(let i=0;i<totalCells;i++){
-    const cellIndex = i - firstDow + 1;
-    let d, inMonth = true;
-    if(cellIndex < 1){
-      inMonth = false;
-      d = new Date(y, m-1, prevDays + cellIndex);
-    }else if(cellIndex > daysInMonth){
-      inMonth = false;
-      d = new Date(y, m+1, cellIndex - daysInMonth);
-    }else{
-      d = new Date(y, m, cellIndex);
-    }
-
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "datePickerDay" + (inMonth ? "" : " muted");
-    btn.textContent = String(d.getDate());
-
-    const fmt = __dpFmtBR__(d);
-    if(sel && fmt === sel) btn.classList.add("sel");
-
-    btn.addEventListener("click", ()=>{
-      __dpPickDate__(d);
-    });
-
-    grid.appendChild(btn);
-  }
-}
-
-function __dpApplyValue__(value){
-  const tk = __DP__.tableKey;
-  const col = __DP__.colKey;
-  const anchor = __DP__.anchor;
-
-  // atualiza input visível
-  try{
-    if(anchor) anchor.value = String(value || "");
-  }catch(e){}
-
-  // aplica filtro (mesma função existente)
-  try{
-    applyFilter(tk, col, String(value || ""));
-  }catch(e){}
-}
-
-function __dpPickDate__(d){
-  if(!d) return;
-  __DP__.selected = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const val = __dpFmtBR__(__DP__.selected);
-  __dpApplyValue__(val);
-  closeDatePicker();
-}
-
-function __dpClearAndApply__(){
-  __DP__.selected = null;
-  __dpApplyValue__("");
-  closeDatePicker();
-}
-
-
 function hasCargasKeyword(text){
   return normalizeText(text || "").includes("carga");
 }
@@ -1291,12 +1014,14 @@ function prepareDataCache(){
     __pushAirId__("cargo", r);
     __pushSolId__("cargo", r);
 
-    // ✅ NOVA ABA: MRO (mesma regra do Cargo Heroes)
-    out.mro.push(r);
-    __pushAirId__("mro", r);
-    __pushSolId__("mro", r);
-
-    // ✅ NOVA ABA: Acompanhamento (mesma regra do Cargo Heroes)
+    // ✅ NOVA ABA: MRO (mesma regra do Cargo Heroes) — mas filtra Base == "MRO"
+    const __baseMro = normalizeText((r["Base"] ?? r["BASE"] ?? "").toString());
+    if(__baseMro === "mro"){
+      out.mro.push(r);
+      __pushAirId__("mro", r);
+      __pushSolId__("mro", r);
+    }
+// ✅ NOVA ABA: Acompanhamento (mesma regra do Cargo Heroes)
     out.acompanhamento.push(r);
     __pushAirId__("acompanhamento", r);
     __pushSolId__("acompanhamento", r);
@@ -2510,17 +2235,13 @@ function renderTable(tableKey){
   html += `</tr></thead>`;
 
   html += `<thead class="filterRow"><tr><th></th>`;
-  html += cols.map(c=>{
-    const isDateCol = (c===DATE_COL || c===EMB_COL || c===LAND_COL);
-    const dp = isDateCol ? ` onfocus="openDatePicker(event,'${tableKey}','${c}')" onclick="openDatePicker(event,'${tableKey}','${c}')"` : "";
-    return `
+  html += cols.map(c=>`
     <th><input class="filter"
       placeholder="filtrar... (ENTER aplica)"
       value="${escapeHtml(getFilterInputValue(tableKey, c))}"
       oninput="setFilterDraft('${tableKey}','${c}',this.value)"
-      onkeydown="if(event.key==='Enter'){applyFilter('${tableKey}','${c}',this.value)}"${dp}>
-    </th>`;
-  }).join("");
+      onkeydown="if(event.key==='Enter'){applyFilter('${tableKey}','${c}',this.value)}">
+    </th>`).join("");
   html += `</tr></thead>`;
 
   html += `<tbody>`;
