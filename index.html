@@ -2920,14 +2920,51 @@ async function syncSharedLinks(){
 async function deleteSharedLinkById_(id, label, url){
   const rid = String(id || "").trim();
   if(!rid) return;
-  if(!confirm(`Excluir este link?\n\n${label || ""}\n${url || ""}`)) return;
+  if(!confirm(`Excluir este link?
+
+${label || ""}
+${url || ""}`)) return;
+
+  // ✅ Otimista: remove na hora no UI de quem clicou
+  let snap = null;
+  try{
+    if(__sharedLinksState && Array.isArray(__sharedLinksState.items)){
+      const it = __sharedLinksState.items.find(x => x && String(x.id||"").trim() === rid);
+      if(it){
+        try{ snap = JSON.parse(JSON.stringify(it)); }catch(e){ snap = Object.assign({}, it); }
+        it.deleted = true;
+        it.deletedAt = new Date().toISOString();
+      }
+    }
+  }catch(e){}
+
+  try{ renderLinksUteis(); }catch(e){}
+
   try{
     let st = null;
     try { st = await gasCall("deleteSharedLink", rid); }
-    catch(e1){ try { st = await gasCall("deleteSharedLinkItem", rid); } catch(e2){ try { st = await gasCall("deleteLink", rid); } catch(e3){ throw e1; } } }
+    catch(e1){
+      try { st = await gasCall("deleteSharedLinkItem", rid); }
+      catch(e2){
+        try { st = await gasCall("deleteLink", rid); }
+        catch(e3){ throw e1; }
+      }
+    }
+
     __sharedLinksState = st || __sharedLinksState;
     renderLinksUteis();
   }catch(err){
+    // rollback local (só para quem clicou)
+    try{
+      if(snap){
+        if(!__sharedLinksState) __sharedLinksState = { items: [] };
+        if(!Array.isArray(__sharedLinksState.items)) __sharedLinksState.items = [];
+        const idx = __sharedLinksState.items.findIndex(x => x && String(x.id||"").trim() === rid);
+        if(idx >= 0) __sharedLinksState.items[idx] = snap;
+        else __sharedLinksState.items.unshift(snap);
+        renderLinksUteis();
+      }
+    }catch(e2){}
     console.error("Falha ao excluir link:", err);
     alert("Não foi possível excluir o link.");
   }
@@ -3079,11 +3116,69 @@ async function toggleDone(kind, id){
   }catch(e){}
 }
 async function deleteItem(kind, id){
+  // ✅ Otimista: some na hora para quem clicou (sem esperar o GAS),
+  // mantendo o compartilhamento (os outros vão ver no sync/refresh).
+  const rid = String(id||"").trim();
+  if(!rid) return;
+
+  // snapshot p/ rollback se falhar
+  let snap = null;
   try{
-    if(kind === "turno"){ const st = await gasCall("deleteSharedTurnoItem", id); __sharedTurnoState = st || __sharedTurnoState; }
-    else{ const st = await gasCall("deleteSharedAvisoItem", id); __sharedAvisosState = st || __sharedAvisosState; }
-    renderSharedList(kind);
+    if(kind === "turno"){
+      if(__sharedTurnoState && Array.isArray(__sharedTurnoState.items)){
+        const it = __sharedTurnoState.items.find(x => x && x.id === rid);
+        if(it){
+          try{ snap = { kind:"turno", item: JSON.parse(JSON.stringify(it)) }; }catch(e){ snap = { kind:"turno", item: Object.assign({}, it) }; }
+          it.deleted = true;
+          it.deletedAt = new Date().toISOString();
+        }
+      }
+    }else{
+      if(__sharedAvisosState && Array.isArray(__sharedAvisosState.items)){
+        const it = __sharedAvisosState.items.find(x => x && x.id === rid);
+        if(it){
+          try{ snap = { kind:"avisos", item: JSON.parse(JSON.stringify(it)) }; }catch(e){ snap = { kind:"avisos", item: Object.assign({}, it) }; }
+          it.deleted = true;
+          it.deletedAt = new Date().toISOString();
+        }
+      }
+    }
   }catch(e){}
+
+  // some imediatamente no UI
+  try{ renderSharedList(kind); }catch(e){}
+
+  // chamada real ao GAS
+  try{
+    if(kind === "turno"){
+      const st = await gasCall("deleteSharedTurnoItem", rid);
+      __sharedTurnoState = st || __sharedTurnoState;
+    }else{
+      const st = await gasCall("deleteSharedAvisoItem", rid);
+      __sharedAvisosState = st || __sharedAvisosState;
+    }
+    renderSharedList(kind);
+  }catch(e){
+    // rollback (mantém o item visível de volta, só para quem clicou)
+    try{
+      if(snap && snap.item){
+        if(snap.kind === "turno"){
+          if(!__sharedTurnoState) __sharedTurnoState = { items: [] };
+          if(!Array.isArray(__sharedTurnoState.items)) __sharedTurnoState.items = [];
+          const idx = __sharedTurnoState.items.findIndex(x => x && x.id === rid);
+          if(idx >= 0) __sharedTurnoState.items[idx] = snap.item;
+          else __sharedTurnoState.items.unshift(snap.item);
+        }else{
+          if(!__sharedAvisosState) __sharedAvisosState = { items: [] };
+          if(!Array.isArray(__sharedAvisosState.items)) __sharedAvisosState.items = [];
+          const idx = __sharedAvisosState.items.findIndex(x => x && x.id === rid);
+          if(idx >= 0) __sharedAvisosState.items[idx] = snap.item;
+          else __sharedAvisosState.items.unshift(snap.item);
+        }
+        renderSharedList(kind);
+      }
+    }catch(e2){}
+  }
 }
 function getRichHtmlFromInput(kind){
   const el = document.getElementById(kind === "turno" ? "turnoInput" : "avisoInput");
