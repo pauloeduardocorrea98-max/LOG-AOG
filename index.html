@@ -759,12 +759,16 @@ function __ensureDatePopup__(){
   // Não fechar ao clicar dentro
   box.addEventListener("mousedown", (e)=>{ e.stopPropagation(); }, true);
 
-  // Fecha ao clicar fora (só se estiver aberto)
-  document.addEventListener("mousedown", ()=>{
-    if(__datePopupEl && __datePopupEl.style.display==="block") hideDatePickerFilter();
-  }, true);
-
-  const prev = document.getElementById("calPrev");
+  // Fecha ao clicar fora (não atrapalha clicar nos dias)
+  document.addEventListener("mousedown", (ev)=>{
+    try{
+      if(!__datePopupEl || __datePopupEl.style.display !== "block") return;
+      const t = ev && ev.target ? ev.target : null;
+      if(t && (__datePopupEl === t || __datePopupEl.contains(t))) return; // clique dentro
+      hideDatePickerFilter();
+    }catch(e){ hideDatePickerFilter(); }
+  });
+const prev = document.getElementById("calPrev");
   const next = document.getElementById("calNext");
   const close = document.getElementById("calClose");
   if(close) close.onclick = ()=> hideDatePickerFilter();
@@ -1229,10 +1233,15 @@ function prepareDataCache(){
     __pushAirId__("cargo", r);
     __pushSolId__("cargo", r);
 
-    // ✅ NOVA ABA: MRO (mesma regra do Cargo Heroes)
-    out.mro.push(r);
-    __pushAirId__("mro", r);
-    __pushSolId__("mro", r);
+    // ✅ NOVA ABA: MRO — somente Base == "MRO"
+    try{
+      const b = String((r && (r.Base ?? r["Base"])) || "").trim().toUpperCase();
+      if(b === "MRO"){
+        out.mro.push(r);
+        __pushAirId__("mro", r);
+        __pushSolId__("mro", r);
+      }
+    }catch(e){}
 
     // ✅ NOVA ABA: Acompanhamento (mesma regra do Cargo Heroes)
     out.acompanhamento.push(r);
