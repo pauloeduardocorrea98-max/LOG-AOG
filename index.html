@@ -363,7 +363,7 @@ function showStatusFilter(ev, tableKey, colKey){
     const el = ev && ev.target ? ev.target : null; if(!el) return;
     __statusPopupTarget = el; __statusPopupTableKey = String(tableKey||"").toLowerCase(); __statusPopupColKey = String(colKey||"");
     let html = `<div class="statusPopupHead"><span>Filtrar Status</span><button class="statusPopupClose" onclick="hideStatusFilter()">×</button></div>`;
-    const options = ["Aguardando separação", "Pronto para envio", "Recebido no destino", "Log 1 Transito", "Remessa Cancelada", "Não Enviado", "Na Base", "Mtl Divergente", "Não Recebi", "Outras", "Mtl Stock Zero"];
+    const options = ["Em Fila de Atendimento", "Aguardando separação", "Pronto para envio", "Log 1 Transito", "Remessa Cancelada", "Recebido no destino", "Não Enviado", "Na Base", "Mtl Divergente", "Não Recebi", "Outras", "Mtl Stock Zero", "Saldo insuficiente", "Ainda em análise", "Sem logistica", "Dgr Não é Enviado", "Remessa Cancelada", "Comprar", "Outros"];
     options.forEach(opt => { html += `<div class="statusOption" onclick="applyStatusOption('${escapeHtml(opt)}')">${escapeHtml(opt)}</div>`; });
     html += `<div class="statusOption clear" onclick="applyStatusOption('')">Limpar Filtro</div>`;
     __statusPopupEl.innerHTML = html;
