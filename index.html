@@ -19,6 +19,7 @@
 
   <div class="menu">
     <button class="active" onclick="openTab('turno',this)">📓 Passagem de Turno</button>
+    <button onclick="openTab('avisos',this)">📢 Avisos da Gestão</button>
     <button onclick="openTab('aog',this)">✈️ AOG</button>
     <button onclick="openTab('war',this)">⚔️ War Room</button>
     <button onclick="openTab('fast',this)">⚡ Fast Pass</button>
@@ -29,7 +30,6 @@
     <button onclick="openTab('hotlist',this)">🔥 Hot List</button>
     <button onclick="openTab('tools',this)">🛠️ Ferramentas</button>
     <button onclick="openTab('links',this)">🔗 Links Úteis</button>
-    <button onclick="openTab('avisos',this)">📢 Avisos da Gestão</button>
   </div>
   <div style="display:none" id="clockBottom"></div>
 </div>
@@ -53,6 +53,15 @@
       </div>
     </div>
     <div class="box sharedList" id="turnoList"></div>
+  </div>
+
+  <div id="avisos" class="section">
+    <h1>Avisos da Gestão</h1>
+    <div class="noteRow">
+      <div id="avisoInput" class="noteInput" contenteditable="true" data-placeholder="Digite o aviso..."></div>
+      <div class="noteTools"><button class="noteBtn" type="button" onclick="addAviso()">Adicionar</button></div>
+    </div>
+    <div class="box sharedList" id="avisosList"></div>
   </div>
 
   <div id="aog" class="section"><h1>AOG</h1><div id="air-aog"></div><div id="sol-aog"></div><div id="prio-aog"></div><div class="tableWrap"><table id="tbl-aog"></table></div></div>
@@ -83,15 +92,6 @@
         </div>
         <div class="linkBoard" id="linkBoard"></div>
       </div>
-  </div>
-
-  <div id="avisos" class="section">
-    <h1>Avisos da Gestão</h1>
-    <div class="noteRow">
-      <div id="avisoInput" class="noteInput" contenteditable="true" data-placeholder="Digite o aviso..."></div>
-      <div class="noteTools"><button class="noteBtn" type="button" onclick="addAviso()">Adicionar</button></div>
-    </div>
-    <div class="box sharedList" id="avisosList"></div>
   </div>
 </div>
 
@@ -129,9 +129,10 @@ function puxarMajorPartsDiretoDoSheets() {
     window[cbName] = function(data) {
       try {
         if (data && data.table && data.table.rows) {
+          // Aqui foi colocado o .toUpperCase() para ignorar letras minúsculas
           MAJOR_PARTS = data.table.rows
-            .map(r => r.c[0] ? String(r.c[0].v).trim() : "")
-            .filter(v => v && v.toUpperCase() !== "PN" && v.toUpperCase() !== "MAJOR PART");
+            .map(r => r.c[0] ? String(r.c[0].v).trim().toUpperCase() : "")
+            .filter(v => v && v !== "PN" && v !== "MAJOR PART");
           console.log("✅ Major Parts carregadas direto via Google: " + MAJOR_PARTS.length + " PNs.");
         }
       } catch(e) { console.error("Erro ao ler Major Parts:", e); }
@@ -738,7 +739,9 @@ function renderPrios(tableKey){
     const id = rowId(r); const vID = cleanVal(r.Material_ID); const vSOL = cleanVal(r.Numero_de_solicitacao); const vNF = cleanVal(r.Nota_fiscal); const vAWB = cleanVal(r.AWB); const vPN = cleanVal(r.PN); const vORG = cleanVal(r.Origem); const vDST = cleanVal(r.Destino); const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : ""; const vLOG = cleanVal(r.Descricao_logistica); const vSTATUS = cleanVal(r[STATUS_COL]); const vEMB_RAW = (r && (r.Data_de_embarque_logistica ?? r["Data_de_embarque_logistica"])) ?? ""; const vPOUSO_RAW = (r && (r.Data_do_pouso_logistica ?? r["Data_do_pouso_logistica"])) ?? ""; const tEMB = fmtTimeHM(parseMaybeDate(vEMB_RAW)); const tPOUSO = fmtTimeHM(parseMaybeDate(vPOUSO_RAW)); const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : "";
     let marked = ""; try{ if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){ const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){}
     
-    const isMajor = (tableKey === "acompanhamento" && MAJOR_PARTS.includes(vPN));
+    // Aqui usamos toUpperCase para garantir a comparacao perfeita com os PNs da aba
+    const cleanPn = String(vPN).trim().toUpperCase();
+    const isMajor = (tableKey === "acompanhamento" && MAJOR_PARTS.includes(cleanPn));
     const pnDisplay = isMajor ? `<span style="color:#ef4444; font-weight:800;" title="Major Part">🚨 ${escapeHtml(vPN)}</span>` : escapeHtml(vPN);
 
     const card = document.createElement("div"); card.className = "prioCard";
@@ -789,9 +792,9 @@ function renderTable(tableKey){
         if(c === DATE_COL || c === EMB_COL || c === LAND_COL){ const parts = getDatePartsForDisplay(r[c], (c===EMB_COL || c===LAND_COL)); if(!parts.date) return `<td></td>`; const timeHtml = parts.time ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(parts.time)}</div>` : ""; return `<td><div>${escapeHtml(parts.date)}</div>${timeHtml}</td>`; }
         if(c === "OBS"){ const mid = cleanVal(r.Material_ID); const txt = getObsTextForCell(tableKey, mid); return `<td><textarea class="obsArea" data-mid="${escapeHtml(mid)}" placeholder="OBS (ENTER salva)" oninput="obsInput(event,'${tableKey}','${escapeHtml(mid)}')" onkeydown="obsKeyDown(event,'${tableKey}','${escapeHtml(mid)}')">${escapeHtml(txt)}</textarea></td>`; }
         
-        // ✅ Alerta vermelho para Major Parts apenas na aba Acompanhamento
+        // AQUI ESTÁ O .toUpperCase() DA COLUNA PN
         if(c === "PN" && tableKey === "acompanhamento") {
-          const cleanPn = cleanVal(displayed);
+          const cleanPn = cleanVal(displayed).toUpperCase();
           if (MAJOR_PARTS.includes(cleanPn)) {
             return `<td style="color: #ef4444; font-weight: 800;" title="Major Part">🚨 ${escapeHtml(displayed)}</td>`;
           }
@@ -831,9 +834,7 @@ function rerenderAll(opts){
   paintUpdateInfo(); paintRefreshInfo(); updateStatusVisibility();
 }
 
-async function __gasGetDadosFull__(){
-  const t0 = performance.now(); const resp = await gasCall("getDadosBaseAOG"); if(!Array.isArray(resp)) throw new Error("getDadosBaseAOG não retornou Array"); return { data: resp, ms: Math.round(performance.now() - t0) };
-}
+async function __gasGetDadosFull__(){ const t0 = performance.now(); const resp = await gasCall("getDadosBaseAOG"); if(!Array.isArray(resp)) throw new Error("getDadosBaseAOG não retornou Array"); return { data: resp, ms: Math.round(performance.now() - t0) }; }
 async function __gasGetDadosChunked__(onProgress){
   const all = []; let offset = 0; let total = null; let safety = 0; const t0 = performance.now();
   while(true){
@@ -994,16 +995,18 @@ function initCtxMenuHandlers(){
   rerenderAll({ onlyActive: true });
   setInterval(paintUpdateInfo, 1000); setInterval(paintRefreshInfo, 1000); setInterval(__tryRerenderPending__, 700);
   document.addEventListener("focusout", ()=>{ setTimeout(__tryRerenderPending__, 150); }, true);
-  scheduleNextRefresh(getAutoRefreshMs()); setTimeout(()=>{ refreshData(); }, 1500);
-  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshData(); }); window.addEventListener("focus", ()=>{ refreshData(); });
-  initCtxMenuHandlers();
-
+  
+  // Sync colaborativo leve (30s)
   setInterval(async ()=>{
     try{ await presenceTick(); }catch(e){}
     if(hasGAS()){ try{ await syncSharedAllTables(); }catch(e){} try{ await syncSharedObs(); }catch(e){} try{ await syncSharedTurno(); }catch(e){} try{ await syncSharedAvisos(); }catch(e){} try{ await syncSharedLinks(); }catch(e){} }
     renderSharedList("turno"); renderSharedList("avisos"); renderLinksUteis();
     try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){}
   }, 30000);
+  
+  scheduleNextRefresh(getAutoRefreshMs()); setTimeout(()=>{ refreshData(); }, 1500);
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshData(); }); window.addEventListener("focus", ()=>{ refreshData(); });
+  initCtxMenuHandlers();
   
   setInterval(()=>{ try{ runFastAutoPinNow("timer"); }catch(e){} }, FAST_AUTO_PIN_INTERVAL_MS);
   setTimeout(()=>{ try{ runFastAutoPinNow("boot"); }catch(e){} }, 5000);
