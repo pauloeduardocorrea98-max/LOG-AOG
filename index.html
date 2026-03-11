@@ -134,9 +134,12 @@ function puxarMajorPartsDiretoDoSheets() {
             .map(r => r.c[0] ? String(r.c[0].v).trim().toUpperCase() : "")
             .filter(v => v && v !== "PN" && v !== "MAJOR PART");
             
-          // 🔥 FILTRO BLINDADO: Remove tudo que não for Letra ou Número para comparar depois
-          window.__MAJOR_PARTS_CLEAN__ = MAJOR_PARTS.map(p => p.replace(/[^A-Z0-9-]/g, ''));
-          console.log("✅ Major Parts carregadas direto via Google: " + MAJOR_PARTS.length + " PNs.");
+          // 🔥 NOVO FILTRO SUPER BLINDADO: Remove TUDO que não for Letra de A-Z ou Número de 0-9
+          window.__MAJOR_PARTS_CLEAN__ = MAJOR_PARTS
+            .map(p => p.replace(/[^A-Z0-9]/ig, '').toUpperCase())
+            .filter(p => p !== "");
+            
+          console.log("✅ Major Parts carregadas (modo ultra blindado): " + window.__MAJOR_PARTS_CLEAN__.length + " PNs limpos.");
         }
       } catch(e) { console.error("Erro ao ler Major Parts:", e); }
       resolve(); delete window[cbName]; script.remove();
@@ -742,9 +745,9 @@ function renderPrios(tableKey){
     const id = rowId(r); const vID = cleanVal(r.Material_ID); const vSOL = cleanVal(r.Numero_de_solicitacao); const vNF = cleanVal(r.Nota_fiscal); const vAWB = cleanVal(r.AWB); const vPN = cleanVal(r.PN); const vORG = cleanVal(r.Origem); const vDST = cleanVal(r.Destino); const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : ""; const vLOG = cleanVal(r.Descricao_logistica); const vSTATUS = cleanVal(r[STATUS_COL]); const vEMB_RAW = (r && (r.Data_de_embarque_logistica ?? r["Data_de_embarque_logistica"])) ?? ""; const vPOUSO_RAW = (r && (r.Data_do_pouso_logistica ?? r["Data_do_pouso_logistica"])) ?? ""; const tEMB = fmtTimeHM(parseMaybeDate(vEMB_RAW)); const tPOUSO = fmtTimeHM(parseMaybeDate(vPOUSO_RAW)); const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : "";
     let marked = ""; try{ if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){ const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){}
     
-    // 🔥 FILTRO BLINDADO AQUI TAMBÉM
-    const pnBlindado = String(vPN).toUpperCase().replace(/[^A-Z0-9-]/g, '');
-    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__ && window.__MAJOR_PARTS_CLEAN__.includes(pnBlindado));
+    // 🔥 FILTRO BLINDADO
+    const pnBlindado = String(vPN).replace(/[^A-Z0-9]/ig, '').toUpperCase();
+    const isMajor = (tableKey === "acompanhamento" && pnBlindado !== "" && window.__MAJOR_PARTS_CLEAN__ && window.__MAJOR_PARTS_CLEAN__.includes(pnBlindado));
     const pnDisplay = isMajor ? `<div style="display:flex;align-items:center;gap:6px"><span>${escapeHtml(vPN)}</span><span style="background:#ef4444;color:#fff;border-radius:6px;padding:2px 6px;font-size:10px;font-weight:bold;">🚨 MAJOR</span></div>` : escapeHtml(vPN);
 
     const card = document.createElement("div"); card.className = "prioCard";
@@ -795,12 +798,12 @@ function renderTable(tableKey){
         if(c === DATE_COL || c === EMB_COL || c === LAND_COL){ const parts = getDatePartsForDisplay(r[c], (c===EMB_COL || c===LAND_COL)); if(!parts.date) return `<td></td>`; const timeHtml = parts.time ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(parts.time)}</div>` : ""; return `<td><div>${escapeHtml(parts.date)}</div>${timeHtml}</td>`; }
         if(c === "OBS"){ const mid = cleanVal(r.Material_ID); const txt = getObsTextForCell(tableKey, mid); return `<td><textarea class="obsArea" data-mid="${escapeHtml(mid)}" placeholder="OBS (ENTER salva)" oninput="obsInput(event,'${tableKey}','${escapeHtml(mid)}')" onkeydown="obsKeyDown(event,'${tableKey}','${escapeHtml(mid)}')">${escapeHtml(txt)}</textarea></td>`; }
         
-        // 🔥 FILTRO BLINDADO + NOVO VISUAL (CAIXINHA VERMELHA)
+        // 🔥 FILTRO BLINDADO
         if(c === "PN" && tableKey === "acompanhamento") {
           const pnSujo = String(displayed).trim();
-          const pnBlindado = pnSujo.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+          const pnBlindado = pnSujo.replace(/[^A-Z0-9]/ig, '').toUpperCase();
           
-          if (window.__MAJOR_PARTS_CLEAN__ && window.__MAJOR_PARTS_CLEAN__.includes(pnBlindado)) {
+          if (pnBlindado !== "" && window.__MAJOR_PARTS_CLEAN__ && window.__MAJOR_PARTS_CLEAN__.includes(pnBlindado)) {
             return `<td><div class="airCell"><span>${escapeHtml(pnSujo)}</span><span style="background:#ef4444; color:#fff; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:bold; cursor:help;" title="Item Major Part">🚨 ALERTA</span></div></td>`;
           }
         }
