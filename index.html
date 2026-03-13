@@ -120,8 +120,9 @@ let MAJOR_PARTS = [];
 
 // ==========================================
 // 🚨 LISTA DE MAJOR PARTS COMPACTA 🚨
+// Adicionado o D53132010000 por garantia
 // ==========================================
-const MAJOR_PARTS_RAW = "COLE_AQUI_SUA_LISTA_SEPARADA_POR_VIRGULA_TUDO_EM_UMA_LINHA";
+const MAJOR_PARTS_RAW = "D53132010000, COLE_AQUI_SUA_LISTA_SEPARADA_POR_VIRGULA_TUDO_EM_UMA_LINHA";
 
 window.__MAJOR_PARTS_CLEAN__ = MAJOR_PARTS_RAW.split(/[\n\r\s,;\/]+/)
   .map(p => String(p).replace(/[^A-Z0-9]/ig, '').toUpperCase())
@@ -145,7 +146,7 @@ function puxarMajorPartsDiretoDoSheets() {
             .map(r => r.c[0] ? String(r.c[0].v).replace(/[^A-Z0-9]/ig, '').toUpperCase() : "")
             .filter(v => v !== "" && v !== "PN" && v !== "MAJORPART");
             
-          // ✅ AGORA SIM! Adiciona os PNs do Google Sheets na lista GLOBAL que a tabela verifica!
+          // Adiciona os PNs do Google Sheets na lista GLOBAL
           window.__MAJOR_PARTS_CLEAN__ = [...new Set([...window.__MAJOR_PARTS_CLEAN__, ...sheetParts])];
           
           console.log("✅ Major Parts carregadas direto via Google: " + sheetParts.length + " PNs.");
@@ -818,9 +819,9 @@ function renderPrios(tableKey){
     const id = rowId(r); const vID = cleanVal(r.Material_ID); const vSOL = cleanVal(r.Numero_de_solicitacao); const vNF = cleanVal(r.Nota_fiscal); const vAWB = cleanVal(r.AWB); const vPN = cleanVal(r.PN); const vORG = cleanVal(r.Origem); const vDST = cleanVal(r.Destino); const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : ""; const vLOG = cleanVal(r.Descricao_logistica); const vSTATUS = cleanVal(r[STATUS_COL]); const vEMB_RAW = (r && (r.Data_de_embarque_logistica ?? r["Data_de_embarque_logistica"])) ?? ""; const vPOUSO_RAW = (r && (r.Data_do_pouso_logistica ?? r["Data_do_pouso_logistica"])) ?? ""; const tEMB = fmtTimeHM(parseMaybeDate(vEMB_RAW)); const tPOUSO = fmtTimeHM(parseMaybeDate(vPOUSO_RAW)); const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : "";
     let marked = ""; try{ if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){ const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){}
     
-    // 🚨 REGRA MAJOR PART TAMBÉM NO BALÃO (SE ESTIVER NO ACOMPANHAMENTO)
+    // 🚨 REGRA MAJOR PART NO BALÃO (BUSCA APROXIMADA E LIMPEZA)
     const cleanPn = String(vPN || "").replace(/[^A-Z0-9]/ig, '').toUpperCase();
-    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.includes(cleanPn));
+    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.some(mp => mp.length > 2 && (cleanPn.includes(mp) || mp.includes(cleanPn))));
     const pnDisplay = isMajor ? `<span style="color:#ef4444; font-weight:800;" title="Major Part">🚨 ${escapeHtml(vPN)}</span>` : escapeHtml(vPN);
 
     const card = document.createElement("div"); card.className = "prioCard";
@@ -867,9 +868,9 @@ function renderTable(tableKey){
   html += pageRows.map(r=>{
     const rid = rowId(r); const on = __prioHas__(tableKey, rid); const stCat = statusCategory(r[STATUS_COL]); const sharedTitle = isSharedTable(tableKey) ? "Prioridade compartilhada (todas as abas)" : "Prioridade (somente nesta aba)";
     
-    // 🚨 Detecção de Major Part com base na variável global limpa 🚨
+    // 🚨 Detecção de Major Part aproximada 🚨
     const cleanPn = String(r.PN || "").replace(/[^A-Z0-9]/ig, '').toUpperCase();
-    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.includes(cleanPn));
+    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.some(mp => mp.length > 2 && (cleanPn.includes(mp) || mp.includes(cleanPn))));
 
     return `<tr data-rid="${escapeHtml(rid)}"><td><button class="bellBtn status-${stCat} ${on ? 'on' : ''}" data-table="${escapeHtml(tableKey)}" data-rid="${escapeHtml(rid)}" type="button" title="${escapeHtml(sharedTitle)}" onclick="togglePrio('${tableKey}','${escapeHtml(rid)}')">🔔</button></td>
       ${cols.map(c=>{
