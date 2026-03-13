@@ -231,7 +231,6 @@ function openTab(id,btn){
     if(tk){
       if(__dirty[tk]){ renderPrios(tk); renderAircraftBox(tk); renderTable(tk); clearDirty(tk); }
       else{ try{ updateObsVisibleForTable(tk); }catch(e){} }
-      if(String(id||"").toLowerCase() === "fast"){ __autoPinFastTodayAircraft__().then(()=>{ try{ renderAircraftBox("fast"); }catch(e){} }).catch(()=>{}); }
     }else{
       if(id === "links"){ markDirty("links"); renderLinksUteis(); clearDirty("links"); }
       if(id === "turno") renderSharedList("turno");
@@ -663,47 +662,6 @@ async function syncSharedAllTables(){
   }catch(e){}
 }
 
-const FAST_AUTO_PIN_INTERVAL_MS = 15 * 60 * 1000; const FAST_AUTO_PIN_STORAGE_KEY = "FAST_AUTO_PIN_MANAGED_V1"; let __fastAutoPinInFlight = false;
-function __todayKey__(){ const d = new Date(); const pad = n => String(n).padStart(2,"0"); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
-function __fastAutoLoadManaged__(){ try{ const raw = localStorage.getItem(FAST_AUTO_PIN_STORAGE_KEY); if(!raw) return { date:"", pins:[] }; const obj = JSON.parse(raw); if(!obj || typeof obj !== "object") return { date:"", pins:[] }; if(!Array.isArray(obj.pins)) obj.pins = []; obj.date = String(obj.date || ""); return obj; }catch(e){ return { date:"", pins:[] }; } }
-function __fastAutoSaveManaged__(dateKey, pins){ try{ localStorage.setItem(FAST_AUTO_PIN_STORAGE_KEY, JSON.stringify({ date:String(dateKey||""), pins:Array.from(pins||[]) })); }catch(e){} }
-function __getFastAircraftSetForToday__(){ const today = __todayKey__(); const rows = getBaseRows("fast") || []; const set = new Set(); for(const r of rows){ const dt = parseMaybeDate(r && r[DATE_COL]); if(!dt) continue; const k = UtilitiesFormatDateKey_(dt); if(k !== today) continue; const a = cleanVal(r && r[AIR_COL]); if(a) set.add(a); } return { today, aircraftSet: set }; }
-function UtilitiesFormatDateKey_(dt){ try{ const d = (dt && Object.prototype.toString.call(dt)==="[object Date]") ? dt : new Date(dt); if(isNaN(d.getTime())) return ""; const pad = n => String(n).padStart(2,"0"); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }catch(e){ return ""; } }
-async function __ensureSharedAirPinned__(aircraft){ const a = cleanVal(aircraft); if(!a) return false; try{ if(!__sharedAirState) await syncSharedAllTables(); }catch(e){} const pins = (airPinnedByTable.fast instanceof Set) ? airPinnedByTable.fast : new Set(); if(pins.has(a)) return false; await toggleAirShared("fast", a); return true; }
-async function __removeManagedPinsIfNeeded__(managedPins, desiredPins){ const currentPins = (airPinnedByTable.fast instanceof Set) ? airPinnedByTable.fast : new Set(); const toRemove = []; for(const a of managedPins){ if(!a) continue; if(!desiredPins.has(a) && currentPins.has(a)) toRemove.push(a); } for(const a of toRemove){ try{ await toggleAirShared("fast", a); }catch(e){} } }
-
-async function runFastAutoPinNow(reason){
-  if(__fastAutoPinInFlight) return; __fastAutoPinInFlight = true;
-  try{
-    if(!Array.isArray(dados) || dados.length === 0){ __fastAutoPinInFlight = false; return; }
-    try{ prepareDataCache(); }catch(e){}
-    const { today, aircraftSet } = __getFastAircraftSetForToday__(); const managed = __fastAutoLoadManaged__();
-    if(managed.date && managed.date !== today){ try{ await __removeManagedPinsIfNeeded__(new Set(managed.pins||[]), new Set()); }catch(e){} managed.date = ""; managed.pins = []; }
-    try{ await __removeManagedPinsIfNeeded__(new Set(managed.pins||[]), aircraftSet); }catch(e){}
-    const newlyManaged = new Set(managed.pins || []);
-    for(const a of aircraftSet){ try{ const changed = await __ensureSharedAirPinned__(a); if(changed) newlyManaged.add(a); }catch(e){} }
-    __fastAutoSaveManaged__(today, Array.from(newlyManaged));
-    const active = document.querySelector(".section.active"); if(active && active.id === "fast"){ markDirty("fast"); renderAircraftBox("fast"); clearDirty("fast"); }
-  }finally{ __fastAutoPinInFlight = false; }
-}
-
-const __FAST_AUTO_AIR_LS_KEY = "FAST_AUTO_AIR_LASTDAY_V1";
-function __dateKeyLocal__(dt){ if(!dt) return ""; const d = (dt instanceof Date) ? dt : parseMaybeDate(dt); if(!d || isNaN(d.getTime())) return ""; const pad = n => String(n).padStart(2,"0"); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
-async function __autoPinFastTodayAircraft__(){
-  try{
-    if(!hasGAS()) return;
-    const todayKey = __dateKeyLocal__(new Date()); const lastKey = String(localStorage.getItem(__FAST_AUTO_AIR_LS_KEY) || "").trim(); if(lastKey === todayKey) return;
-    if(!__sharedAirState){ try{ await syncSharedAllTables(); }catch(e){} }
-    const rows = getBaseRows("fast") || []; const setToday = new Set();
-    for(let i=0;i<rows.length;i++){ const r = rows[i]; const dk = __dateKeyLocal__(r && r[DATE_COL]); if(dk !== todayKey) continue; const a = cleanVal(r && r[AIR_COL]); if(a) setToday.add(a); }
-    if(setToday.size === 0){ localStorage.setItem(__FAST_AUTO_AIR_LS_KEY, todayKey); return; }
-    const pinned = airPinnedByTable.fast || new Set();
-    for(const a of Array.from(setToday)){ if(pinned.has(a)) continue; try{ await gasCall("toggleSharedAirPin", "fast", a); }catch(e){} }
-    try{ await syncSharedAllTables(); }catch(e){}
-    localStorage.setItem(__FAST_AUTO_AIR_LS_KEY, todayKey);
-  }catch(e){ console.warn("FAST auto-pin falhou:", e); }
-}
-
 function __cssEscape__(s){ try{ if(window.CSS && CSS.escape) return CSS.escape(String(s)); }catch(e){} return String(s).replace(/["\\]/g, "\\$&"); }
 function updateBellButton(tableKey, rid){ const q = `button.bellBtn[data-table="${__cssEscape__(tableKey)}"][data-rid="${__cssEscape__(rid)}"]`; const btn = document.querySelector(q); if(!btn) return; const on = __prioHas__(tableKey, rid); btn.classList.toggle("on", !!on); }
 
@@ -948,6 +906,41 @@ function paintRefreshInfo(){
   if(pState){ if(__lastRefreshError){ pState.classList.add("warn"); pState.innerText = `Estado: ERRO • ${__lastRefreshError}`; } else{ pState.classList.remove("warn"); pState.innerText = "Estado: OK"; } }
 }
 
+function autoPinFastPassToday() {
+  const today = new Date();
+  const tYear = today.getFullYear();
+  const tMonth = today.getMonth();
+  const tDate = today.getDate();
+
+  const fastRows = getBaseRows("fast");
+  if (!fastRows || fastRows.length === 0) return;
+
+  let added = false;
+  fastRows.forEach(r => {
+     const dtObj = parseMaybeDate(r[DATE_COL]);
+     if (dtObj && dtObj.getFullYear() === tYear && dtObj.getMonth() === tMonth && dtObj.getDate() === tDate) {
+         const aircraft = cleanVal(r[AIR_COL]);
+         if (aircraft) {
+             const set = airPinnedByTable["fast"];
+             if (!set.has(aircraft)) {
+                 set.add(aircraft);
+                 added = true;
+                 try { gasCall("toggleSharedAirPin", "fast", aircraft).catch(()=>{}); } catch(e){}
+             }
+         }
+     }
+  });
+
+  if (added) {
+     saveAirPinned("fast");
+     const active = document.querySelector(".section.active");
+     if(active && active.id === "fast") {
+         renderAircraftBox("fast");
+         markDirty("fast"); renderTable("fast"); clearDirty("fast");
+     }
+  }
+}
+
 function rerenderAll(opts){
   const onlyActive = !!(opts && opts.onlyActive); prepareDataCache(); __lastUpdateDate = computeLastUpdateFromData();
   if(onlyActive){ const active = document.querySelector(".section.active"); const tk = active ? tableKeysBySection[active.id] : null; if(tk){ renderAircraftBox(tk); renderSolBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); } renderLinksUteis(); }
@@ -984,7 +977,12 @@ async function refreshData(){
     if(!Array.isArray(newData) || newData.length === 0){ __lastRefreshError = erros.length ? erros.join(" | ") : "Sem dados"; return; }
     dados = newData; __lastSuccessAt = new Date(); __lastRefreshError = "";
     try{ await syncSharedAllTables(); }catch(e){} try{ await syncSharedObs(); }catch(e){} try{ await syncSharedTurno(); }catch(e){} try{ await syncSharedAvisos(); }catch(e){} try{ await syncSharedLinks(); }catch(e){}
+    
     __dataVersion++; __sortedBaseVersion = -1; for(const tk of SHARED_TABLE_KEYS) invalidateFilterCache(tk); markAllTablesDirty(); prepareDataCache(); __lastUpdateDate = computeLastUpdateFromData();
+    
+    // ✅ CHAMA A NOVA FUNÇÃO SIMPLES AQUI
+    autoPinFastPassToday();
+
     if(__isUserTyping__()){ __pendingRerender = true; setTimeout(()=>{ if(__pendingRerender){ __pendingRerender = false; rerenderAll({ onlyActive: true }); } }, 3000); }else{ rerenderAll({ onlyActive: true }); }
   }catch(err){ __lastRefreshError = (err && err.message) ? err.message : String(err); }finally{ __refreshInFlight = false; paintUpdateInfo(); paintRefreshInfo(); try{ renderFrescorBanner(); }catch(e){} }
 }
@@ -1116,6 +1114,10 @@ function initCtxMenuHandlers(){
   __lastUpdateDate = computeLastUpdateFromData(); __lastSuccessAt = new Date(); __lastFetchAt = new Date();
   
   prepareDataCache();
+
+  // ✅ CHAMA A NOVA FUNÇÃO SIMPLES AQUI NO BOOT
+  autoPinFastPassToday();
+
   try{ await presenceTick(); }catch(e){}
   if(hasGAS()){
     try{ await syncSharedAllTables(); }catch(e){} try{ await syncSharedObs(); }catch(e){} try{ await syncSharedTurno(); }catch(e){} try{ await syncSharedAvisos(); }catch(e){} try{ await syncSharedLinks(); }catch(e){}
@@ -1151,10 +1153,6 @@ function initCtxMenuHandlers(){
     renderSharedList("turno"); renderSharedList("avisos"); renderLinksUteis();
     try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){}
   }, 30000);
-  
-  // FAST: auto-marcar aeronaves do dia a cada 15min
-  setInterval(()=>{ try{ runFastAutoPinNow("timer"); }catch(e){} }, FAST_AUTO_PIN_INTERVAL_MS);
-  setTimeout(()=>{ try{ runFastAutoPinNow("boot"); }catch(e){} }, 5000);
   
   updateStatusVisibility();
 })();
