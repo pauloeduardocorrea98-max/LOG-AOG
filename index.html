@@ -7,8 +7,8 @@
 *{box-sizing:border-box;font-family:Segoe UI,Arial} body{margin:0;display:flex;background:#0b2440;color:#e5e7eb} .sidebar{width:260px;background:#0f172a;color:#e5e7eb;display:flex;flex-direction:column;padding:12px} .sidebar h2{margin:0 0 10px;font-size:16px;color:#38bdf8} .menu button{width:100%;background:none;border:none;color:#e5e7eb;padding:10px 12px;text-align:left;cursor:pointer;border-radius:8px;margin-bottom:6px;display:flex;align-items:center;gap:10px;white-space:nowrap} .menu button:hover,.menu button.active{background:#1e293b;color:#38bdf8} .clock{margin-top:0;margin-bottom:12px;text-align:center;font-size:14px;padding:10px 0;border-top:1px solid #334155;border-bottom:1px solid #334155} .connectedBox{margin-top:10px;padding:10px;border:1px solid #334155;border-radius:10px;background:#0b1d33;font-size:12px;color:#e5e7eb} .connectedBox .title{font-weight:700;color:#38bdf8;margin-bottom:6px} .connectedBox .item{margin-top:4px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .content{flex:1;padding:16px} h1{margin:8px 0 10px;font-size:20px;color:#f8fafc} .section{display:none} .section.active{display:block} #status{background:#ffffff;border:1px solid #e5e7eb;padding:10px;border-radius:10px;margin-bottom:10px;font-size:13px;color:#0f172a;display:none} #status .statusLine{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px;color:#334155} #status .pill{display:inline-block;padding:4px 8px;border:1px solid #e5e7eb;border-radius:999px;background:#f8fafc;font-size:12px} #status .warn{background:#fff7ed;border-color:#fed7aa;color:#9a3412} #pillAttempt,#pillAuto,#pillNext,#pillUpdatedAgo{display:none !important} .noteRow{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-top:6px} .noteInput{width:80%;min-width:280px;min-height:74px;padding:10px;border:1px solid #e5e7eb;border-radius:10px;outline:none;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden;background:#fff;color:#0f172a} .noteInput:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.18)} .noteTools{display:flex;align-items:center;gap:8px;flex-wrap:wrap} .noteBtn{padding:10px 12px;border:none;background:#0ea5e9;color:#fff;border-radius:10px;cursor:pointer} .noteBtn:hover{filter:brightness(.95)} .noteBtn.gray{background:#334155} .noteBtn.orange{background:#c2410c} .linkPills{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px} .linkPill{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;border:1px solid #e5e7eb;background:#f8fafc;color:#0f172a;text-decoration:none;cursor:pointer;font-size:13px;max-width:520px} .linkPill:hover{filter:brightness(.97);box-shadow:0 0 0 3px rgba(56,189,248,.18);border-color:#38bdf8} .linkPillIcon{width:10px;height:10px;border-radius:999px;background:#0ea5e9;flex:none} .linkAddRow{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;align-items:center} .linkAddInput{min-width:320px;width:520px;max-width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;outline:none} .linkAddInput:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.18)} .linkPillWrap{position:relative;display:inline-flex;align-items:center} .linkPillX{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border:none;border-radius:999px;background:#111827;color:#fff;cursor:pointer;font-size:12px;line-height:20px;display:flex;align-items:center;justify-content:center} .linkPillX:hover{filter:brightness(.95)} .tableWrap{overflow:auto;border-radius:10px} table{width:100%;border-collapse:collapse;background:#fff;font-size:13px;min-width:1500px;color:#0f172a} th,td{border:1px solid #e5e7eb;padding:6px;vertical-align:top} th{background:#f1f5f9;position:sticky;top:0;z-index:2} .filterRow th{background:#ffffff;position:sticky;top:34px;z-index:1} .filter{width:100%;padding:6px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px} .th-pn,.td-pn{max-width:140px;min-width:120px;white-space:normal;word-break:normal;overflow-wrap:break-word} .th-resize{position:relative} .th-resize::after{content:"";position:absolute;right:0;top:0;width:6px;height:100%;cursor:col-resize} .prioBox{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:10px 0 12px;color:#0f172a} .prioBox h3{margin:0 0 8px;font-size:13px;color:#0f172a} .prioGrid{display:flex;flex-wrap:wrap;gap:8px} .prioCard{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:8px 10px;min-width:220px;max-width:520px} .prioLine1{font-weight:700;font-size:12px;color:#0f172a} .prioLine{margin-top:4px;font-size:12px;color:#475569} .prioNoWrap{white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;display:block} .prioRemove{margin-top:8px;border:none;background:#ef4444;color:#fff;border-radius:8px;padding:6px 8px;cursor:pointer;font-size:12px} .statusTag{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;border:1px solid #e5e7eb;font-size:12px;line-height:1.2;white-space:nowrap} .statusDot{width:8px;height:8px;border-radius:999px;display:inline-block;flex:none} .status-green{background:#ecfdf5;border-color:#a7f3d0;color:#065f46} .status-green .statusDot{background:#10b981} .status-yellow{background:#fffbeb;border-color:#fde68a;color:#92400e} .status-yellow .statusDot{background:#f59e0b} .status-red{background:#fef2f2;border-color:#fecaca;color:#991b1b} .status-red .statusDot{background:#ef4444} .status-orange{background:#fff7ed;border-color:#fdba74;color:#9a3412} .status-orange .statusDot{background:#c2410c} .status-default{background:#f8fafc;border-color:#e5e7eb;color:#334155} .status-default .statusDot{background:#64748b} .airCell{display:flex;align-items:center;gap:8px} .solCell{display:flex;align-items:center;gap:8px} .solBtn{border:none;background:#a78bfa;color:#111827;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:12px;line-height:1} .solBtn:hover{filter:brightness(.95)} .solBox{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:10px 0 12px;color:#0f172a} .solBox h3{margin:0 0 8px;font-size:13px;color:#0f172a} .solGrid{display:flex;flex-wrap:wrap;gap:8px} .solCard{position:relative;background:#eef2ff;border:1px solid #c7d2fe;border-radius:12px;padding:10px;min-width:220px;max-width:520px} .solCardTitle{font-weight:800;font-size:12px;color:#3730a3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .solCardMeta{margin-top:6px;font-size:12px;color:#4338ca} .solCardX{position:absolute;top:6px;left:6px;border:none;background:#111827;color:#fff;border-radius:999px;width:18px;height:18px;cursor:pointer;font-size:12px;line-height:18px;padding:0;display:flex;align-items:center;justify-content:center} .solCardActions{margin-top:8px;display:flex;gap:8px;align-items:center} .solFilterPill{border:none;cursor:pointer;padding:6px 10px;border-radius:999px;font-size:12px;background:#0ea5e9;color:#fff} .solFilterPill.on{background:#10b981} .airWarnBtn{border:none;background:#f59e0b;color:#111827;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:12px;line-height:1} .airWarnBtn:hover{filter:brightness(.95)} .airBox{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:10px 0 12px;color:#0f172a} .airBox h3{margin:0 0 8px;font-size:13px;color:#0f172a} .airGrid{display:flex;flex-wrap:wrap;gap:8px} .airCard{position:relative;background:#fff7ed;border:1px solid #fdba74;border-radius:12px;padding:10px;min-width:220px;max-width:520px} .airCardTitle{font-weight:800;font-size:12px;color:#9a3412;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .airCardMeta{margin-top:6px;font-size:12px;color:#7c2d12} .airCardX{position:absolute;top:6px;left:6px;border:none;background:#111827;color:#fff;border-radius:999px;width:18px;height:18px;cursor:pointer;font-size:12px;line-height:18px;padding:0;display:flex;align-items:center;justify-content:center} .airCardActions{margin-top:8px;display:flex;gap:8px;align-items:center} .airFilterPill{border:none;cursor:pointer;padding:6px 10px;border-radius:999px;font-size:12px;background:#0ea5e9;color:#fff} .airFilterPill.on{background:#10b981} .bellBtn{border:none;color:#fff;border-radius:8px;padding:6px 8px;cursor:pointer;font-size:12px;transition:filter .12s ease,box-shadow .12s ease,transform .12s ease} .bellBtn.status-green{background:#10b981} .bellBtn.status-yellow{background:#f59e0b;color:#111827} .bellBtn.status-red{background:#ef4444} .bellBtn.status-orange{background:#c2410c} .bellBtn.status-default{background:#0ea5e9} .bellBtn.on{box-shadow:0 0 0 3px rgba(15,23,42,.12);transform:translateY(-1px)} .bellBtn:hover{filter:brightness(.95)} .box{background:#fff;padding:12px;border-radius:10px;margin-top:12px;border:1px solid #e5e7eb;color:#0f172a} .sharedList .itemRow{display:flex;align-items:flex-start;gap:8px;margin-top:8px} .sharedList .itemRow.done .itemBody{text-decoration:line-through;color:#6b7280} .itemBody{flex:1;min-height:22px;padding:2px 0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word} .itemBody[contenteditable="true"]{outline:2px solid rgba(56,189,248,.45);border-radius:8px;padding:6px;background:#f8fafc} .iconBtn{border:none;background:none;cursor:pointer;font-size:14px;line-height:1} .trashIcon{display:inline-block;width:18px;height:18px;vertical-align:middle;background-repeat:no-repeat;background-position:center;background-size:contain;background-image:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22currentColor%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpolyline%20points=%223%206%205%206%2021%206%22/%3E%3Cpath%20d=%22M19%206l-1%2014a2%202%200%200%201-2%202H8a2%202%200%200%201-2-2L5%206%22/%3E%3Cpath%20d=%22M10%2011v6%22/%3E%3Cpath%20d=%22M14%2011v6%22/%3E%3Cpath%20d=%22M9%206V4a1%201%200%200%201%201-1h4a1%201%200%200%201%201%201v2%22/%3E%3C/svg%3E")} .markedBy{margin-top:6px;font-size:12px;color:#64748b} .obsArea{width:100%;min-width:220px;min-height:54px;padding:8px;border:1px solid #e5e7eb;border-radius:10px;outline:none;resize:vertical;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden} .obsArea:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.18)} .obsSaving{border-color:#f59e0b !important;box-shadow:0 0 0 3px rgba(245,158,11,.16) !important} .obsSaved{border-color:#10b981 !important;box-shadow:0 0 0 3px rgba(16,185,129,.14) !important} .ctxMenu{position:fixed;z-index:9999;display:none;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 18px 40px rgba(15,23,42,.18);padding:10px;min-width:300px;color:#0f172a} .ctxRow{display:flex;gap:8px;align-items:center;flex-wrap:wrap} .ctxTitle{font-size:12px;color:#64748b;margin-bottom:8px} .ctxBtn{height:34px;padding:0 10px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;cursor:pointer;font-size:13px} .ctxBtn:hover{filter:brightness(.98)} .ctxBtn.on{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.18)} .ctxSel{height:34px;padding:0 10px;border:1px solid #e5e7eb;border-radius:10px;background:#fff} .ctxColor{height:34px;width:44px;border:none;padding:0;cursor:pointer;background:transparent} .ctxApply{height:34px;padding:0 12px;border:none;border-radius:10px;background:#0ea5e9;color:#fff;cursor:pointer;font-size:13px} .ctxApply:hover{filter:brightness(.95)} .ctxHint{margin-top:8px;font-size:12px;color:#64748b} .linkBoard{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px} .linkCol{flex:1;min-width:260px;background:#0b1d33;border:1px solid #334155;border-radius:12px;padding:10px} .linkColHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;color:#e5e7eb} .linkColTitle{font-weight:800;font-size:13px;color:#38bdf8} .linkColCount{font-size:12px;color:#94a3b8} .linkDropZone{min-height:120px;display:flex;flex-direction:column;gap:10px} .linkCard{background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;color:#0f172a;box-shadow:0 6px 14px rgba(15,23,42,.08);cursor:grab} .linkCard:active{cursor:grabbing} .linkCard.dragging{opacity:.55} .linkCardTop{display:flex;align-items:center;justify-content:space-between;gap:10px} .linkCardName{font-weight:800;font-size:12px;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px} .linkCardSite{font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;margin-top:4px} .linkCardActions{display:flex;gap:6px;align-items:center} .linkTinyBtn{border:none;background:#0ea5e9;color:#fff;border-radius:8px;padding:6px 8px;cursor:pointer;font-size:12px;line-height:1} .linkTinyBtn.gray{background:#334155} .linkTinyBtn:hover{filter:brightness(.95)} .linkNote{margin-top:8px;width:100%;min-height:56px;border:1px solid #e5e7eb;border-radius:10px;padding:8px;font-size:12px;resize:vertical;outline:none;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word} .linkCol[data-col="sem"] .linkCard{border-color:#60a5fa} .linkCol[data-col="sem"] .linkCard:hover{box-shadow:0 0 0 3px rgba(96,165,250,.18)} .linkNote:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.18)} .linkCol.dragOver{outline:2px dashed rgba(56,189,248,.8);outline-offset:2px} .datePopup{position:fixed;z-index:10050;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;box-shadow:0 18px 40px rgba(15,23,42,.18);display:none;width:270px;color:#0f172a} .datePopup .dateHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px} .datePopup .dateHead .ttl{font-size:12px;color:#334155} .datePopup .dateNav{display:flex;gap:6px;align-items:center} .datePopup .dateBtn{border:none;background:#111827;color:#fff;border-radius:999px;width:26px;height:26px;cursor:pointer;line-height:26px} .datePopup .dateYM{font-weight:800;font-size:13px;color:#0f172a;min-width:120px;text-align:center} .datePopup .dateGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px} .datePopup .dow{font-size:11px;color:#64748b;text-align:center;padding:2px 0} .datePopup .day{border:1px solid #e5e7eb;background:#f8fafc;border-radius:10px;padding:6px 0;font-size:12px;cursor:pointer;text-align:center;user-select:none} .datePopup .day:hover{filter:brightness(.98);box-shadow:0 0 0 3px rgba(56,189,248,.18);border-color:#38bdf8} .datePopup .day.muted{opacity:.35;cursor:default;background:transparent;border-color:transparent;box-shadow:none} .datePopup .day.today{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.14)} .datePopup .day.sel{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.18);background:#ecfeff} .statusPopup{position:fixed;z-index:10050;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;box-shadow:0 18px 40px rgba(15,23,42,.18);display:none;width:220px;color:#0f172a;max-height:300px;overflow-y:auto} .statusPopupHead{font-size:12px;font-weight:bold;color:#64748b;margin-bottom:8px;border-bottom:1px solid #e5e7eb;padding-bottom:4px;display:flex;justify-content:space-between;align-items:center} .statusPopupClose{border:none;background:#111827;color:#fff;border-radius:999px;width:20px;height:20px;cursor:pointer;line-height:20px;display:flex;align-items:center;justify-content:center;font-size:12px} .statusOption{padding:8px 10px;font-size:12px;cursor:pointer;border-radius:8px;transition:background 0.2s;border-bottom:1px solid #f8fafc} .statusOption:hover{background:#f1f5f9;color:#0ea5e9;font-weight:bold} .statusOption.clear{color:#ef4444;font-weight:bold;margin-top:5px;border-top:1px solid #e5e7eb;border-bottom:none;text-align:center}
 
 /* ====================================================================
-   🚨 ESTILOS ESPECÍFICOS PARA MAJOR PARTS 🚨
-   ==================================================================== */
+   🚨 ESTILOS ESPECÍFICOS PARA MAJOR PARTS 🚨
+   ==================================================================== */
 tr.major-part-row { background-color: #fee2e2 !important; }
 .major-part-alert { color: #ef4444 !important; font-weight: 800 !important; }
 
@@ -17,101 +17,101 @@ tr.major-part-row { background-color: #fee2e2 !important; }
 <body>
 
 <div class="sidebar">
-  <h2>LOGÍSTICA AOG</h2>
-  <div class="clock" id="clock"></div>
-  <div class="connectedBox" id="connectedBox">
-    <div class="title">👥 Conectados</div>
-    <div class="item">Carregando…</div>
-  </div>
+  <h2>LOGÍSTICA AOG</h2>
+  <div class="clock" id="clock"></div>
+  <div class="connectedBox" id="connectedBox">
+    <div class="title">👥 Conectados</div>
+    <div class="item">Carregando…</div>
+  </div>
 
-  <div class="menu">
-    <button class="active" onclick="openTab('turno',this)">📓 Passagem de Turno</button>
-    <button onclick="openTab('avisos',this)">📢 Avisos da Gestão</button>
-    <button onclick="openTab('aog',this)">✈️ AOG</button>
-    <button onclick="openTab('war',this)">⚔️ War Room</button>
-    <button onclick="openTab('fast',this)">⚡ Fast Pass</button>
-    <button onclick="openTab('cargo',this)">📦 Cargo Heroes</button>
-    <button onclick="openTab('mro',this)">🧰 MRO</button>
-    <button onclick="openTab('acompanhamento',this)">📍 Acompanhamento</button>
-    <button onclick="openTab('cargas',this)">🚚 Cargas</button>
-    <button onclick="openTab('hotlist',this)">🔥 Hot List</button>
-    <button onclick="openTab('tools',this)">🛠️ Ferramentas</button>
-    <button onclick="openTab('links',this)">🔗 Links Úteis</button>
-    
-  </div>
-  <div style="display:none" id="clockBottom"></div>
+  <div class="menu">
+    <button class="active" onclick="openTab('turno',this)">📓 Passagem de Turno</button>
+    <button onclick="openTab('avisos',this)">📢 Avisos da Gestão</button>
+    <button onclick="openTab('aog',this)">✈️ AOG</button>
+    <button onclick="openTab('war',this)">⚔️ War Room</button>
+    <button onclick="openTab('fast',this)">⚡ Fast Pass</button>
+    <button onclick="openTab('cargo',this)">📦 Cargo Heroes</button>
+    <button onclick="openTab('mro',this)">🧰 MRO</button>
+    <button onclick="openTab('acompanhamento',this)">📍 Acompanhamento</button>
+    <button onclick="openTab('cargas',this)">🚚 Cargas</button>
+    <button onclick="openTab('hotlist',this)">🔥 Hot List</button>
+    <button onclick="openTab('tools',this)">🛠️ Ferramentas</button>
+    <button onclick="openTab('links',this)">🔗 Links Úteis</button>
+    
+  </div>
+  <div style="display:none" id="clockBottom"></div>
 </div>
 
 <div class="content">
-  <div id="status">Carregando…</div>
+  <div id="status">Carregando…</div>
 
-  <div id="turno" class="section active">
-    <h1>Passagem de Turno</h1>
-    <div id="frescorBanner" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#e5e7eb;">
-      <span style="font-size:16px">🟢</span>
-      <span id="frescorTexto">Aguardando primeira atualização…</span>
-      <span id="frescorContador" style="margin-left:auto; font-size:12px; color:#94a3b8;"></span>
-    </div>
-    <div class="noteRow">
-      <div id="turnoInput" class="noteInput" contenteditable="true" data-placeholder="Digite a passagem..."></div>
-      <div class="noteTools">
-        <button class="noteBtn" type="button" onclick="addTurno()">Adicionar</button>
-        <button class="noteBtn gray" type="button" onclick="refreshNowUrl()">Atualizar agora (URL)</button>
-        <button class="noteBtn orange" type="button" onclick="forceUpdateNow()">Forçar atualização (Sheets)</button>
-      </div>
-    </div>
-    <div class="box sharedList" id="turnoList"></div>
-  </div>
+  <div id="turno" class="section active">
+    <h1>Passagem de Turno</h1>
+    <div id="frescorBanner" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#e5e7eb;">
+      <span style="font-size:16px">🟢</span>
+      <span id="frescorTexto">Aguardando primeira atualização…</span>
+      <span id="frescorContador" style="margin-left:auto; font-size:12px; color:#94a3b8;"></span>
+    </div>
+    <div class="noteRow">
+      <div id="turnoInput" class="noteInput" contenteditable="true" data-placeholder="Digite a passagem..."></div>
+      <div class="noteTools">
+        <button class="noteBtn" type="button" onclick="addTurno()">Adicionar</button>
+        <button class="noteBtn gray" type="button" onclick="refreshNowUrl()">Atualizar agora (URL)</button>
+        <button class="noteBtn orange" type="button" onclick="forceUpdateNow()">Forçar atualização (Sheets)</button>
+      </div>
+    </div>
+    <div class="box sharedList" id="turnoList"></div>
+  </div>
 
-  <div id="aog" class="section"><h1>AOG</h1><div id="air-aog"></div><div id="sol-aog"></div><div id="prio-aog"></div><div class="tableWrap"><table id="tbl-aog"></table></div></div>
-  <div id="war" class="section"><h1>War Room</h1><div id="air-war"></div><div id="sol-war"></div><div id="prio-war"></div><div class="tableWrap"><table id="tbl-war"></table></div></div>
-  <div id="fast" class="section"><h1>Fast Pass</h1><div id="air-fast"></div><div id="sol-fast"></div><div id="prio-fast"></div><div class="tableWrap"><table id="tbl-fast"></table></div></div>
-  <div id="cargo" class="section"><h1>Cargo Heroes</h1><div id="air-cargo"></div><div id="sol-cargo"></div><div id="prio-cargo"></div><div class="tableWrap"><table id="tbl-cargo"></table></div></div>
-  <div id="mro" class="section"><h1>MRO</h1><div id="air-mro"></div><div id="sol-mro"></div><div id="prio-mro"></div><div class="tableWrap"><table id="tbl-mro"></table></div></div>
-  <div id="acompanhamento" class="section"><h1>Acompanhamento</h1><div id="air-acompanhamento"></div><div id="sol-acompanhamento"></div><div id="prio-acompanhamento"></div><div class="tableWrap"><table id="tbl-acompanhamento"></table></div></div>
-  <div id="cargas" class="section"><h1>Cargas</h1><div id="air-cargas"></div><div id="sol-cargas"></div><div id="prio-cargas"></div><div class="tableWrap"><table id="tbl-cargas"></table></div></div>
-  <div id="hotlist" class="section"><h1>Hot List</h1><div id="air-hotlist"></div><div id="sol-hotlist"></div><div id="prio-hotlist"></div><div class="tableWrap"><table id="tbl-hotlist"></table></div></div>
-  <div id="tools" class="section"><h1>Ferramentas</h1><div id="air-tools"></div><div id="sol-tools"></div><div id="prio-tools"></div><div class="tableWrap"><table id="tbl-tools"></table></div></div>
+  <div id="aog" class="section"><h1>AOG</h1><div id="air-aog"></div><div id="sol-aog"></div><div id="prio-aog"></div><div class="tableWrap"><table id="tbl-aog"></table></div></div>
+  <div id="war" class="section"><h1>War Room</h1><div id="air-war"></div><div id="sol-war"></div><div id="prio-war"></div><div class="tableWrap"><table id="tbl-war"></table></div></div>
+  <div id="fast" class="section"><h1>Fast Pass</h1><div id="air-fast"></div><div id="sol-fast"></div><div id="prio-fast"></div><div class="tableWrap"><table id="tbl-fast"></table></div></div>
+  <div id="cargo" class="section"><h1>Cargo Heroes</h1><div id="air-cargo"></div><div id="sol-cargo"></div><div id="prio-cargo"></div><div class="tableWrap"><table id="tbl-cargo"></table></div></div>
+  <div id="mro" class="section"><h1>MRO</h1><div id="air-mro"></div><div id="sol-mro"></div><div id="prio-mro"></div><div class="tableWrap"><table id="tbl-mro"></table></div></div>
+  <div id="acompanhamento" class="section"><h1>Acompanhamento</h1><div id="air-acompanhamento"></div><div id="sol-acompanhamento"></div><div id="prio-acompanhamento"></div><div class="tableWrap"><table id="tbl-acompanhamento"></table></div></div>
+  <div id="cargas" class="section"><h1>Cargas</h1><div id="air-cargas"></div><div id="sol-cargas"></div><div id="prio-cargas"></div><div class="tableWrap"><table id="tbl-cargas"></table></div></div>
+  <div id="hotlist" class="section"><h1>Hot List</h1><div id="air-hotlist"></div><div id="sol-hotlist"></div><div id="prio-hotlist"></div><div class="tableWrap"><table id="tbl-hotlist"></table></div></div>
+  <div id="tools" class="section"><h1>Ferramentas</h1><div id="air-tools"></div><div id="sol-tools"></div><div id="prio-tools"></div><div class="tableWrap"><table id="tbl-tools"></table></div></div>
 
-  <div id="links" class="section">
-    <h1>Links Úteis</h1>
-    <div class="box" id="linksTopBox" style="display:none">
-      Links compartilhados pelo time:
-      <div class="linkPills" id="linksPills"></div>
-      <div class="linkAddRow">
-        <button class="noteBtn" type="button" title="Adicionar link" onclick="toggleLinkAdd()">＋</button>
-        <input id="linkAddInput" class="linkAddInput" style="display:none" placeholder="Ex: SHEETS CASA NOVA https://docs.google.com/..." onkeydown="if(event.key==='Enter'){addLinkFromInput();}">
-      </div>
-    </div>
-      <div class="box" style="margin-top:12px;background:#0f172a;border-color:#334155;color:#e5e7eb">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div style="font-weight:800;color:#38bdf8">🧩 Classificação de Links</div>
-          <div style="font-size:12px;color:#94a3b8">Arraste os balões para as colunas • Clique para abrir o link</div>
-          <div id="linkAddDock" style="margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap"></div>
-        </div>
-        <div class="linkBoard" id="linkBoard"></div>
-      </div>
-  </div>
+  <div id="links" class="section">
+    <h1>Links Úteis</h1>
+    <div class="box" id="linksTopBox" style="display:none">
+      Links compartilhados pelo time:
+      <div class="linkPills" id="linksPills"></div>
+      <div class="linkAddRow">
+        <button class="noteBtn" type="button" title="Adicionar link" onclick="toggleLinkAdd()">＋</button>
+        <input id="linkAddInput" class="linkAddInput" style="display:none" placeholder="Ex: SHEETS CASA NOVA https://docs.google.com/..." onkeydown="if(event.key==='Enter'){addLinkFromInput();}">
+      </div>
+    </div>
+      <div class="box" style="margin-top:12px;background:#0f172a;border-color:#334155;color:#e5e7eb">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="font-weight:800;color:#38bdf8">🧩 Classificação de Links</div>
+          <div style="font-size:12px;color:#94a3b8">Arraste os balões para as colunas • Clique para abrir o link</div>
+          <div id="linkAddDock" style="margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap"></div>
+        </div>
+        <div class="linkBoard" id="linkBoard"></div>
+      </div>
+  </div>
 
-  <div id="avisos" class="section">
-    <h1>Avisos da Gestão</h1>
-    <div class="noteRow">
-      <div id="avisoInput" class="noteInput" contenteditable="true" data-placeholder="Digite o aviso..."></div>
-      <div class="noteTools"><button class="noteBtn" type="button" onclick="addAviso()">Adicionar</button></div>
-    </div>
-    <div class="box sharedList" id="avisosList"></div>
-  </div>
+  <div id="avisos" class="section">
+    <h1>Avisos da Gestão</h1>
+    <div class="noteRow">
+      <div id="avisoInput" class="noteInput" contenteditable="true" data-placeholder="Digite o aviso..."></div>
+      <div class="noteTools"><button class="noteBtn" type="button" onclick="addAviso()">Adicionar</button></div>
+    </div>
+    <div class="box sharedList" id="avisosList"></div>
+  </div>
 </div>
 
 <div id="ctxMenu" class="ctxMenu">
-  <div class="ctxTitle">Formatação (selecione o texto → botão direito → ajustar → Aplicar)</div>
-  <div class="ctxRow">
-    <button id="ctxBold" class="ctxBtn" type="button" title="Negrito">B</button>
-    <select id="ctxFont" class="ctxSel" title="Tamanho da fonte"><option value="10">10</option><option value="12" selected>12</option><option value="14">14</option><option value="16">16</option><option value="18">18</option><option value="20">20</option></select>
-    <input id="ctxColor" class="ctxColor" type="color" value="#0f172a" title="Cor">
-    <button id="ctxApply" class="ctxApply" type="button">Aplicar</button>
-  </div>
-  <div class="ctxHint">Dica: o texto só muda quando você clicar em <b>Aplicar</b>.</div>
+  <div class="ctxTitle">Formatação (selecione o texto → botão direito → ajustar → Aplicar)</div>
+  <div class="ctxRow">
+    <button id="ctxBold" class="ctxBtn" type="button" title="Negrito">B</button>
+    <select id="ctxFont" class="ctxSel" title="Tamanho da fonte"><option value="10">10</option><option value="12" selected>12</option><option value="14">14</option><option value="16">16</option><option value="18">18</option><option value="20">20</option></select>
+    <input id="ctxColor" class="ctxColor" type="color" value="#0f172a" title="Cor">
+    <button id="ctxApply" class="ctxApply" type="button">Aplicar</button>
+  </div>
+  <div class="ctxHint">Dica: o texto só muda quando você clicar em <b>Aplicar</b>.</div>
 </div>
 
 <div id="datePopup" class="datePopup"></div>
@@ -122,51 +122,46 @@ tr.major-part-row { background-color: #fee2e2 !important; }
 // ✅ 1. VARIÁVEL E ID DA PLANILHA PARA LER A ABA "MAJOR PART" DIRETAMENTE
 // =========================================================================
 
-const SPREADSHEET_ID = "1QmS-uwGOmew98THL2_odh8HwnCVdoNMHf74GsNP1ljg"; 
+const SPREADSHEET_ID = "1QmS-uwGOmew98THL2_odh8HwnCVdoNMHf74GsNP1ljg"; 
 let MAJOR_PARTS = [];
+
 // ==========================================
-// 🚨 LISTA DE MAJOR PARTS COMPLETA 🚨
+// 🚨 LISTA DE MAJOR PARTS COMPACTA 🚨
 // ==========================================
-const MAJOR_PARTS_RAW = `
-98d53103500000 113T6100-89G 113T6100-89SP 113T6002-1SP 113T6100-7SP 113T6100-87SP 113T6100-90G 113W7003-107 113W7003-105 113W7003-103 113W7003-109 113W7003-501 113W7003-106 113W7003-108 113W7003-104 113W7003-502 113W7003-110 137Z0001-1-11 137Z0001-1-12 137Z0001-501-7 137Z0001-501-2 137Z0001-501-4 137Z0001-502-6 137Z0001-1-13 137Z0001-501-9 137Z0001-1-10 137Z0001-502-5 137Z0001-502-3 137Z0001-502-4 137Z0001-501-5 137Z0001-501-3 137Z0001-2-12 137Z0001-502-6 137Z0001-502-9 137Z0001-502-5 137Z0001-2-13 137Z0001-502-2 137Z0001-502-3 137Z0001-502-4 137Z0001-2-11 137Z0001-502-7 137Z0001-2-10 D5547100400000 H D5547100600000 D5547100600200 D5547100001200 D5547100000200 D5547100601200 D5547100200000 D5547100100000 D5547100002000 D5547100001800 D5547100601000 D5547100600600 D5547100001400 D5547100600400 D5547100400000 D5547100600800 D5547100001600 173W0062-313 173W0062-309 173W0062-311 173W0062-307 183W0061-17B 183W0061-22B 183W0061-18B D5528000101300 D55280002001 D55280001009 D5528000100195 D55280001005 D5528000300700 D5528000303300 D5528000303100 D5528000200300 D5528000300100 D5528000303900 D5528000100500 D55280003031 D5528000100100 D5528000303500 D55280003013 D5528000100900 D5528000302700 D5528000302100 D5528000100152 D5528000100352 D5528000301100 D5528000100951 D5528000300500 D5528000100300 D5528000301300 D5528000101100 D5528000200100 D5528000100751 D5528000302900 D5528000101351 D5528000301500 D5528000300900 D5528000100595 D5528000301700 D5528000101151 D5528000200151 D55280003015 D5528000100151 D5528000100551 D55280001001 D5528000300300 D5528000302300 D5528000303700 D5528000301900 D5528000101300 D5528000302500 D5528000101200 D5528000101000 D5528000100496 D5528000300800 D5528000302200 D5528000302400 D55280003016 D5528000303800 D55280003036 D5528000100096 D5528000100490 D5528000100495 D5528000101251 D5528000301800 D5528000200200 D5528000301600 D5528000101200 D5528000100095 D5528000100200 D5528000302000 D5528000303000 D5528000303400 D55280003012 D5528000100000 D5528000101051 D5528000100851 D5528000302800 D5528000303600 D55280003030 D5528000301400 D5528000301200 D55280001004 D5528000300000 D5528000100800 D5528000300600 D5528000301000 D5528000300400 D5528000303200 D55280003014 D5528000100451 D5528000300200 D5528000304000 D5528000200051 D5528000100252 D55280001010 D5528000100400 D5528000302600 D5528000200000 D5528000100052 D5528000100651 WW030ANABAAA WW030AHABAAA WW030AGABAAA WW030AKABAAA WW030APABAAA WW030ARABAAA WW030ALABAAA WW031AJABAAA WW031AQABAAA WW031AFABAAA WW031AGABAAA WW031AKABAAA WW031AMABAAA WW031ANABAAA 113T2301-7SP 113T2301-39G 113T2301-33G 113T2301-7A 113T2301-37G 113T2301-31G 113T2301-33SP 113T2301-31SP 113T2301-32G 113T2301-34G 113T2301-38G 113T2301-8A 113T2301-34SP 113T2301-8SP 113T2301-32SP 113W2100-61 113W2100-53 113W2100-54 113W2100-62 133Z0001-1-5032 133Z0001-1-5034 133Z0001-501-6 133Z0001-1-5031 133Z0001-3-3 133Z0001-501-4 133Z0001-501-9 133Z0001-501-13 133Z0001-1-10 133Z0001-1-8 133Z0001-501-5 133Z0001-3-4 133Z0001-501-10 133Z0001-2-5031 133Z0001-502-4 133Z0001-502-5 133Z0001-502-9 133Z0001-2-10 133Z0001-4-4 133Z0001-4-3 133Z0001-502-13 133Z0001-502-10 133Z0001-2-5034 133Z0001-502-6 133Z0001-2-8 133Z0001-2-5032 132Z0001-1-5013 132Z0001-1-10 132Z0001-1-19 132Z0001-501-11 132Z0001-501-4 132Z0001-501-9 132Z0001-3-2 132Z0001-501-8 132Z0001-1-18 132Z0001-1-5019 132Z0001-501-6 132Z0001-3-3 132Z0001-501-5 132Z0001-1-17 132Z0001-502-6 132Z0001-2-5019 132Z0001-502-4 132Z0001-2-18 132Z0001-2-10 132Z0001-502-5 132Z0001-502-8 132Z0001-2-5013 132Z0001-502-9 132Z0001-2-17 132Z0001-502-11 132Z0001-2-19 132Z0001-4-2 113W3003-501 113W3003-21 113A3172-16 113W3003-502 113W3003Y502 113W3003-22 113T3100-93SP 113T3100-95G 113T3100-89 113T3100-103G 113T3100-77 113T3100-93G 113T3100-401G 113T3100-104G 113T3100-402G 113T3100-94G 113T3100-94SP 113T3100-90 113T3100-78 113T3100-96G D5757075000600 D5757075000400 D5757075000200 D5757075000000 D5757075001000 D5757075001200 D5757075000800 D5757075000500 D5757075000700 D5757075001100 D5757075000100 D5757075000300 D5757075001300 D5757075000900 114T3100-41 114T3100-31 114T3100-51SP 114T3100-401SP 114T3100-405SP 114T3100-43 114T3100-413SP 114T3100-55SP 114T3100-47 114T3100-37 015T1507-627 114T3100-21SP 015T1507-669 114T3100-27 114T3100-45 114T3100-413G 114T3100-53SP 114T3100-51G 114T3100-39 114T3100-23 114T3100-49SP 114T3100-402G 114T3100-402SP 114T3100-48 114T3100-414SP 114T3100-54SP 114T3100-406G 114T3100-38 015T1507-628 114T3100-42 015T1507-630 114T3100-406SP 114T3100-32 114T3100-52SP 114T3100-56SP 114T3100-52G 114T3100-50SP 114T3100-22SP 114T3100-46 114T3100-40 114T3100-56G 114T3100-44 114T3100-28 114T3100-414G 114T3100-24 767-3600-1573 114T4101-61SP 015T1507-147 114T4101-63G 114T4101-67G 114T4101-59SP 767-3600-59G3 114T4101-43 767-3600-31A5 114T4101-31SP 114T4101-59G 114T4101-49 114T4101-31A 114T4101-47 015T1507-151 114T4101-51G 114T4101-57G 767-3600-433 114T4180-62 114T4101-51SP 015T1507-157 114T4101-63SP 114T4180-90 767-3600-31A3 114T4101-53G 114T4101-57SP 767-3600-52G4 767-3600-65G3 114T4101-35 114T4101-61G 114T4101-65G 015T1507-143 015T1507-145 767-3600-58G6 114T4101-53SP 767-3600-57G3 015T1507-152 114T4101-32A 114T4101-58G 015T1507-144 114T4101-58SP 114T4101-62SP 114T4101-54G 114T4101-64G 114T4101-62G 114T4101-68G 114T4101-54SP 767-3600-444 114T4101-60G 114T4101-66G 114T4101-60SP 114T4101-50 114T4101-36 015T1507-158 114T4101-48 114T4101-52SP 767-3600-66G4 114T4101-44 114T4101-64SP 114T4101-32SP 114T4101-52G 114T4102-401G 767-3601-51G1 114T4102-53SP 114T4102-31 767-3601-407G1 114T4102-41 015T1507-265 114T4102-51SP 114T4102-51G 767-3601-52G2 114T4102-25SP 114T4102-407G 767-3601-411 114T4102-403G 767-3601-405G1 114T4102-47 114T4102-49 114T4102-405G 114T4102-31 114T4102-50 767-3601-406G2 767-3601-404G1 114T4102-26SP 114T4102-48 114T4102-54SP 114T4102-408G 114T4102-42 767-3601-408G2 767-3601-322 114T4102-52SP 114T4102-402G 114T4102-406G 114T4102-52G 767-3601-422 114T4102-404G 015T1507-266 114T4102-32 767-3602-401G1 114T4103-41 767-3602-403G1 114T4103-401G 114T4103-413G 114T4103-403G 114T4103-37SP 114T4103-417G 767-3602-411 767-3602-413G1 114T4103-409G 114T4103-49 114T4104-49 114T4104-57G 114T4104-403G 114T4104-41 114T4104-57SP 114T4104-53 114T4104-37SP 015T1507-433 114T4104-401G 114T4104-405G 114T4104-59G 114T4104-59SP 114T4104-407G 114T4104-51 114T4104-55 114T4104-404G 114T4104-58G 114T4104-50 114T4104-56 114T4104-408G 114T4104-402G 114T4104-60SP 114T4104-406G 114T4104-58SP 114T4104-38SP 114T4104-52 114T4104-42 114T4104-54 114T4180-63 114T4105-189 114T4105-203SP 114T4105-203G 114T4105-193 114T4105-187 114T4105-31 114T4105-209SP 114T4105-47 114T4105-405G 114T4105-199SP 114T4105-57 114T4105-21 114T4105-188 015T1507-718 114T4105-46 114T4105-186 114T4105-190 114T4105-204SP 114T4105-202SP 114T4105-210SP 114T4105-204G 114T4105-194 114T4105-402G 114T4105-406G 114T4105-208SP 654T0513-1368 114T4105-58 114T4105-200SP 767-3602-418G2 114T4103-418G 767-3602-404G2 114T4103-414G 767-3602-414G2 654T0513-1364 767-3602-410G2 141Z0201-503-2 141Z0201-503-3 141Z0201-503-4 141Z0201-21-5 141Z0201-31-2 141Z0201-503-6 141Z0201-21-3 141Z0201-31-1 141Z0201-21-1 141Z0201-21-2 141Z0201-503-5 141Z0201-503-1 141Z0201-503-10 141Z0201-31-3 141Z0201-504-3 141Z0201-22-5 141Z0201-504-1 141Z0201-504-4 141Z0201-22-3 141Z0201-504-2 141Z0201-504-6 141Z0201-504-5 141Z0201-22-1 141Z0201-22-2 141Z0201-32-3 141Z0201-32-1 141Z0201-32-2 141Z0201-504-10 142Z0201-503-1 142Z0201-503-2 142Z0201-505-2 142Z0201-21-3 142Z0201-31-1 142Z0201-21-2 142Z0201-503-7 142Z0201-33-1 142Z0201-503-5 142Z0201-21-5 142Z0201-21-1 142Z0201-503-3 142Z0201-503-4 142Z0201-506-2 142Z0201-504-1 142Z0201-504-2 142Z0201-504-4 142Z0201-22-1 142Z0201-22-2 142Z0201-22-5 142Z0201-22-3 142Z0201-504-7 142Z0201-32-1 142Z0201-504-3 142Z0201-34-1 142Z0201-504-5 143Z0201-31-1 143Z0201-503-4 143Z0201-23-2 143Z0201-23-1 143Z0201-505-3 143Z0201-503-5 143Z0201-21-2 143Z0201-33-1 143Z0201-503-3 143Z0201-21-3 143Z0201-503-7 143Z0201-21-1 143Z0201-503-1 143Z0201-503-2 143Z0201-504-2 143Z0201-504-7 143Z0201-32-1 143Z0201-24-2 143Z0201-504-3 143Z0201-504-5 143Z0201-504-4 143Z0201-22-1 143Z0201-22-2 143Z0201-506-3 143Z0201-24-1 143Z0201-34-1 143Z0201-22-3 143Z0201-504-1 144Z0201-504-4 144Z0201-504-3 144Z0201-504-2 144Z0201-32-1 144Z0201-22-2 144Z0201-22-3 144Z0201-504-7 144Z0201-22-5 144Z0201-22-1 144Z0201-508-2 144Z0201-504-5 144Z0201-504-1 144Z0201-34-2 144Z0201-503-1 144Z0201-503-2 144Z0201-21-3 144Z0201-31-1 144Z0201-503-7 144Z0201-33-2 144Z0201-507-2 144Z0201-503-5 144Z0201-503-3 144Z0201-503-4 145Z0201-505-6 145Z0201-505-3 145Z0201-21-8 145Z0201-31-1 145Z0201-505-1 145Z0201-35-1 145Z0201-27-1 145Z0201-507-2 145Z0201-37-1 145Z0201-505-2 145Z0201-25-4 145Z0201-505-4 145Z0201-26-4 145Z0201-506-4 145Z0201-506-2 145Z0201-28-1 145Z0201-32-1 145Z0201-38-1 145Z0201-506-1 145Z0201-508-2 145Z0201-22-8 145Z0201-506-6 145Z0201-506-3 145Z0201-36-1 146Z0201-504-7 146Z0201-504-3 146Z0201-26-1 146Z0201-502-2 146Z0201-32-3 146Z0201-34-2 146Z0201-504-1 146Z0201-504-5 146Z0201-24-4 146Z0201-504-2 146Z0201-504-4 146Z0201-32-2 146Z0201-25-1 146Z0201-33-2 146Z0201-503-4 146Z0201-503-1 146Z0201-31-3 146Z0201-503-7 146Z0201-503-2 146Z0201-31-2 146Z0201-503-3 146Z0201-23-4 146Z0201-503-5 114W2100-109 114W2100-111 114W2100-110 114W2100Y110 114W2100-112 114W5110-9 114W5110-3 114W5110-7 114W5110-5 114W5110-1 114W5110-6 114W5110-4 114W5110-2 114W5110-8 114W5110-10 114W4120-111 114W4120-107 114W4120-109 114W4120-105 114W4120-103 114W4120-101 114W4120-110 114W4120-112 114W4120-104 114W4120-108 114W4120-106 114W4120-102 114W4130-101 114W4130-105 114W4130-111 114W4130-103 114W4130-109 114W4130-107 114W4130-102 114W4130-110 114W4130-108 114W4130-106 114W4130-104 114W4130-112 114W4140-103 114W4140-101 114W4140-107 114W4140-105 114W4140-109 114W4140-111 114W4140-104 114W4140-112 114W4140-110 114W4140-108 114W4140-106 114W4140-102 114W4150-105 114W4150-109 114W4150-103 114W4150-111 114W4150-101 114W4150-107 114W4150-112 114W4150-102 114W4150-110 114W4150-106 114W4150-104 114W4150-108 114W4160-101 114W4160-103 114W4160-109 114W4160-107 114W4160-105 114W4160-106 114W4160-102 114W4160-108 114W4160-104 114W4160-110 D5746067700400 D57460910002 D5746091500000 D5746067700200 D5746091000200 D5746016800800 D5746091000000 D5746067700000 D5746091000400 D5746067700400 D5746060000800 D5746016801000 D5746067700500 D5746016800100 D5746060000900 D5746091000300 D5746016801100 D5746067700100 D5746091500100 D5746091000100 D5746067700500 D5746016800900 D5746067700300 D5746091000500 D5746027700200 D5746092000200 D5746027800000 D5746027801000 D5746027700200 D5746027700000 D5746092000000 D5746027800800 D5746027800600 D5746092000400 D5746027700300 D5746092000500 D5746027801100 D5746027800700 D5746027700300 D5746092000300 D5746027700100 D5746027800900 D5746092000100 D5746037700200 D5746093000200 D5746037700200 D5746037800800 D5746030000600 D5746037700000 D5746093000400 D5746037801000 D5746093000000 D5746037700300 D5746093000300 D5746037700300 D5746037700100 D5746037800900 D5746093000500 D5746037801100 D5746093000100 D5746047700200 D5746047700000 D5746047700200 D5746047800400 D5746094000400 D5746047800600 D5746047800800 D5746094000000 D5746047801000 D5746094000200 D5746047700300 D5746047700300 D5746047800700 D5746047801100 D5746094000300 D5746094000100 D5746047800900 D5746047700100 D5746094000500 D5746057700200 D5746059800800 D5746095000200 D5746057700000 D5746095000000 D57460577002 D5746095000600 D5746057700200 D5746095000400 D5746059801000 D5746057700300 D5746095000300 D5746057700100 D5746095000700 D5746057700300 D5746059800900 D5746059801100 D5746095000100 D5746095000500 161T0000-825 161T0000-807 161T0000-695 161T0000-605 161T0000-673 161T0000-625 161T0000-665 161T0000-821 161T0000-783 161T0000-823 161T0000-229 161T0000-793 161T0000-799 161T0000-759 161W2100-9 161W2100-5 161W1100-23 161W2100-3 161W2100-7 161T0000-655 161T0000-674 161T0000-794 161T0000-760 161T0000-372 161T0000-626 161T0000-666 161T0000-800 161T0000-826 161T0000-824 161T0000-696 161T0000-822 161T0000-606 161T0000-784 161T0000-808 161T0000-656 161W0000-53 161W0000-45 161W0000-65 161W0000-55 161W0000-54 161W0000-56 161W0000-66 161W0000-46 201581001 201581001 10-450101-000 201521001 10-450101-002 201659001 201376001 10-452901-001 10-450101-001 201581002 201581002 201659002 10-450201-002 10-453001-001 201376002 201521002 10-450201-000 10-450201-001 10-355505-000 10-355503-001 10-355504-000 10-355604-000 10-355605-000 10-355603-001 510Z1210-31 510Z1210-35 510Z1210-25 510Z1210-511 510Z1210-33 510Z1210-507 510Z1210-27 510Z1210-37 510Z1210-503 510Z1210-26 510Z1210-508 510Z1210-36 510Z1210-28 510Z1210-504 510Z1210-38 510Z1210-512 510Z1210-32 510Z1210-34 162A1100-5 162A1100-13 162A1100-9 162A1100-7 162A1100-14 162A1100-11 162A1100-6 162A1100-10 162A1100-4 162A1100-8 162W0000-18 162W0000-16 162W0000-14 162A0001-1 162A1100-5 162A0001-6 162T0000-602 162T0000-608 162T0000-194 162T0000-377 162T0000-234 162T0000-505 162T0000-619 162T0000-350 162T0000-195 162T0000-611 162T0000-195 D23596000-2 D23596000-1 D23596000-3 D23073000-7 D23596000 D23073000-8 10-375601-001 10-375601-000 D23596000-2 D23589530-3 D23589520-11 D23175005-7 D23757550-4 D23589000-10 D23589510 D23757550-7 D23757560 D23589520-11 10-375902-000 D23175005-6 D23589520-7 D23757550-3 10-375901-000 D23757500-8 D23589020-1 D23589000-1 D23757500-6 D23589520-10 D23589520-9 D23757550-6 D23757550-2 D23589510-7 D23589520 D23757500-7 10-375902-002 D23589520-6 10-375902-001 D23589520-3 D23589520-4 D23589520-12 D23175005-16 D23589520-2 D23589520-1 D23757500-9 520Z1110-502 520Z1110-19 520Z1110-503 520Z1110-15 520Z1110-17 520Z1110-16 520Z1110-501 520Z1110-504 520Z1110-505 6406A0000-02 6406A0000-01 4816A0000-05 4816A0000-06 284T0052-41 284T0052-21 284T0052-24 284T0052-13 284T0052-35 284T0052-39 414Z7110-2 414Z7110-1 5195-200-6 5195-200-11 D53132010000 D5311047700006 D5311047700003 D5311047700007 D5311047700005 D53132210000 D5313201000000 D53132110000 D5311047700004 D53132010000 V53132110000 V53132010000 314W1400-9 314W1400-9SP 314W1400-24SP 314W1400-24 314W1400-32 314W1086-7SP 314W1086-11SP 314W1086-19SP 314W1500-13SP 314W1086-15SP 314W1086-7 314W1086-21SP 314W1086-17SP 314W1086-9SP 314W1086-13SP 314W1500-15SP 314W1086-20SP 314W1500-10SP 314W1086-12 314W1086-8SP 314W1086-12SP 314W1086-120 314W1086-16SP 314W1500-8SP 314W1086-10 314W1086-10SP 314W1086-18SP 314W1086-22SP 314W1086-14SP 315W1298-27SP 315W1298-5023 315W1298-23SP 315W1298-49SP 315W1298-5027 315W1298-51SP 315W1298-25SP 315W1298-5025 315W1298-24SP 315W1298-50SP 315W1298-5024 315W1298-30SP 315W1298-26SP 315W1298-5030 315W1298-52SP 315W1298-5026 323Z2000-1529 323Z2000-1503 323Z2000-1041 323Z2000-1039 323Z2000-1507 323Z2000-1033 323Z2000-1029 323Z2000-1031 323Z2000-1515 323Z2000-1030 323Z2000-1040 323Z2000-1516 323Z2000-1042 323Z2000-1530 323Z2000-1508 323Z2000-1034 323Z2000-1032 323Z2000-1504 183T2001-37G 183T2001-33 183T2001-29 183T2001-37SP 183T2001-38G 183T2001-30 183T2001-34 183T2001-38SP 183T3001-15G 183T3001-7 183T3001-11G 183T3001-13G 183T3001-9 183T3001-11SP 183T3001-12G 183T3001-8 183T3001-16G 183T3001-10 183T3001-14G 183T3001-12SP 654T0513-187 173T2001-23 173T2001-29 173T2001-10 173T2001-4 WV003AMAAAAA WV003ASAAAAA WV003BAAAAAA WV003BBAAAAA WV003ALAAAAA WV003AKAAAAA WV003BDAAAAA 767-0010-103 767-0010-3 767-0010-5 767-0010-7 767-0010-1 767-0010-101 767-0010-6 767-0010-104 767-0010-8 767-0010-2 767-0010-102 767-0010-4 D5735672000601 D5735672000400 D5735690300000 D5735690300200 D5735690300201 D5735672000600 D5735690300001 D5735672000401 D5735672000701 D5735672000500 D5735690300101 D5735672000501 D5735690300301 D5735690300300 D5735672000700 D5735690300100 WQ102AGAAAAA WQ102ADAAAAA WQ102AEAAAAA WR102AFAAAAA WR102AEAAAAA WR102AKAAAAA WQ103AHAAAAA WQ103AKAAAAA WR103AFAAAAA WR103AKAAAAA WQ104AFAAAAA WQ104AHAAAAA WR104AEAAAAA WR104AJAAAAA WQ105AEAAAAA WQ105AJAAAAA WQ105AGAAAAA WR105AJAAAAA WR105AEAAAAA WR105ADAAAAA WQ106AHAAAAA WQ106AEAAAAA WR106AFAAAAA WR106AKAAAAA WQ107AFAAAAA WQ107ADAAAAA WR107AEAAAAA WR107AJAAAAA D5757065002600 D5757065000600 D5757065001000 D5757065001800 D5757065001400 D5757065002600 D5757065001600 D5757065003200 D5757065000400 D5757065004000 D5757065005400 D5757065005200 D5757305006600 D5757065003800 D5757065001695 D5757065003000 D5757065001200 D5757065000200 D5757305004200 D5757065002800 D5757065004200 D5757305006200 D5757065003400 D5757053000000 D5757305003800 D5757065004600 D5757065003600 D5757065002000 D5757053000200 D5757305006400 D5757065000800 D5757065005000 D5757305006451 D5757065003451 D5757305005000 D5757065002700 D5757065002500 D5757065004700 D5757065003900 D5757305006700 D5757065003500 D5757065005300 D5757305004300 D5757065003551 D5757065002700 D5757065002900 D5757065002300 D5757065003100 D5757065002195 D5757065004100 D5757065001300 D5757305003900 D5757065002100 D5757305006300 D5757065005100 D5757053000100 D5757065004300 D5757305005100 D5757065001900 D5757065003700 D5757065003300 D5757065001700 D5757305006551 D5757065005500 D5757305006500 D5757420200200 D5757420200200 D5757420200000 D5758550101200 D5757440000600 D5758550102400 D5757420201600 D5758550001200 D5757440000000 D5757440000200 D5757420200400 D5758550100800 D5758550100600 D5758550102000 D5757440000800 D5757420201000 D5758550101600 D5757420201800 D5757420200800 D57571008000000000 D5757440001000 D5758550102200 D5757100602600 D5757420201200 D5757440000400 D5757420200600 D5757420202000 D5757100800000 D5758550101800 D5757100700000 D5757100601400 D5757420200300 D5757440000500 D57571008001000000 D5758550001900 D5757440000700 D5758550102500 D5757440000900 D5757440000300 D5757420200700 D5758550101900 D5757420201900 D5757440001100 D5757420200100 D5758550100700 D5757420200900 D5757440000100 D5757420200300 D5758550101300 D5757100800100 D5758550100900 D5757420201300 D5758550102300 D5757420202100 D5758550101700 D5758550102100 D5757420201100 D5757420201700 D5757100700100 D5757420200500 WQ209BLAAAAA WQ209BWAAAAA WQ209BCAAAAA WQ209BVAAAAA WQ209ATAAAAA WQ209AYAAAAA WQ209AZAAAAA WR209AYAAAAA WR209BBAAAAA WR209BSAAAAA WR209BTAAAAA WR209AWAAAAA WR209BJAAAAA WR209AZAAAAA WQ210BGAAAAA WQ210AMAAAAA WQ210BAAAAA WQ210ANAAAAA WQ210ARAAAAA WQ210BEAAAAA WR210BAAAAA WR210ALAAAAA WR210BEAAAAA WR210ANAAAAA WR210ASAAAAA WR210BGAAAAA D5764000000600Z D5764000001008A D576500000038A D5764000001000A D5764000001238A D5764000001018A D5765000000638A D5764000000800Z D5764000000400Z D5765000000838A D5764000000808A D5764000001200A D5764000001005A D5765000001238A D5765000000000A D5764000000805A D5765000000200A D5764000001237A D5765000000037A D5765000000238A D5764000000800A D5764000001218A D5764000000200Z D5764000001118A D5765000000300A D5765000001338A D5764000000700R D5765000000100A D5764000000900 D5764000001337A D5765000000338A D5764000001300A D5764000001100A D5765000000938A D5765000000138A D5764000001338A D5764000000300Y D5764000000900Z D5764000001105A D5764000001108A D5764000000300Z D5764000001318A D5764000000700Z D5764000000500R D5764000000500Z D5764000000300R D5764000000900A D5765000000738A WQ050ANAAAAA WQ050ASAAAAA WQ050AXAAAAA WR050ASAAAAA WR050ANAAAAA WR050AKAAAAA WQ055AKAAAAA WQ055BCAAAAA WQ055AQAAAAA WR055APAAAAA WR055AKAAAAA WR055BBAAAAA 725Z2300-5007 725Z2300-5003 725Z2300-301 725Z2300-303 725Z2300-101 725Z2300-19 725Z2300-5001 725Z2300-5005 725Z2300-305 224-2101-527 224-2101-513 224-2101-573 S314U001-1 224-2101-563 224-2101-513BL 224-2101-543 224-2101-531 224-2101BL513A 224-2101-571 725Z2200-305 725Z2200-101 725Z2200-19 725Z2200-5005 725Z2200-303 725Z2200-5003 725Z2200-301 725Z2200-5007 725Z2200-5001 224-2301-521 S314U001-1 7224M4761-513 224-2201-507 224-2280-501 224-2280-503 224-2201-509 224-2281-503 224-2202-509 224-2202-507 224-2281-501 224-2302-539 224M4761-503 224-2302-527 224-2302-549 224-2302-525 224-2302-545 224-2302-529 224M4761-539 725Z2400-305 725Z2400-5005 725Z2400-5003 725Z2400-5001 725Z2400-5007 725Z2400-101 725Z2400-19 725Z2400-303 725Z2400-301 642-1000-505 642-1000-501 745-3000-515 745-3000-507 745-3400-501 745-3400-503 745-3000-9503 745-3000-511 745-3000-503 745-3000-515 745-3000-9511 745-3400-507 725Z2100-5001 725Z2100-305 725Z2100-5007 725Z2100-101 725Z2100-303 725Z2100-23 725Z2100-5005 725Z2100-5003 725Z2100-19 725Z2100-301 725Z1100-19 725Z1100-17 725Z1100-103 725Z1100-101 642M3001-503 642-3001-507 642-3001-505 642-3001-503 642M3001-505 642-3001-513 642-3001-511 642-3001-509 340-2501-511 642-3002-507 642-3002-513 642-3002-517 642-3002-523 642-3002-503 642-3002-511 642M3002-507 642M3002-509 642M3002-505 642M3002-503 642-3002-509 642-3002-515 642-3002-521 642-3002-525 642-3002-505 642-3002-519 745-4000-503 745-4000-503 745G4000-505 745-4000-505 745G4000-503 740-4000-501 745G4000-509 740-4000-503 745-4000-515 745G4000-511 745-4000-501 745G4000-501 745G4000-507 745-4000-513 745-4000-517 745-4000-510 745G4000-502 740-4000-502 745-4000-9504 745G4000-504 745-4000-9506 745-4000-516 745G4000-508 740-4000-504 745-4000-510 745-4000-514 745G4000-512 740-4000-506 745-4000-508 740-4000-508 745-4000-9502 745G4000-506 745G4000-510 745-4000-506 745-4000-512 745-4000-518 745-4000-502 745-4000-504 636-2040-515 636-2040-511 636-2040-507 636-2040-513 636-2040-517 636-2040-509 636-2050-515 636-2051-507 636-2050-519 636-2051-509 636-2050-521 636-2050-517 636-1101-505 636-1101-507 745-1107-501 745-1107-503 314U2100-1 314U2100-53 314U2100-57 314U2100-46 015T0805-6 015T0805-10 314U2100-31 314U2100-43 314U2100-47 314U2100-71 015T0805-11 314U2100-27 314U2100-72 314U2100-70 2204M24G03 2204M24G02 2204M24G01 314W5510-60 314W5510-71 725Z4300-3 314W5520-15 642-4001-501 238-0401-501 642-4612-501 745-1101-505 745-1101-503 745-1101-501 745-1101-507 745-1101-507 636-4210-503 636-4210-505 745-0002-513 745M0007-505 745M0007-507 740-0002-713 745-0002-513 745-0002-501 745-0002-515 745-0002-505 740-0002-709 740-0002-701 745-0002-517 745-0002-519 745-0002-511 745M0007-501 745-0002-503 745-0002-509 740-0002-705 745-0002-517 740-0002-693 745M0007-503 745-0002-515 740-0002-711 740-0002-703 740-0002-715 745M0007-507 745M0007-505 745-0002-513 745-0002-505 745-0002-501 745-0002-515 745-0002-519 745-0002-519 745-0002-511 745M0007-501 745-0002-509 745-0002-507 740-0002-707 740-0002-695 745M0007-503 745-0002-517 740-0002-693 636-3005-507 636-3005-509 636-3005-513 636-3005-503 636-3005-515 636-3006-509 636-3006-513 636-3006-507 636-3006-503 636-3006-515 491B1613000-109 D52B1000-9 D52B1000-25 491B1613000-119 D52B1000-1 491B1613000-069 491B1613000-089 491B1613000-099 D52B1000-23 491B1613000-059 491B1613000-129 491B1613000-119 491B1613000-109 D52B1000-9 D52B1000-25 491B1613000-059 491B1613000-129 D52B1000-23 491B1613000-099 D52B1000-1 491B1613000-069 491B1613000-089 725Z3060-107 725Z3060-5008 725Z3060-5011 725Z3060-5002 725Z3060-315 725Z3060-5010 725Z3060-109 725Z3060-5007 725Z3060-5006 725Z3060-311 725Z3060-303 725Z3060-307 725Z3060-301 725Z3060-305 725Z3060-5009 725Z3050-301 725Z3050-5011 725Z3050-5007 725Z3050-305 725Z3050-315 725Z3050-5006 725Z3050-5008 725Z3050-5010 725Z3050-5009 725Z3050-5002 725Z3050-307 725Z3050-303 725Z3050-109 725Z3050-107 725Z3050-311 725Z3030-5002 725Z3030-5007 725Z3030-5011 725Z3030-5008 725Z3030-307 725Z3030-5009 725Z3030-109 725Z3030-301 725Z3030-5006 725Z3030-5010 725Z3030-107 725Z3030-303 725Z3030-305 725Z3030-311 725Z3030-315 725Z3040-311 725Z3040-5002 725Z3040-307 725Z3040-315 725Z3040-301 725Z3040-107 725Z3040-303 725Z3040-5009 725Z3040-5008 725Z3040-5007 725Z3040-109 725Z3040-5011 725Z3040-305 725Z3040-5006 725Z3040-5010 642-3801-525 642-3801-529 642-3801-511 642-3801-515 642-3801-521 642-3801-533 642-3802-535 642-3801-519 642-3802-523 642-3802-529 642-3802-531 642-3801-533 642-3802-513 642-3802-521 642-3802-517 642-3801-519 642-3802-535 745-0006-501 740-0006-145 740-0006-541 745-0006-501 740-0006-519 740-0006-543 745-0006-503 681L269G07 681L269G13 681L269G09 TRCF6F23FG09 681L269G06 315U2028-103 315U2028-104 681L270G02 681L270G09 681L270G13 681L272G13 681L270G11 TRCF6F23FG09 315U2028-60W 681L270G08 681L271G12 681L271G02 315U2028-105 681L271G13 681L271G08 681L271G05 683L137G13 TRCF6F23FG10 681L272G02 681L272G10 681L272G08 681L272G12 TR-CF6-F23FG02 TRCF6F23FG10 681L270G13 681L272G07 TRCF6F23FG02 315U2028-106
-`;
+const MAJOR_PARTS_RAW = "COLE_AQUI_SUA_LISTA_SEPARADA_POR_VIRGULA_TUDO_EM_UMA_LINHA";
 
 window.__MAJOR_PARTS_CLEAN__ = MAJOR_PARTS_RAW.split(/[\n\r\s,;\/]+/)
-  .map(p => String(p).replace(/[^A-Z0-9]/ig, '').toUpperCase())
-  .filter(p => p !== "" && p !== "PN");;
-
-window.__MAJOR_PARTS_CLEAN__ = MAJOR_PARTS_RAW.split(/[\n\r\s,;\/]+/)
-  .map(p => String(p).replace(/[^A-Z0-9]/ig, '').toUpperCase())
-  .filter(p => p !== "" && p !== "PN");
+  .map(p => String(p).replace(/[^A-Z0-9]/ig, '').toUpperCase())
+  .filter(p => p !== "" && p !== "PN");
 
 
 function puxarMajorPartsDiretoDoSheets() {
-  return new Promise((resolve) => {
-    if (!SPREADSHEET_ID || SPREADSHEET_ID.includes("COLE_AQUI")) {
-      console.log("ID da planilha não configurado. PNs Major Part não serão pintados.");
-      resolve(); return; 
-    }
-    const script = document.createElement('script');
-    const cbName = 'callbackMajorPart_' + Math.random().toString(36).substring(7);
-    
-    window[cbName] = function(data) {
-      try {
-        if (data && data.table && data.table.rows) {
-          // Pega do google sheets. Se quiser usar APENAS a lista acima, comente as 3 linhas abaixo.
-          MAJOR_PARTS = data.table.rows
-            .map(r => r.c[0] ? String(r.c[0].v).trim() : "")
-            .filter(v => v && v.toUpperCase() !== "PN" && v.toUpperCase() !== "MAJOR PART");
-          console.log("✅ Major Parts carregadas direto via Google: " + MAJOR_PARTS.length + " PNs.");
-        }
-      } catch(e) { console.error("Erro ao ler Major Parts:", e); }
-      resolve(); delete window[cbName]; script.remove();
-    };
-    
-    script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:${cbName}&sheet=MAJOR%20PART&tq=select%20A`;
-    script.onerror = () => { resolve(); script.remove(); };
-    document.head.appendChild(script);
-    setTimeout(resolve, 8000);
-  });
+  return new Promise((resolve) => {
+    if (!SPREADSHEET_ID || SPREADSHEET_ID.includes("COLE_AQUI")) {
+      console.log("ID da planilha não configurado. PNs Major Part não serão pintados.");
+      resolve(); return; 
+    }
+    const script = document.createElement('script');
+    const cbName = 'callbackMajorPart_' + Math.random().toString(36).substring(7);
+    
+    window[cbName] = function(data) {
+      try {
+        if (data && data.table && data.table.rows) {
+          // Pega do google sheets. Se quiser usar APENAS a lista acima, comente as 3 linhas abaixo.
+          MAJOR_PARTS = data.table.rows
+            .map(r => r.c[0] ? String(r.c[0].v).trim() : "")
+            .filter(v => v && v.toUpperCase() !== "PN" && v.toUpperCase() !== "MAJOR PART");
+          console.log("✅ Major Parts carregadas direto via Google: " + MAJOR_PARTS.length + " PNs.");
+        }
+      } catch(e) { console.error("Erro ao ler Major Parts:", e); }
+      resolve(); delete window[cbName]; script.remove();
+    };
+    
+    script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:${cbName}&sheet=MAJOR%20PART&tq=select%20A`;
+    script.onerror = () => { resolve(); script.remove(); };
+    document.head.appendChild(script);
+    setTimeout(resolve, 8000);
+  });
 }
 
 // =========================================================================
@@ -176,12 +171,12 @@ let __ACCESS_BLOCKED__ = false;
 let __accessBlockedUntil = 0;
 
 function __showAccessBlocked__(msg){
-  const reason = msg || "Acesso bloqueado (Google). Tentando novamente automaticamente…";
-  __ACCESS_BLOCKED__ = true;
-  __accessBlockedUntil = Date.now() + (5 * 60 * 1000);
-  __lastRefreshError = reason;
-  try{ paintRefreshInfo(); }catch(e){}
-  try{ renderFrescorBanner(); }catch(e){}
+  const reason = msg || "Acesso bloqueado (Google). Tentando novamente automaticamente…";
+  __ACCESS_BLOCKED__ = true;
+  __accessBlockedUntil = Date.now() + (5 * 60 * 1000);
+  __lastRefreshError = reason;
+  try{ paintRefreshInfo(); }catch(e){}
+  try{ renderFrescorBanner(); }catch(e){}
 }
 
 const __ADMIN_MODE = (/\badmin=1\b/i.test(window.location.search) || localStorage.getItem("ADMIN_MODE")==="1");
@@ -190,33 +185,33 @@ function isSharedTable(tableKey){ return SHARED_TABLE_KEYS.includes(String(table
 
 let __pendingRerender = false;
 function __isUserTyping__(){
-  try{
-    const ae = document.activeElement; if(!ae) return false;
-    const cls = String(ae.className || "");
-    if(cls.includes("filter") || cls.includes("obsArea") || ae.isContentEditable) return true;
-    const tag = String(ae.tagName || "").toUpperCase();
-    if(tag === "INPUT" || tag === "TEXTAREA") return true;
-    return false;
-  }catch(e){ return false; }
+  try{
+    const ae = document.activeElement; if(!ae) return false;
+    const cls = String(ae.className || "");
+    if(cls.includes("filter") || cls.includes("obsArea") || ae.isContentEditable) return true;
+    const tag = String(ae.tagName || "").toUpperCase();
+    if(tag === "INPUT" || tag === "TEXTAREA") return true;
+    return false;
+  }catch(e){ return false; }
 }
 function __tryRerenderPending__(){
-  if(!__pendingRerender) return;
-  if(__isUserTyping__()) return;
-  __pendingRerender = false;
-  rerenderAll({ onlyActive: true });
+  if(!__pendingRerender) return;
+  if(__isUserTyping__()) return;
+  __pendingRerender = false;
+  rerenderAll({ onlyActive: true });
 }
 
 setInterval(()=>{
-  const el = document.getElementById("clock");
-  if(el) el.innerText = new Date().toLocaleTimeString("pt-BR");
+  const el = document.getElementById("clock");
+  if(el) el.innerText = new Date().toLocaleTimeString("pt-BR");
 },1000);
 
 function updateStatusVisibility(){
-  const st = document.getElementById("status"); if(!st) return;
-  if(!__ADMIN_MODE){ st.style.display = "none"; return; }
-  const active = document.querySelector(".section.active");
-  const show = active && active.id === "turno";
-  st.style.display = show ? "block" : "none";
+  const st = document.getElementById("status"); if(!st) return;
+  if(!__ADMIN_MODE){ st.style.display = "none"; return; }
+  const active = document.querySelector(".section.active");
+  const show = active && active.id === "turno";
+  st.style.display = show ? "block" : "none";
 }
 
 const __dirty = { aog:true, war:true, fast:true, cargo:true, mro:true, cargas:true, hotlist:true, acompanhamento:true, tools:true, links:true, turno:true, avisos:true };
@@ -225,57 +220,57 @@ function clearDirty(key){ if(Object.prototype.hasOwnProperty.call(__dirty, key))
 function markAllTablesDirty(){ markDirty("aog"); markDirty("war"); markDirty("fast"); markDirty("cargo"); markDirty("mro"); markDirty("cargas"); markDirty("hotlist"); markDirty("acompanhamento"); markDirty("tools"); }
 
 function openTab(id,btn){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  updateStatusVisibility();
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updateStatusVisibility();
 
-  try{ scheduleNextRefresh(getAutoRefreshMs()); }catch(e){}
+  try{ scheduleNextRefresh(getAutoRefreshMs()); }catch(e){}
 
-  try{
-    const tk = tableKeysBySection[id];
-    if(tk){
-      if(__dirty[tk]){ renderPrios(tk); renderAircraftBox(tk); renderTable(tk); clearDirty(tk); }
-      else{ try{ updateObsVisibleForTable(tk); }catch(e){} }
-      if(String(id||"").toLowerCase() === "fast"){ __autoPinFastTodayAircraft__().then(()=>{ try{ renderAircraftBox("fast"); }catch(e){} }).catch(()=>{}); }
-    }else{
-      if(id === "links"){ markDirty("links"); renderLinksUteis(); clearDirty("links"); }
-      if(id === "turno") renderSharedList("turno");
-      if(id === "avisos") renderSharedList("avisos");
-    }
-  }catch(e){}
+  try{
+    const tk = tableKeysBySection[id];
+    if(tk){
+      if(__dirty[tk]){ renderPrios(tk); renderAircraftBox(tk); renderTable(tk); clearDirty(tk); }
+      else{ try{ updateObsVisibleForTable(tk); }catch(e){} }
+      if(String(id||"").toLowerCase() === "fast"){ __autoPinFastTodayAircraft__().then(()=>{ try{ renderAircraftBox("fast"); }catch(e){} }).catch(()=>{}); }
+    }else{
+      if(id === "links"){ markDirty("links"); renderLinksUteis(); clearDirty("links"); }
+      if(id === "turno") renderSharedList("turno");
+      if(id === "avisos") renderSharedList("avisos");
+    }
+  }catch(e){}
 }
 
 function escapeHtml(v){ return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
 function cleanVal(v){ return String(v ?? "").trim(); }
 function parseMaybeDate(v){
-  if(!v) return null;
-  let s = String(v).trim().replace(/[\u2028\u2029\r\n]+/g, " ").trim();
-  let d = new Date(s); if(!isNaN(d.getTime())) return d;
-  if((s.includes("T") || /^\d{4}-\d{2}-\d{2}/.test(s)) && /\s/.test(s)){ const s2 = s.replace(/\s+/g, ""); const d2 = new Date(s2); if(!isNaN(d2.getTime())) return d2; }
-  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
-  if(m){ const dt = new Date(Number(m[3]), Number(m[2])-1, Number(m[1]), Number(m[4]||0), Number(m[5]||0), Number(m[6]||0)); if(!isNaN(dt.getTime())) return dt; }
-  const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
-  if(m2){ const dt = new Date(Number(m2[1]), Number(m2[2])-1, Number(m2[3]), Number(m2[4]||0), Number(m2[5]||0), Number(m2[6]||0)); if(!isNaN(dt.getTime())) return dt; }
-  return null;
+  if(!v) return null;
+  let s = String(v).trim().replace(/[\u2028\u2029\r\n]+/g, " ").trim();
+  let d = new Date(s); if(!isNaN(d.getTime())) return d;
+  if((s.includes("T") || /^\d{4}-\d{2}-\d{2}/.test(s)) && /\s/.test(s)){ const s2 = s.replace(/\s+/g, ""); const d2 = new Date(s2); if(!isNaN(d2.getTime())) return d2; }
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if(m){ const dt = new Date(Number(m[3]), Number(m[2])-1, Number(m[1]), Number(m[4]||0), Number(m[5]||0), Number(m[6]||0)); if(!isNaN(dt.getTime())) return dt; }
+  const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if(m2){ const dt = new Date(Number(m2[1]), Number(m2[2])-1, Number(m2[3]), Number(m2[4]||0), Number(m2[5]||0), Number(m2[6]||0)); if(!isNaN(dt.getTime())) return dt; }
+  return null;
 }
 function fmtBR(dt){ if(!dt) return ""; const pad = n => String(n).padStart(2,"0"); return `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`; }
 function fmtDateOnlyBR(dt){ if(!dt) return ""; const pad = n => String(n).padStart(2,"0"); return `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()}`; }
 function fmtTimeOnly(dt){ if(!dt) return ""; const pad = n => String(n).padStart(2,"0"); return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`; }
 function fmtTimeHM(dt){ if(!dt) return ""; const pad = n => String(n).padStart(2,"0"); return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`; }
 function getDatePartsForDisplay(rawValue, forceTime){
-  const dt = parseMaybeDate(rawValue); if(!dt) return { date:"", time:"" };
-  const date = fmtDateOnlyBR(dt); const time = fmtTimeOnly(dt);
-  const s = String(rawValue ?? "").trim(); const hasTimeInText = /\b\d{2}:\d{2}(:\d{2})?\b/.test(s);
-  return { date, time: (forceTime || hasTimeInText) ? time : "" };
+  const dt = parseMaybeDate(rawValue); if(!dt) return { date:"", time:"" };
+  const date = fmtDateOnlyBR(dt); const time = fmtTimeOnly(dt);
+  const s = String(rawValue ?? "").trim(); const hasTimeInText = /\b\d{2}:\d{2}(:\d{2})?\b/.test(s);
+  return { date, time: (forceTime || hasTimeInText) ? time : "" };
 }
 function normalizeText(v){ try{ return String(v ?? "").toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s\-_.\/\\(){}\[\],;:|]+/g, ""); }catch(e){ return String(v ?? "").toLowerCase().trim(); } }
 function digitsOnly(v){ return String(v ?? "").replace(/\D/g, ""); }
 function buildFilterToken(input){
-  const raw = String(input || "").trim().toLowerCase(); const norm = normalizeText(raw); const digits = digitsOnly(raw);
-  const parts = raw.split(/\s+/).map(p=>p.trim()).filter(Boolean).map(p=>({raw:p.toLowerCase(), norm:normalizeText(p), digits:digitsOnly(p)}));
-  return { raw, norm, digits, parts };
+  const raw = String(input || "").trim().toLowerCase(); const norm = normalizeText(raw); const digits = digitsOnly(raw);
+  const parts = raw.split(/\s+/).map(p=>p.trim()).filter(Boolean).map(p=>({raw:p.toLowerCase(), norm:normalizeText(p), digits:digitsOnly(p)}));
+  return { raw, norm, digits, parts };
 }
 
 const DATE_COL = "Data_da_solicitacao"; const EMB_COL = "Data_de_embarque_logistica"; const LAND_COL = "Data_do_pouso_logistica";
@@ -289,95 +284,95 @@ function __brFromIso__(iso){ const m = String(iso||"").match(/^(\d{4})-(\d{2})-(
 function __monthNamePt__(m0){ const names = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]; return names[m0] || ""; }
 
 function __ensureDatePopup__(){
-  if(__datePopupEl) return;
-  const box = document.createElement("div"); box.className = "datePopup"; box.id = "datePopup";
-  box.innerHTML = `<div class="dateHead"><div class="ttl"><b>Calendário</b></div><div class="dateNav"><button class="dateBtn" type="button" id="calPrev" title="Mês anterior">‹</button><div class="dateYM" id="calYM">—</div><button class="dateBtn" type="button" id="calNext" title="Próximo mês">›</button><button class="dateBtn" type="button" id="calClose" title="Fechar">×</button></div></div><div class="dateGrid" id="calGrid"></div>`;
-  document.body.appendChild(box); __datePopupEl = box;
-  box.addEventListener("mousedown", (e)=>{ e.stopPropagation(); }, true);
-  document.addEventListener("mousedown", (ev)=>{ try{ if(!__datePopupEl || __datePopupEl.style.display !== "block") return; const t = ev && ev.target ? ev.target : null; if(t && (__datePopupEl === t || __datePopupEl.contains(t))) return; hideDatePickerFilter(); }catch(e){ hideDatePickerFilter(); } });
-  document.getElementById("calClose").onclick = ()=> hideDatePickerFilter();
-  document.getElementById("calPrev").onclick = ()=>{ if(__calYear == null || __calMonth == null) return; __calMonth -= 1; if(__calMonth < 0){ __calMonth = 11; __calYear -= 1; } __renderCalendarGrid__(); };
-  document.getElementById("calNext").onclick = ()=>{ if(__calYear == null || __calMonth == null) return; __calMonth += 1; if(__calMonth > 11){ __calMonth = 0; __calYear += 1; } __renderCalendarGrid__(); };
-  window.addEventListener("scroll", ()=>{ if(__datePopupEl && __datePopupEl.style.display==="block") __repositionDatePopup__(); }, true);
-  window.addEventListener("resize", ()=>{ if(__datePopupEl && __datePopupEl.style.display==="block") __repositionDatePopup__(); }, true);
+  if(__datePopupEl) return;
+  const box = document.createElement("div"); box.className = "datePopup"; box.id = "datePopup";
+  box.innerHTML = `<div class="dateHead"><div class="ttl"><b>Calendário</b></div><div class="dateNav"><button class="dateBtn" type="button" id="calPrev" title="Mês anterior">‹</button><div class="dateYM" id="calYM">—</div><button class="dateBtn" type="button" id="calNext" title="Próximo mês">›</button><button class="dateBtn" type="button" id="calClose" title="Fechar">×</button></div></div><div class="dateGrid" id="calGrid"></div>`;
+  document.body.appendChild(box); __datePopupEl = box;
+  box.addEventListener("mousedown", (e)=>{ e.stopPropagation(); }, true);
+  document.addEventListener("mousedown", (ev)=>{ try{ if(!__datePopupEl || __datePopupEl.style.display !== "block") return; const t = ev && ev.target ? ev.target : null; if(t && (__datePopupEl === t || __datePopupEl.contains(t))) return; hideDatePickerFilter(); }catch(e){ hideDatePickerFilter(); } });
+  document.getElementById("calClose").onclick = ()=> hideDatePickerFilter();
+  document.getElementById("calPrev").onclick = ()=>{ if(__calYear == null || __calMonth == null) return; __calMonth -= 1; if(__calMonth < 0){ __calMonth = 11; __calYear -= 1; } __renderCalendarGrid__(); };
+  document.getElementById("calNext").onclick = ()=>{ if(__calYear == null || __calMonth == null) return; __calMonth += 1; if(__calMonth > 11){ __calMonth = 0; __calYear += 1; } __renderCalendarGrid__(); };
+  window.addEventListener("scroll", ()=>{ if(__datePopupEl && __datePopupEl.style.display==="block") __repositionDatePopup__(); }, true);
+  window.addEventListener("resize", ()=>{ if(__datePopupEl && __datePopupEl.style.display==="block") __repositionDatePopup__(); }, true);
 }
 
 function __repositionDatePopup__(){
-  try{
-    if(!__datePopupEl || !__datePopupTarget) return;
-    const r = __datePopupTarget.getBoundingClientRect(); const pad = 8; const w = 270; const h = 320;
-    let left = Math.min(r.left, window.innerWidth - w - pad); let top = Math.min(r.bottom + 6, window.innerHeight - h - pad);
-    if(left < pad) left = pad; if(top < pad) top = pad;
-    __datePopupEl.style.left = left + "px"; __datePopupEl.style.top  = top  + "px";
-  }catch(e){}
+  try{
+    if(!__datePopupEl || !__datePopupTarget) return;
+    const r = __datePopupTarget.getBoundingClientRect(); const pad = 8; const w = 270; const h = 320;
+    let left = Math.min(r.left, window.innerWidth - w - pad); let top = Math.min(r.bottom + 6, window.innerHeight - h - pad);
+    if(left < pad) left = pad; if(top < pad) top = pad;
+    __datePopupEl.style.left = left + "px"; __datePopupEl.style.top  = top  + "px";
+  }catch(e){}
 }
 
 function __renderCalendarGrid__(){
-  try{
-    const grid = document.getElementById("calGrid"); const ym = document.getElementById("calYM");
-    if(!grid || !ym || __calYear == null || __calMonth == null) return;
-    ym.textContent = `${__monthNamePt__(__calMonth)} ${__calYear}`;
-    let html = ["D","S","T","Q","Q","S","S"].map(d=>`<div class="dow">${d}</div>`).join("");
-    const startDow = new Date(__calYear, __calMonth, 1).getDay(); const daysInMonth = new Date(__calYear, __calMonth+1, 0).getDate();
-    const todayIso = __isoFromYMD__(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-    for(let i=0;i<startDow;i++) html += `<div class="day muted"> </div>`;
-    for(let d=1; d<=daysInMonth; d++){
-      const iso = __isoFromYMD__(__calYear, __calMonth, d); const isToday = (iso === todayIso); const isSel = (__calSelectedIso && iso === __calSelectedIso);
-      html += `<div class="day ${isToday ? "today" : ""} ${isSel ? "sel" : ""}" data-iso="${iso}">${d}</div>`;
-    }
-    grid.innerHTML = html;
-    grid.querySelectorAll(".day[data-iso]").forEach(el=>{
-      el.addEventListener("click", ()=>{
-        const iso = el.getAttribute("data-iso"); if(!iso) return; __calSelectedIso = iso; const br = __brFromIso__(iso);
-        if(__datePopupTarget){ __datePopupTarget.value = br; try{ __datePopupTarget.dispatchEvent(new Event("input", { bubbles:true })); }catch(e){} }
-        try{ const tk = String(__datePopupTableKey || "").toLowerCase(); const col = String(__datePopupColKey || ""); if(tk && col) applyFilter(tk, col, br); }catch(e){}
-        hideDatePickerFilter();
-      });
-    });
-  }catch(e){}
+  try{
+    const grid = document.getElementById("calGrid"); const ym = document.getElementById("calYM");
+    if(!grid || !ym || __calYear == null || __calMonth == null) return;
+    ym.textContent = `${__monthNamePt__(__calMonth)} ${__calYear}`;
+    let html = ["D","S","T","Q","Q","S","S"].map(d=>`<div class="dow">${d}</div>`).join("");
+    const startDow = new Date(__calYear, __calMonth, 1).getDay(); const daysInMonth = new Date(__calYear, __calMonth+1, 0).getDate();
+    const todayIso = __isoFromYMD__(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+    for(let i=0;i<startDow;i++) html += `<div class="day muted"> </div>`;
+    for(let d=1; d<=daysInMonth; d++){
+      const iso = __isoFromYMD__(__calYear, __calMonth, d); const isToday = (iso === todayIso); const isSel = (__calSelectedIso && iso === __calSelectedIso);
+      html += `<div class="day ${isToday ? "today" : ""} ${isSel ? "sel" : ""}" data-iso="${iso}">${d}</div>`;
+    }
+    grid.innerHTML = html;
+    grid.querySelectorAll(".day[data-iso]").forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const iso = el.getAttribute("data-iso"); if(!iso) return; __calSelectedIso = iso; const br = __brFromIso__(iso);
+        if(__datePopupTarget){ __datePopupTarget.value = br; try{ __datePopupTarget.dispatchEvent(new Event("input", { bubbles:true })); }catch(e){} }
+        try{ const tk = String(__datePopupTableKey || "").toLowerCase(); const col = String(__datePopupColKey || ""); if(tk && col) applyFilter(tk, col, br); }catch(e){}
+        hideDatePickerFilter();
+      });
+    });
+  }catch(e){}
 }
 
 function showDatePickerFilter(ev, tableKey, colKey){
-  try{
-    const c = String(colKey||""); if(!(c === DATE_COL || c === EMB_COL || c === LAND_COL)) return;
-    __ensureDatePopup__(); const el = ev && ev.target ? ev.target : null; if(!el) return;
-    __datePopupTarget = el; __datePopupTableKey = String(tableKey||"").toLowerCase(); __datePopupColKey = String(colKey||"");
-    const isoFromField = __isoFromBr__(String(el.value||"").trim()); const base = isoFromField ? new Date(isoFromField + "T00:00:00") : new Date();
-    __calYear = base.getFullYear(); __calMonth = base.getMonth(); __calSelectedIso = isoFromField || "";
-    __repositionDatePopup__(); __datePopupEl.style.display = "block"; __renderCalendarGrid__();
-  }catch(e){}
+  try{
+    const c = String(colKey||""); if(!(c === DATE_COL || c === EMB_COL || c === LAND_COL)) return;
+    __ensureDatePopup__(); const el = ev && ev.target ? ev.target : null; if(!el) return;
+    __datePopupTarget = el; __datePopupTableKey = String(tableKey||"").toLowerCase(); __datePopupColKey = String(colKey||"");
+    const isoFromField = __isoFromBr__(String(el.value||"").trim()); const base = isoFromField ? new Date(isoFromField + "T00:00:00") : new Date();
+    __calYear = base.getFullYear(); __calMonth = base.getMonth(); __calSelectedIso = isoFromField || "";
+    __repositionDatePopup__(); __datePopupEl.style.display = "block"; __renderCalendarGrid__();
+  }catch(e){}
 }
 function hideDatePickerFilter(){ try{ if(__datePopupEl) __datePopupEl.style.display = "none"; __datePopupTarget = null; __datePopupTableKey = null; __datePopupColKey = null; }catch(e){} }
 
 let __statusPopupEl = null; let __statusPopupTarget = null; let __statusPopupTableKey = null; let __statusPopupColKey = null;
 function __ensureStatusPopup__(){
-  if(__statusPopupEl) return;
-  const box = document.createElement("div"); box.className = "statusPopup"; box.id = "statusPopup"; document.body.appendChild(box); __statusPopupEl = box;
-  box.addEventListener("mousedown", (e)=>{ e.stopPropagation(); }, true);
-  document.addEventListener("mousedown", (ev)=>{ try{ if(!__statusPopupEl || __statusPopupEl.style.display !== "block") return; const t = ev && ev.target ? ev.target : null; if(t && (__statusPopupEl === t || __statusPopupEl.contains(t))) return; hideStatusFilter(); }catch(e){ hideStatusFilter(); } });
+  if(__statusPopupEl) return;
+  const box = document.createElement("div"); box.className = "statusPopup"; box.id = "statusPopup"; document.body.appendChild(box); __statusPopupEl = box;
+  box.addEventListener("mousedown", (e)=>{ e.stopPropagation(); }, true);
+  document.addEventListener("mousedown", (ev)=>{ try{ if(!__statusPopupEl || __statusPopupEl.style.display !== "block") return; const t = ev && ev.target ? ev.target : null; if(t && (__statusPopupEl === t || __statusPopupEl.contains(t))) return; hideStatusFilter(); }catch(e){ hideStatusFilter(); } });
 }
 function showStatusFilter(ev, tableKey, colKey){
-  try{
-    if(colKey !== STATUS_COL) return; 
-    hideDatePickerFilter(); __ensureStatusPopup__();
-    const el = ev && ev.target ? ev.target : null; if(!el) return;
-    __statusPopupTarget = el; __statusPopupTableKey = String(tableKey||"").toLowerCase(); __statusPopupColKey = String(colKey||"");
-    let html = `<div class="statusPopupHead"><span>Filtrar Status</span><button class="statusPopupClose" onclick="hideStatusFilter()">×</button></div>`;
-    const options = ["Em Fila de Atendimento", "Aguardando separação", "Pronto para envio", "Log 1 Transito", "Remessa Cancelada", "Recebido no destino", "Não Enviado", "Na Base", "Mtl Divergente", "Não Recebi", "Outras", "Mtl Stock Zero", "Saldo insuficiente", "Ainda em análise", "Sem logistica", "Dgr Não é Enviado", "Remessa Cancelada", "Comprar", "Outros"];
-    options.forEach(opt => { html += `<div class="statusOption" onclick="applyStatusOption('${escapeHtml(opt)}')">${escapeHtml(opt)}</div>`; });
-    html += `<div class="statusOption clear" onclick="applyStatusOption('')">Limpar Filtro</div>`;
-    __statusPopupEl.innerHTML = html;
-    const r = el.getBoundingClientRect(); const pad = 8; const w = 220; const h = 300;
-    let left = Math.min(r.left, window.innerWidth - w - pad); let top = Math.min(r.bottom + 6, window.innerHeight - h - pad);
-    if(left < pad) left = pad; if(top < pad) top = pad;
-    __statusPopupEl.style.left = left + "px"; __statusPopupEl.style.top  = top  + "px"; __statusPopupEl.style.display = "block";
-  }catch(e){}
+  try{
+    if(colKey !== STATUS_COL) return; 
+    hideDatePickerFilter(); __ensureStatusPopup__();
+    const el = ev && ev.target ? ev.target : null; if(!el) return;
+    __statusPopupTarget = el; __statusPopupTableKey = String(tableKey||"").toLowerCase(); __statusPopupColKey = String(colKey||"");
+    let html = `<div class="statusPopupHead"><span>Filtrar Status</span><button class="statusPopupClose" onclick="hideStatusFilter()">×</button></div>`;
+    const options = ["Em Fila de Atendimento", "Aguardando separação", "Pronto para envio", "Log 1 Transito", "Remessa Cancelada", "Recebido no destino", "Não Enviado", "Na Base", "Mtl Divergente", "Não Recebi", "Outras", "Mtl Stock Zero", "Saldo insuficiente", "Ainda em análise", "Sem logistica", "Dgr Não é Enviado", "Remessa Cancelada", "Comprar", "Outros"];
+    options.forEach(opt => { html += `<div class="statusOption" onclick="applyStatusOption('${escapeHtml(opt)}')">${escapeHtml(opt)}</div>`; });
+    html += `<div class="statusOption clear" onclick="applyStatusOption('')">Limpar Filtro</div>`;
+    __statusPopupEl.innerHTML = html;
+    const r = el.getBoundingClientRect(); const pad = 8; const w = 220; const h = 300;
+    let left = Math.min(r.left, window.innerWidth - w - pad); let top = Math.min(r.bottom + 6, window.innerHeight - h - pad);
+    if(left < pad) left = pad; if(top < pad) top = pad;
+    __statusPopupEl.style.left = left + "px"; __statusPopupEl.style.top  = top  + "px"; __statusPopupEl.style.display = "block";
+  }catch(e){}
 }
 function hideStatusFilter(){ if(__statusPopupEl) __statusPopupEl.style.display = "none"; __statusPopupTarget = null; __statusPopupTableKey = null; __statusPopupColKey = null; }
 function applyStatusOption(val){
-  if(__statusPopupTarget){ __statusPopupTarget.value = val; try{ __statusPopupTarget.dispatchEvent(new Event("input", { bubbles:true })); }catch(e){} }
-  try{ const tk = String(__statusPopupTableKey || "").toLowerCase(); const col = String(__statusPopupColKey || ""); if(tk && col) applyFilter(tk, col, val); }catch(e){}
-  hideStatusFilter();
+  if(__statusPopupTarget){ __statusPopupTarget.value = val; try{ __statusPopupTarget.dispatchEvent(new Event("input", { bubbles:true })); }catch(e){} }
+  try{ const tk = String(__statusPopupTableKey || "").toLowerCase(); const col = String(__statusPopupColKey || ""); if(tk && col) applyFilter(tk, col, val); }catch(e){}
+  hideStatusFilter();
 }
 
 const STATUS_COL = "Status_material_ferramenta"; const AIR_COL = "Aeronave"; const SOL_COL = "Numero_de_solicitacao"; const TYPE_COL = "Tipo";
@@ -428,48 +423,57 @@ let __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:ne
 let __solIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), mro:new Map(), cargas:new Map(), hotlist:new Map(), acompanhamento:new Map(), tools:new Map() };
 
 function __compareBaseOrder__(a,b){
-  const da = (a && a.__dateDayTs != null) ? a.__dateDayTs : (function(){ const d = parseMaybeDate(a ? a[DATE_COL] : null); if(!d){ if(a) a.__dateDayTs = 0; return 0; } const t = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); if(a) a.__dateDayTs = t; return t; })();
-  const db = (b && b.__dateDayTs != null) ? b.__dateDayTs : (function(){ const d = parseMaybeDate(b ? b[DATE_COL] : null); if(!d){ if(b) b.__dateDayTs = 0; return 0; } const t = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); if(b) b.__dateDayTs = t; return t; })();
-  if(da !== db) return db - da;
-  const ra = (a && a.__stRank != null) ? a.__stRank : statusPriorityRank(a ? a[STATUS_COL] : "");
-  const rb = (b && b.__stRank != null) ? b.__stRank : statusPriorityRank(b ? b[STATUS_COL] : "");
-  if(ra !== rb) return ra - rb;
-  const ida = (a && a.__midStr != null) ? a.__midStr : String((a && a.Material_ID) ?? "");
-  const idb = (b && b.__midStr != null) ? b.__midStr : String((b && b.Material_ID) ?? "");
-  if(ida !== idb) return ida.localeCompare(idb);
-  const sa = (a && a.__solStr != null) ? a.__solStr : String((a && a.Numero_de_solicitacao) ?? "");
-  const sb = (b && b.__solStr != null) ? b.__solStr : String((b && b.Numero_de_solicitacao) ?? "");
-  return sa.localeCompare(sb);
+  const da = (a && a.__dateDayTs != null) ? a.__dateDayTs : (function(){ const d = parseMaybeDate(a ? a[DATE_COL] : null); if(!d){ if(a) a.__dateDayTs = 0; return 0; } const t = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); if(a) a.__dateDayTs = t; return t; })();
+  const db = (b && b.__dateDayTs != null) ? b.__dateDayTs : (function(){ const d = parseMaybeDate(b ? b[DATE_COL] : null); if(!d){ if(b) b.__dateDayTs = 0; return 0; } const t = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); if(b) b.__dateDayTs = t; return t; })();
+  if(da !== db) return db - da;
+  const ra = (a && a.__stRank != null) ? a.__stRank : statusPriorityRank(a ? a[STATUS_COL] : "");
+  const rb = (b && b.__stRank != null) ? b.__stRank : statusPriorityRank(b ? b[STATUS_COL] : "");
+  if(ra !== rb) return ra - rb;
+  const ida = (a && a.__midStr != null) ? a.__midStr : String((a && a.Material_ID) ?? "");
+  const idb = (b && b.__midStr != null) ? b.__midStr : String((b && b.Material_ID) ?? "");
+  if(ida !== idb) return ida.localeCompare(idb);
+  const sa = (a && a.__solStr != null) ? a.__solStr : String((a && a.Numero_de_solicitacao) ?? "");
+  const sb = (b && b.__solStr != null) ? b.__solStr : String((b && b.Numero_de_solicitacao) ?? "");
+  return sa.localeCompare(sb);
 }
 
 function buildSortedBaseCache(){
-  if(__sortedBaseVersion === __dataVersion) return;
-  __sortedBaseByTable = { aog: (__cacheByTable.aog||[]).slice().sort(__compareBaseOrder__), war: (__cacheByTable.war||[]).slice().sort(__compareBaseOrder__), fast: (__cacheByTable.fast||[]).slice().sort(__compareBaseOrder__), cargo: (__cacheByTable.cargo||[]).slice().sort(__compareBaseOrder__), mro: (__cacheByTable.mro||[]).slice().sort(__compareBaseOrder__), acompanhamento:(__cacheByTable.acompanhamento||[]).slice().sort(__compareBaseOrder__), cargas:(__cacheByTable.cargas||[]).slice().sort(__compareBaseOrder__), hotlist:(__cacheByTable.hotlist||[]).slice().sort(__compareBaseOrder__), tools: (__cacheByTable.tools||[]).slice().sort(__compareBaseOrder__) };
-  __sortedBaseVersion = __dataVersion;
+  if(__sortedBaseVersion === __dataVersion) return;
+  __sortedBaseByTable = { aog: (__cacheByTable.aog||[]).slice().sort(__compareBaseOrder__), war: (__cacheByTable.war||[]).slice().sort(__compareBaseOrder__), fast: (__cacheByTable.fast||[]).slice().sort(__compareBaseOrder__), cargo: (__cacheByTable.cargo||[]).slice().sort(__compareBaseOrder__), mro: (__cacheByTable.mro||[]).slice().sort(__compareBaseOrder__), acompanhamento:(__cacheByTable.acompanhamento||[]).slice().sort(__compareBaseOrder__), cargas:(__cacheByTable.cargas||[]).slice().sort(__compareBaseOrder__), hotlist:(__cacheByTable.hotlist||[]).slice().sort(__compareBaseOrder__), tools: (__cacheByTable.tools||[]).slice().sort(__compareBaseOrder__) };
+  __sortedBaseVersion = __dataVersion;
 }
 
+// =========================================================================
+// 🚨 AJUSTE PRINCIPAL NA FILTRAGEM DO AOG PARA EXCLUIR "T-AOG" 🚨
+// =========================================================================
 function prepareDataCache(){
-  const out = { aog:[], war:[], fast:[], cargo:[], mro:[], acompanhamento:[], cargas:[], hotlist:[], tools:[] }; let maxDt = null;
-  __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
-  __solIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
-  const arr = Array.isArray(dados) ? dados : [];
-  for(let i=0;i<arr.length;i++){
-    const r = arr[i]; rowId(r); if(r) r.__search = null;
-    if(r){ if(r.__stRank == null) r.__stRank = statusPriorityRank(r[STATUS_COL]); if(r.__midStr == null) r.__midStr = String(r.Material_ID ?? ""); if(r.__solStr == null) r.__solStr = String(r.Numero_de_solicitacao ?? ""); }
-    if(r && r.__dispDateLower == null){ const shown = displayCell(DATE_COL, r[DATE_COL], "aog", r); r.__dispDateLower = String(shown || "").toLowerCase(); }
-    out.cargo.push(r); __pushAirId__("cargo", r); __pushSolId__("cargo", r);
-    try{ const b = String((r && (r.Base ?? r["Base"])) || "").trim().toUpperCase(); if(b === "MRO"){ out.mro.push(r); __pushAirId__("mro", r); __pushSolId__("mro", r); } }catch(e){}
-    out.acompanhamento.push(r); __pushAirId__("acompanhamento", r); __pushSolId__("acompanhamento", r);
-    if(isCargasRow(r)){ out.cargas.push(r); __pushAirId__("cargas", r); __pushSolId__("cargas", r); out.hotlist.push(r); __pushAirId__("hotlist", r); __pushSolId__("hotlist", r); }
-    if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r); __pushSolId__("tools", r); }
-    const c = String((r && r.Criticidade) || "").toUpperCase();
-    if(c.includes("WAR")){ out.war.push(r); __pushAirId__("war", r); __pushSolId__("war", r); }
-    if(c.includes("FAST PASS") || c.includes("FASTPASS") || c.includes("FAST")){ out.fast.push(r); __pushAirId__("fast", r); __pushSolId__("fast", r); }
-    if(c.includes("AOG")){ out.aog.push(r); __pushAirId__("aog", r); __pushSolId__("aog", r); }
-    const dt = parseMaybeDate(r && r.Data_Ultima_Atualizacao); if(dt && (!maxDt || dt.getTime() > maxDt.getTime())) maxDt = dt;
-  }
-  __cacheByTable = out; __cacheLastUpdate = maxDt || new Date(); buildSortedBaseCache();
+  const out = { aog:[], war:[], fast:[], cargo:[], mro:[], acompanhamento:[], cargas:[], hotlist:[], tools:[] }; let maxDt = null;
+  __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
+  __solIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map() };
+  const arr = Array.isArray(dados) ? dados : [];
+  for(let i=0;i<arr.length;i++){
+    const r = arr[i]; rowId(r); if(r) r.__search = null;
+    if(r){ if(r.__stRank == null) r.__stRank = statusPriorityRank(r[STATUS_COL]); if(r.__midStr == null) r.__midStr = String(r.Material_ID ?? ""); if(r.__solStr == null) r.__solStr = String(r.Numero_de_solicitacao ?? ""); }
+    if(r && r.__dispDateLower == null){ const shown = displayCell(DATE_COL, r[DATE_COL], "aog", r); r.__dispDateLower = String(shown || "").toLowerCase(); }
+    out.cargo.push(r); __pushAirId__("cargo", r); __pushSolId__("cargo", r);
+    try{ const b = String((r && (r.Base ?? r["Base"])) || "").trim().toUpperCase(); if(b === "MRO"){ out.mro.push(r); __pushAirId__("mro", r); __pushSolId__("mro", r); } }catch(e){}
+    out.acompanhamento.push(r); __pushAirId__("acompanhamento", r); __pushSolId__("acompanhamento", r);
+    if(isCargasRow(r)){ out.cargas.push(r); __pushAirId__("cargas", r); __pushSolId__("cargas", r); out.hotlist.push(r); __pushAirId__("hotlist", r); __pushSolId__("hotlist", r); }
+    if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r); __pushSolId__("tools", r); }
+    const c = String((r && r.Criticidade) || "").toUpperCase();
+    if(c.includes("WAR")){ out.war.push(r); __pushAirId__("war", r); __pushSolId__("war", r); }
+    if(c.includes("FAST PASS") || c.includes("FASTPASS") || c.includes("FAST")){ out.fast.push(r); __pushAirId__("fast", r); __pushSolId__("fast", r); }
+    
+    // 👇 Mudança aqui para garantir que vai ser apenas AOG e NÃO o T-AOG
+    if(c.includes("AOG") && !c.includes("T-AOG")){ out.aog.push(r); __pushAirId__("aog", r); __pushSolId__("aog", r); }
+    // 👆 Mudança aqui
+    
+    const dt = parseMaybeDate(r && r.Data_Ultima_Atualizacao); if(dt && (!maxDt || dt.getTime() > maxDt.getTime())) maxDt = dt;
+  }
+  __cacheByTable = out; __cacheLastUpdate = maxDt || new Date(); buildSortedBaseCache();
 }
+// =========================================================================
+
 function __pushAirId__(tableKey, r){ const a = cleanVal(r && r[AIR_COL]); if(!a) return; const mid = cleanVal(r && r.Material_ID); const mp = __airIdSetByTable[tableKey]; if(!mp) return; let set = mp.get(a); if(!set){ set = new Set(); mp.set(a,set); } if(mid) set.add(mid); }
 function __pushSolId__(tableKey, r){ const sol = cleanVal(r && r[SOL_COL]); if(!sol) return; const mid = cleanVal(r && r.Material_ID); const mp = __solIdSetByTable[tableKey]; if(!mp) return; let set = mp.get(sol); if(!set){ set = new Set(); mp.set(sol,set); } if(mid) set.add(mid); }
 
@@ -477,29 +481,29 @@ function getBaseRows(tableKey){ return (__cacheByTable[tableKey]||[]); }
 function getBaseRowsSorted(tableKey){ return (__sortedBaseByTable[tableKey]||getBaseRows(tableKey)); }
 
 function getRowSearchBundle(r, col, tableKey){
-  if(!r) return { lower:"", norm:"", digits:"" };
-  if(!r.__search) r.__search = {}; const key = `${col}__${tableKey||""}`; if(r.__search[key]) return r.__search[key];
-  let lower;
-  if(col === DATE_COL){ lower = (r.__dispDateLower != null) ? String(r.__dispDateLower) : String(displayCell(DATE_COL, r[DATE_COL], tableKey, r) || "").toLowerCase(); }
-  else if(col === "OBS"){ lower = String(displayCell("OBS", "", tableKey, r) || "").toLowerCase(); }
-  else { lower = String((r[col] ?? "")).toLowerCase(); }
-  const bundle = { lower, norm: normalizeText(lower), digits: digitsOnly(lower) };
-  r.__search[key] = bundle; return bundle;
+  if(!r) return { lower:"", norm:"", digits:"" };
+  if(!r.__search) r.__search = {}; const key = `${col}__${tableKey||""}`; if(r.__search[key]) return r.__search[key];
+  let lower;
+  if(col === DATE_COL){ lower = (r.__dispDateLower != null) ? String(r.__dispDateLower) : String(displayCell(DATE_COL, r[DATE_COL], tableKey, r) || "").toLowerCase(); }
+  else if(col === "OBS"){ lower = String(displayCell("OBS", "", tableKey, r) || "").toLowerCase(); }
+  else { lower = String((r[col] ?? "")).toLowerCase(); }
+  const bundle = { lower, norm: normalizeText(lower), digits: digitsOnly(lower) };
+  r.__search[key] = bundle; return bundle;
 }
 function matchApprox(rowBundle, token){
-  const parts = (token.parts && token.parts.length) ? token.parts : [{raw: token.raw, norm: token.norm, digits: token.digits}];
-  for(const t of parts){
-    const hasRaw = t.raw ? rowBundle.lower.includes(t.raw) : false;
-    const hasNorm = t.norm ? rowBundle.norm.includes(t.norm) : false;
-    const hasDigits = t.digits ? rowBundle.digits.includes(t.digits) : false;
-    if(!(hasRaw || hasNorm || hasDigits)) return false;
-  }
-  return true;
+  const parts = (token.parts && token.parts.length) ? token.parts : [{raw: token.raw, norm: token.norm, digits: token.digits}];
+  for(const t of parts){
+    const hasRaw = t.raw ? rowBundle.lower.includes(t.raw) : false;
+    const hasNorm = t.norm ? rowBundle.norm.includes(t.norm) : false;
+    const hasDigits = t.digits ? rowBundle.digits.includes(t.digits) : false;
+    if(!(hasRaw || hasNorm || hasDigits)) return false;
+  }
+  return true;
 }
 function getActiveFilters(tableKey){
-  const f = filtersByTable[tableKey] || {}; const active = [];
-  for(const k in f){ if(!Object.prototype.hasOwnProperty.call(f,k)) continue; const v = String(f[k]||"").trim(); if(v) active.push([k, buildFilterToken(v)]); }
-  return active;
+  const f = filtersByTable[tableKey] || {}; const active = [];
+  for(const k in f){ if(!Object.prototype.hasOwnProperty.call(f,k)) continue; const v = String(f[k]||"").trim(); if(v) active.push([k, buildFilterToken(v)]); }
+  return active;
 }
 
 const __filterCompiledCache = { aog:null, war:null, fast:null, cargo:null, mro:null, acompanhamento:null, cargas:null, hotlist:null, tools:null };
@@ -508,24 +512,24 @@ function buildFiltersSignatureCore(tableKey){ const f = filtersByTable[tableKey]
 function buildCombinedFilterSignature(tableKey){ return buildFiltersSignatureCore(tableKey) + "|AF=" + (airFocusByTable[tableKey] ? normalizeText(airFocusByTable[tableKey]) : "") + "|SF=" + (solFocusByTable[tableKey] ? normalizeText(solFocusByTable[tableKey]) : ""); }
 function invalidateFilterCache(tableKey){ __filterCompiledCache[tableKey] = null; __filterRowsCache[tableKey] = null; }
 function getCompiledFilters(tableKey){
-  const sig = buildFiltersSignatureCore(tableKey); const c = __filterCompiledCache[tableKey];
-  if(c && c.signature === sig && c.dataVersion === __dataVersion) return c.compiled;
-  const compiled = getActiveFilters(tableKey); __filterCompiledCache[tableKey] = { signature: sig, dataVersion: __dataVersion, compiled }; return compiled;
+  const sig = buildFiltersSignatureCore(tableKey); const c = __filterCompiledCache[tableKey];
+  if(c && c.signature === sig && c.dataVersion === __dataVersion) return c.compiled;
+  const compiled = getActiveFilters(tableKey); __filterCompiledCache[tableKey] = { signature: sig, dataVersion: __dataVersion, compiled }; return compiled;
 }
 function getFilteredBaseRows(tableKey){
-  const sig = buildCombinedFilterSignature(tableKey); const c = __filterRowsCache[tableKey];
-  if(c && c.signature === sig && c.dataVersion === __dataVersion) return c.rows;
-  const base = getBaseRowsSorted(tableKey); const compiled = getCompiledFilters(tableKey);
-  let rows = base;
-  if(compiled && compiled.length){
-    rows = base.filter(r=>{
-      for(let i=0;i<compiled.length;i++){ const col = compiled[i][0]; const token = compiled[i][1]; const bundle = getRowSearchBundle(r, col, tableKey); if(!matchApprox(bundle, token)) return false; }
-      return true;
-    });
-  }
-  const focus = airFocusByTable[tableKey]; if(focus){ const nf = normalizeText(focus); rows = rows.filter(r => normalizeText(cleanVal(r[AIR_COL])) === nf); }
-  const solFocus = solFocusByTable[tableKey]; if(solFocus){ const ns = normalizeText(solFocus); rows = rows.filter(r => normalizeText(cleanVal(r[SOL_COL])) === ns); }
-  __filterRowsCache[tableKey] = { signature: sig, dataVersion: __dataVersion, rows }; return rows;
+  const sig = buildCombinedFilterSignature(tableKey); const c = __filterRowsCache[tableKey];
+  if(c && c.signature === sig && c.dataVersion === __dataVersion) return c.rows;
+  const base = getBaseRowsSorted(tableKey); const compiled = getCompiledFilters(tableKey);
+  let rows = base;
+  if(compiled && compiled.length){
+    rows = base.filter(r=>{
+      for(let i=0;i<compiled.length;i++){ const col = compiled[i][0]; const token = compiled[i][1]; const bundle = getRowSearchBundle(r, col, tableKey); if(!matchApprox(bundle, token)) return false; }
+      return true;
+    });
+  }
+  const focus = airFocusByTable[tableKey]; if(focus){ const nf = normalizeText(focus); rows = rows.filter(r => normalizeText(cleanVal(r[AIR_COL])) === nf); }
+  const solFocus = solFocusByTable[tableKey]; if(solFocus){ const ns = normalizeText(solFocus); rows = rows.filter(r => normalizeText(cleanVal(r[SOL_COL])) === ns); }
+  __filterRowsCache[tableKey] = { signature: sig, dataVersion: __dataVersion, rows }; return rows;
 }
 
 let __sharedObsState = null; const __obsDraftGlobal = {};
@@ -536,39 +540,39 @@ function getObsTextForCell(tableKey, materialId){ const d = getObsDraft(tableKey
 function obsInput(ev, tableKey, materialId){ const id = __obsNormId__(materialId); if(!id) return; __obsDraftGlobal[id] = (ev && ev.target) ? ev.target.value : ""; }
 
 async function obsKeyDown(ev, tableKey, materialId){
-  if(!ev) return; if(ev.key !== "Enter") return; if(ev.shiftKey) return; ev.preventDefault();
-  const el = ev.target; if(!el) return;
-  el.classList.remove("obsSaved"); el.classList.add("obsSaving");
-  const id = __obsNormId__(materialId); const text = String(el.value || "");
-  try{
-    const st = await gasCall("setSharedObs", tableKey, id, text); __sharedObsState = st || __sharedObsState;
-    if(__obsDraftGlobal[id] != null) delete __obsDraftGlobal[id];
-    el.classList.remove("obsSaving"); el.classList.add("obsSaved");
-    const tk = String(tableKey || "").toLowerCase(); markDirty(tk); renderTable(tk); clearDirty(tk);
-  }catch(e){ el.classList.remove("obsSaving"); __obsDraftGlobal[id] = String(el.value || ""); console.error("Erro ao salvar OBS:", e); }
+  if(!ev) return; if(ev.key !== "Enter") return; if(ev.shiftKey) return; ev.preventDefault();
+  const el = ev.target; if(!el) return;
+  el.classList.remove("obsSaved"); el.classList.add("obsSaving");
+  const id = __obsNormId__(materialId); const text = String(el.value || "");
+  try{
+    const st = await gasCall("setSharedObs", tableKey, id, text); __sharedObsState = st || __sharedObsState;
+    if(__obsDraftGlobal[id] != null) delete __obsDraftGlobal[id];
+    el.classList.remove("obsSaving"); el.classList.add("obsSaved");
+    const tk = String(tableKey || "").toLowerCase(); markDirty(tk); renderTable(tk); clearDirty(tk);
+  }catch(e){ el.classList.remove("obsSaving"); __obsDraftGlobal[id] = String(el.value || ""); console.error("Erro ao salvar OBS:", e); }
 }
 function updateObsVisibleForTable(tableKey){
-  const tk = String(tableKey||"").toLowerCase(); const tbl = document.getElementById(`tbl-${tk}`); if(!tbl) return;
-  const areas = tbl.querySelectorAll("textarea.obsArea"); if(!areas || !areas.length) return;
-  for(const a of areas){
-    try{
-      if(document.activeElement === a) continue;
-      const mid = __obsNormId__(a.getAttribute("data-mid") || ""); if(!mid) continue;
-      const draft = getObsDraft(tk, mid); if(draft !== "") continue;
-      const st = getObsFromState(tk, mid); if(String(a.value || "") !== String(st || "")) a.value = String(st || "");
-    }catch(e){}
-  }
+  const tk = String(tableKey||"").toLowerCase(); const tbl = document.getElementById(`tbl-${tk}`); if(!tbl) return;
+  const areas = tbl.querySelectorAll("textarea.obsArea"); if(!areas || !areas.length) return;
+  for(const a of areas){
+    try{
+      if(document.activeElement === a) continue;
+      const mid = __obsNormId__(a.getAttribute("data-mid") || ""); if(!mid) continue;
+      const draft = getObsDraft(tk, mid); if(draft !== "") continue;
+      const st = getObsFromState(tk, mid); if(String(a.value || "") !== String(st || "")) a.value = String(st || "");
+    }catch(e){}
+  }
 }
 function updateObsVisibleActiveTable(){ const active = document.querySelector(".section.active"); const tk = active ? tableKeysBySection[active.id] : null; if(!tk) return; updateObsVisibleForTable(tk); }
 async function syncSharedObs(){ try{ const st = await gasCall("getSharedObsState"); __sharedObsState = st || __sharedObsState; try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){} }catch(e){} }
 
 function displayCell(colKey, rawValue, tableKey, row){
-  if(colKey === DATE_COL || colKey === EMB_COL || colKey === LAND_COL){
-    const parts = getDatePartsForDisplay(rawValue, (colKey===EMB_COL || colKey===LAND_COL));
-    if(!parts.date) return ""; if(parts.time) return `${parts.date} ${parts.time}`; return parts.date;
-  }
-  if(colKey === "OBS"){ const id = row ? cleanVal(row.Material_ID) : ""; return getObsTextForCell(tableKey, id); }
-  return String(rawValue ?? "");
+  if(colKey === DATE_COL || colKey === EMB_COL || colKey === LAND_COL){
+    const parts = getDatePartsForDisplay(rawValue, (colKey===EMB_COL || colKey===LAND_COL));
+    if(!parts.date) return ""; if(parts.time) return `${parts.date} ${parts.time}`; return parts.date;
+  }
+  if(colKey === "OBS"){ const id = row ? cleanVal(row.Material_ID) : ""; return getObsTextForCell(tableKey, id); }
+  return String(rawValue ?? "");
 }
 
 const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1wU2tiPZC1_iW1SYiIOJe9WYnm93QpumnQlUd4UJKFiBh28T3wFfd3RGYoi_iUtQKng/exec";
@@ -576,78 +580,78 @@ function hasGAS(){ return !!GAS_WEBAPP_URL; }
 function buildGASUrl(params){ const u = new URL(GAS_WEBAPP_URL); Object.keys(params || {}).forEach(k => u.searchParams.set(k, String(params[k]))); u.searchParams.set("ts", String(Date.now())); return u.toString(); }
 
 function jsonpCall(params, timeoutMs = 20000){
-  return new Promise((resolve, reject)=>{
-    const cbName = "__cb_" + Math.random().toString(36).slice(2);
-    const url = buildGASUrl(Object.assign({}, params || {}, { callback: cbName }));
-    let done = false;
-    const timer = setTimeout(()=>{ if(done) return; done = true; cleanup(); reject(new Error("timeout JSONP")); }, Math.max(3000, timeoutMs|0));
-    function cleanup(){ try{ clearTimeout(timer); }catch(e){} try{ delete window[cbName]; }catch(e){} try{ if(script && script.parentNode) script.parentNode.removeChild(script); }catch(e){} }
-    window[cbName] = (data)=>{
-      if(done) return;
-      try{ if(data && data.ok === false && String(data.error||"").toLowerCase() === "forbidden"){ __showAccessBlocked__(data.message || "Acesso permitido somente para contas Google @latam.com."); done = true; cleanup(); reject(new Error("forbidden")); return; } }catch(e){}
-      done = true; cleanup(); resolve(data);
-    };
-    let script = document.createElement("script"); script.src = url; script.async = true;
-    script.onerror = ()=>{ if(done) return; done = true; cleanup(); reject(new Error("erro ao carregar script JSONP")); };
-    document.head.appendChild(script);
-  });
+  return new Promise((resolve, reject)=>{
+    const cbName = "__cb_" + Math.random().toString(36).slice(2);
+    const url = buildGASUrl(Object.assign({}, params || {}, { callback: cbName }));
+    let done = false;
+    const timer = setTimeout(()=>{ if(done) return; done = true; cleanup(); reject(new Error("timeout JSONP")); }, Math.max(3000, timeoutMs|0));
+    function cleanup(){ try{ clearTimeout(timer); }catch(e){} try{ delete window[cbName]; }catch(e){} try{ if(script && script.parentNode) script.parentNode.removeChild(script); }catch(e){} }
+    window[cbName] = (data)=>{
+      if(done) return;
+      try{ if(data && data.ok === false && String(data.error||"").toLowerCase() === "forbidden"){ __showAccessBlocked__(data.message || "Acesso permitido somente para contas Google @latam.com."); done = true; cleanup(); reject(new Error("forbidden")); return; } }catch(e){}
+      done = true; cleanup(); resolve(data);
+    };
+    let script = document.createElement("script"); script.src = url; script.async = true;
+    script.onerror = ()=>{ if(done) return; done = true; cleanup(); reject(new Error("erro ao carregar script JSONP")); };
+    document.head.appendChild(script);
+  });
 }
 
 function gasCall(fnName, ...args){
-  if(!hasGAS()) return Promise.reject(new Error("GAS_WEBAPP_URL não configurado"));
-  const fn = String(fnName||"").trim();
-  if(fn === "getDadosBaseAOG" || fn === "getDadosBase" || fn === "getDados") return jsonpCall({ dados: 1 });
-  if(fn === "forceUpdate" || fn === "atualizarAOG" || fn === "runForceUpdate") return jsonpCall({ forceUpdate: 1 });
-  if(fn === "pingPresence") return jsonpCall({ presencePing: 1 });
-  if(fn === "getConnectedUsers") return jsonpCall({ presenceList: 1 });
-  if(fn === "getSharedPrioState") return jsonpCall({ sharedPrioGet: 1 });
-  if(fn === "toggleSharedPrio") return jsonpCall({ sharedPrioToggle: 1, tableKey: args[0] || "", rowId: args[1] || "" });
-  if(fn === "getSharedAirState") return jsonpCall({ sharedAirGet: 1 });
-  if(fn === "toggleSharedAirPin") return jsonpCall({ sharedAirToggle: 1, tableKey: args[0] || "", aircraft: args[1] || "" });
-  if(fn === "getSharedObsState") return jsonpCall({ sharedObsGet: 1 });
-  if(fn === "setSharedObs") return jsonpCall({ sharedObsSet: 1, tableKey: args[0] || "", materialId: args[1] || "", text: args[2] || "" });
-  if(fn === "getSharedTurnoState") return jsonpCall({ sharedTurnoGet: 1 });
-  if(fn === "addSharedTurnoItem") return jsonpCall({ sharedTurnoAdd: 1, html: args[0] || "" });
-  if(fn === "updateSharedTurnoItem") return jsonpCall({ sharedTurnoUpdate: 1, id: args[0] || "", html: args[1] || "" });
-  if(fn === "toggleSharedTurnoDone") return jsonpCall({ sharedTurnoDone: 1, id: args[0] || "" });
-  if(fn === "deleteSharedTurnoItem") return jsonpCall({ sharedTurnoDelete: 1, id: args[0] || "" });
-  if(fn === "getSharedAvisosState") return jsonpCall({ sharedAvisosGet: 1 });
-  if(fn === "addSharedAvisoItem") return jsonpCall({ sharedAvisosAdd: 1, html: args[0] || "" });
-  if(fn === "updateSharedAvisoItem") return jsonpCall({ sharedAvisosUpdate: 1, id: args[0] || "", html: args[1] || "" });
-  if(fn === "toggleSharedAvisoDone") return jsonpCall({ sharedAvisosDone: 1, id: args[0] || "" });
-  if(fn === "deleteSharedAvisoItem") return jsonpCall({ sharedAvisosDelete: 1, id: args[0] || "" });
-  if(fn === "getSharedLinksState") return jsonpCall({ sharedLinksGet: 1 });
-  if(fn === "addSharedLink") return jsonpCall({ sharedLinksAdd: 1, name: args[0] || "", url: args[1] || "" });
-  if(fn === "deleteSharedLink" || fn === "deleteSharedLinkItem" || fn === "deleteLink") return jsonpCall({ sharedLinksDelete: 1, id: args[0] || "" });
-  if(fn === "getLastProgress") return jsonpCall({ progressGet: 1 });
-  return Promise.reject(new Error("Função não mapeada no GitHub: " + fn));
+  if(!hasGAS()) return Promise.reject(new Error("GAS_WEBAPP_URL não configurado"));
+  const fn = String(fnName||"").trim();
+  if(fn === "getDadosBaseAOG" || fn === "getDadosBase" || fn === "getDados") return jsonpCall({ dados: 1 });
+  if(fn === "forceUpdate" || fn === "atualizarAOG" || fn === "runForceUpdate") return jsonpCall({ forceUpdate: 1 });
+  if(fn === "pingPresence") return jsonpCall({ presencePing: 1 });
+  if(fn === "getConnectedUsers") return jsonpCall({ presenceList: 1 });
+  if(fn === "getSharedPrioState") return jsonpCall({ sharedPrioGet: 1 });
+  if(fn === "toggleSharedPrio") return jsonpCall({ sharedPrioToggle: 1, tableKey: args[0] || "", rowId: args[1] || "" });
+  if(fn === "getSharedAirState") return jsonpCall({ sharedAirGet: 1 });
+  if(fn === "toggleSharedAirPin") return jsonpCall({ sharedAirToggle: 1, tableKey: args[0] || "", aircraft: args[1] || "" });
+  if(fn === "getSharedObsState") return jsonpCall({ sharedObsGet: 1 });
+  if(fn === "setSharedObs") return jsonpCall({ sharedObsSet: 1, tableKey: args[0] || "", materialId: args[1] || "", text: args[2] || "" });
+  if(fn === "getSharedTurnoState") return jsonpCall({ sharedTurnoGet: 1 });
+  if(fn === "addSharedTurnoItem") return jsonpCall({ sharedTurnoAdd: 1, html: args[0] || "" });
+  if(fn === "updateSharedTurnoItem") return jsonpCall({ sharedTurnoUpdate: 1, id: args[0] || "", html: args[1] || "" });
+  if(fn === "toggleSharedTurnoDone") return jsonpCall({ sharedTurnoDone: 1, id: args[0] || "" });
+  if(fn === "deleteSharedTurnoItem") return jsonpCall({ sharedTurnoDelete: 1, id: args[0] || "" });
+  if(fn === "getSharedAvisosState") return jsonpCall({ sharedAvisosGet: 1 });
+  if(fn === "addSharedAvisoItem") return jsonpCall({ sharedAvisosAdd: 1, html: args[0] || "" });
+  if(fn === "updateSharedAvisoItem") return jsonpCall({ sharedAvisosUpdate: 1, id: args[0] || "", html: args[1] || "" });
+  if(fn === "toggleSharedAvisoDone") return jsonpCall({ sharedAvisosDone: 1, id: args[0] || "" });
+  if(fn === "deleteSharedAvisoItem") return jsonpCall({ sharedAvisosDelete: 1, id: args[0] || "" });
+  if(fn === "getSharedLinksState") return jsonpCall({ sharedLinksGet: 1 });
+  if(fn === "addSharedLink") return jsonpCall({ sharedLinksAdd: 1, name: args[0] || "", url: args[1] || "" });
+  if(fn === "deleteSharedLink" || fn === "deleteSharedLinkItem" || fn === "deleteLink") return jsonpCall({ sharedLinksDelete: 1, id: args[0] || "" });
+  if(fn === "getLastProgress") return jsonpCall({ progressGet: 1 });
+  return Promise.reject(new Error("Função não mapeada no GitHub: " + fn));
 }
 
 function renderConnected(users){
-  const box = document.getElementById("connectedBox"); if(!box) return;
-  const list = Array.isArray(users) ? users : [];
-  if(list.length === 0){ box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">—</div>`; return; }
-  box.innerHTML = [`<div class="title">👥 Conectados (${list.length})</div>`].concat(list.slice(0,12).map(u=>{ const em = (u && u.email) ? u.email : "desconhecido"; return `<div class="item">${escapeHtml(em)}</div>`; })).join("");
+  const box = document.getElementById("connectedBox"); if(!box) return;
+  const list = Array.isArray(users) ? users : [];
+  if(list.length === 0){ box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">—</div>`; return; }
+  box.innerHTML = [`<div class="title">👥 Conectados (${list.length})</div>`].concat(list.slice(0,12).map(u=>{ const em = (u && u.email) ? u.email : "desconhecido"; return `<div class="item">${escapeHtml(em)}</div>`; })).join("");
 }
 
 async function presenceTick(){
-  const watchdog = setTimeout(()=>{ const box = document.getElementById("connectedBox"); if(box && box.innerText && box.innerText.includes("Carregando")){ box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`; } }, 8000);
-  try{
-    if(!hasGAS()) { renderConnected([]); return; }
-    try{ const users = await gasCall("pingPresence"); renderConnected(users || []); }catch(e1){ const users2 = await gasCall("getConnectedUsers"); renderConnected(users2 || []); }
-  }catch(err){ const box = document.getElementById("connectedBox"); if(box) box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`; } finally { clearTimeout(watchdog); }
+  const watchdog = setTimeout(()=>{ const box = document.getElementById("connectedBox"); if(box && box.innerText && box.innerText.includes("Carregando")){ box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`; } }, 8000);
+  try{
+    if(!hasGAS()) { renderConnected([]); return; }
+    try{ const users = await gasCall("pingPresence"); renderConnected(users || []); }catch(e1){ const users2 = await gasCall("getConnectedUsers"); renderConnected(users2 || []); }
+  }catch(err){ const box = document.getElementById("connectedBox"); if(box) box.innerHTML = `<div class="title">👥 Conectados</div><div class="item">⚠️ indisponível</div>`; } finally { clearTimeout(watchdog); }
 }
 
-let __sharedPrioState = null; let __sharedAirState  = null;
+let __sharedPrioState = null; let __sharedAirState  = null;
 async function syncSharedAllTables(){
-  try{
-    const pr = await gasCall("getSharedPrioState"); const ar = await gasCall("getSharedAirState");
-    __sharedPrioState = pr || __sharedPrioState; __sharedAirState  = ar || __sharedAirState;
-    for(const tk of SHARED_TABLE_KEYS){
-      try{ const prPins = (__sharedPrioState && __sharedPrioState[tk] && Array.isArray(__sharedPrioState[tk].pins)) ? __sharedPrioState[tk].pins : null; if(prPins){ priosByTable[tk] = new Set(prPins); savePrios(tk); markDirty(tk); } }catch(e){}
-      try{ const arPins = (__sharedAirState && __sharedAirState[tk] && Array.isArray(__sharedAirState[tk].pins)) ? __sharedAirState[tk].pins : null; if(arPins){ airPinnedByTable[tk] = new Set(arPins); saveAirPinned(tk); markDirty(tk); } }catch(e){}
-    }
-  }catch(e){}
+  try{
+    const pr = await gasCall("getSharedPrioState"); const ar = await gasCall("getSharedAirState");
+    __sharedPrioState = pr || __sharedPrioState; __sharedAirState  = ar || __sharedAirState;
+    for(const tk of SHARED_TABLE_KEYS){
+      try{ const prPins = (__sharedPrioState && __sharedPrioState[tk] && Array.isArray(__sharedPrioState[tk].pins)) ? __sharedPrioState[tk].pins : null; if(prPins){ priosByTable[tk] = new Set(prPins); savePrios(tk); markDirty(tk); } }catch(e){}
+      try{ const arPins = (__sharedAirState && __sharedAirState[tk] && Array.isArray(__sharedAirState[tk].pins)) ? __sharedAirState[tk].pins : null; if(arPins){ airPinnedByTable[tk] = new Set(arPins); saveAirPinned(tk); markDirty(tk); } }catch(e){}
+    }
+  }catch(e){}
 }
 
 const FAST_AUTO_PIN_INTERVAL_MS = 15 * 60 * 1000; const FAST_AUTO_PIN_STORAGE_KEY = "FAST_AUTO_PIN_MANAGED_V1"; let __fastAutoPinInFlight = false;
@@ -660,117 +664,176 @@ async function __ensureSharedAirPinned__(aircraft){ const a = cleanVal(aircraft)
 async function __removeManagedPinsIfNeeded__(managedPins, desiredPins){ const currentPins = (airPinnedByTable.fast instanceof Set) ? airPinnedByTable.fast : new Set(); const toRemove = []; for(const a of managedPins){ if(!a) continue; if(!desiredPins.has(a) && currentPins.has(a)) toRemove.push(a); } for(const a of toRemove){ try{ await toggleAirShared("fast", a); }catch(e){} } }
 
 async function runFastAutoPinNow(reason){
-  if(__fastAutoPinInFlight) return; __fastAutoPinInFlight = true;
-  try{
-    if(!Array.isArray(dados) || dados.length === 0){ __fastAutoPinInFlight = false; return; }
-    try{ prepareDataCache(); }catch(e){}
-    const { today, aircraftSet } = __getFastAircraftSetForToday__(); const managed = __fastAutoLoadManaged__();
-    if(managed.date && managed.date !== today){ try{ await __removeManagedPinsIfNeeded__(new Set(managed.pins||[]), new Set()); }catch(e){} managed.date = ""; managed.pins = []; }
-    try{ await __removeManagedPinsIfNeeded__(new Set(managed.pins||[]), aircraftSet); }catch(e){}
-    const newlyManaged = new Set(managed.pins || []);
-    for(const a of aircraftSet){ try{ const changed = await __ensureSharedAirPinned__(a); if(changed) newlyManaged.add(a); }catch(e){} }
-    __fastAutoSaveManaged__(today, Array.from(newlyManaged));
-    const active = document.querySelector(".section.active"); if(active && active.id === "fast"){ markDirty("fast"); renderAircraftBox("fast"); clearDirty("fast"); }
-  }finally{ __fastAutoPinInFlight = false; }
+  if(__fastAutoPinInFlight) return; __fastAutoPinInFlight = true;
+  try{
+    if(!Array.isArray(dados) || dados.length === 0){ __fastAutoPinInFlight = false; return; }
+    try{ prepareDataCache(); }catch(e){}
+    const { today, aircraftSet } = __getFastAircraftSetForToday__(); const managed = __fastAutoLoadManaged__();
+    if(managed.date && managed.date !== today){ try{ await __removeManagedPinsIfNeeded__(new Set(managed.pins||[]), new Set()); }catch(e){} managed.date = ""; managed.pins = []; }
+    try{ await __removeManagedPinsIfNeeded__(new Set(managed.pins||[]), aircraftSet); }catch(e){}
+    const newlyManaged = new Set(managed.pins || []);
+    for(const a of aircraftSet){ try{ const changed = await __ensureSharedAirPinned__(a); if(changed) newlyManaged.add(a); }catch(e){} }
+    __fastAutoSaveManaged__(today, Array.from(newlyManaged));
+    const active = document.querySelector(".section.active"); if(active && active.id === "fast"){ markDirty("fast"); renderAircraftBox("fast"); clearDirty("fast"); }
+  }finally{ __fastAutoPinInFlight = false; }
 }
 
 const __FAST_AUTO_AIR_LS_KEY = "FAST_AUTO_AIR_LASTDAY_V1";
 function __dateKeyLocal__(dt){ if(!dt) return ""; const d = (dt instanceof Date) ? dt : parseMaybeDate(dt); if(!d || isNaN(d.getTime())) return ""; const pad = n => String(n).padStart(2,"0"); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 async function __autoPinFastTodayAircraft__(){
-  try{
-    if(!hasGAS()) return;
-    const todayKey = __dateKeyLocal__(new Date()); const lastKey = String(localStorage.getItem(__FAST_AUTO_AIR_LS_KEY) || "").trim(); if(lastKey === todayKey) return;
-    if(!__sharedAirState){ try{ await syncSharedAllTables(); }catch(e){} }
-    const rows = getBaseRows("fast") || []; const setToday = new Set();
-    for(let i=0;i<rows.length;i++){ const r = rows[i]; const dk = __dateKeyLocal__(r && r[DATE_COL]); if(dk !== todayKey) continue; const a = cleanVal(r && r[AIR_COL]); if(a) setToday.add(a); }
-    if(setToday.size === 0){ localStorage.setItem(__FAST_AUTO_AIR_LS_KEY, todayKey); return; }
-    const pinned = airPinnedByTable.fast || new Set();
-    for(const a of Array.from(setToday)){ if(pinned.has(a)) continue; try{ await gasCall("toggleSharedAirPin", "fast", a); }catch(e){} }
-    try{ await syncSharedAllTables(); }catch(e){}
-    localStorage.setItem(__FAST_AUTO_AIR_LS_KEY, todayKey);
-  }catch(e){ console.warn("FAST auto-pin falhou:", e); }
+  try{
+    if(!hasGAS()) return;
+    const todayKey = __dateKeyLocal__(new Date()); const lastKey = String(localStorage.getItem(__FAST_AUTO_AIR_LS_KEY) || "").trim(); if(lastKey === todayKey) return;
+    if(!__sharedAirState){ try{ await syncSharedAllTables(); }catch(e){} }
+    const rows = getBaseRows("fast") || []; const setToday = new Set();
+    for(let i=0;i<rows.length;i++){ const r = rows[i]; const dk = __dateKeyLocal__(r && r[DATE_COL]); if(dk !== todayKey) continue; const a = cleanVal(r && r[AIR_COL]); if(a) setToday.add(a); }
+    if(setToday.size === 0){ localStorage.setItem(__FAST_AUTO_AIR_LS_KEY, todayKey); return; }
+    const pinned = airPinnedByTable.fast || new Set();
+    for(const a of Array.from(setToday)){ if(pinned.has(a)) continue; try{ await gasCall("toggleSharedAirPin", "fast", a); }catch(e){} }
+    try{ await syncSharedAllTables(); }catch(e){}
+    localStorage.setItem(__FAST_AUTO_AIR_LS_KEY, todayKey);
+  }catch(e){ console.warn("FAST auto-pin falhou:", e); }
 }
 
 function __cssEscape__(s){ try{ if(window.CSS && CSS.escape) return CSS.escape(String(s)); }catch(e){} return String(s).replace(/["\\]/g, "\\$&"); }
 function updateBellButton(tableKey, rid){ const q = `button.bellBtn[data-table="${__cssEscape__(tableKey)}"][data-rid="${__cssEscape__(rid)}"]`; const btn = document.querySelector(q); if(!btn) return; const on = __prioHas__(tableKey, rid); btn.classList.toggle("on", !!on); }
 
 async function togglePrioShared(tableKey, id){
-  const tk = String(tableKey||"").toLowerCase(); const set = priosByTable[tk]; if(set.has(id)) set.delete(id); else set.add(id); savePrios(tk); renderPrios(tk); updateBellButton(tk, id);
-  try{ const st = await gasCall("toggleSharedPrio", tk, id); __sharedPrioState = st || __sharedPrioState; const pins = (__sharedPrioState && __sharedPrioState[tk] && Array.isArray(__sharedPrioState[tk].pins)) ? __sharedPrioState[tk].pins : []; priosByTable[tk] = new Set(pins); savePrios(tk); renderPrios(tk); updateBellButton(tk, id); }catch(e){ try{ await syncSharedAllTables(); }catch(e2){} renderPrios(tk); updateBellButton(tk, id); }
+  const tk = String(tableKey||"").toLowerCase(); const set = priosByTable[tk]; if(set.has(id)) set.delete(id); else set.add(id); savePrios(tk); renderPrios(tk); updateBellButton(tk, id);
+  try{ const st = await gasCall("toggleSharedPrio", tk, id); __sharedPrioState = st || __sharedPrioState; const pins = (__sharedPrioState && __sharedPrioState[tk] && Array.isArray(__sharedPrioState[tk].pins)) ? __sharedPrioState[tk].pins : []; priosByTable[tk] = new Set(pins); savePrios(tk); renderPrios(tk); updateBellButton(tk, id); }catch(e){ try{ await syncSharedAllTables(); }catch(e2){} renderPrios(tk); updateBellButton(tk, id); }
 }
 
 async function toggleAirShared(tableKey, aircraft){
-  const tk = String(tableKey||"").toLowerCase(); const a = cleanVal(aircraft); if(!a) return; const set = airPinnedByTable[tk]; if(set.has(a)) set.delete(a); else set.add(a); saveAirPinned(tk); renderAircraftBox(tk);
-  try{ const st = await gasCall("toggleSharedAirPin", tk, a); __sharedAirState = st || __sharedAirState; const pins = (__sharedAirState && __sharedAirState[tk] && Array.isArray(__sharedAirState[tk].pins)) ? __sharedAirState[tk].pins : []; airPinnedByTable[tk] = new Set(pins); saveAirPinned(tk); renderAircraftBox(tk); }catch(e){ try{ await syncSharedAllTables(); }catch(e2){} renderAircraftBox(tk); }
+  const tk = String(tableKey||"").toLowerCase(); const a = cleanVal(aircraft); if(!a) return; const set = airPinnedByTable[tk]; if(set.has(a)) set.delete(a); else set.add(a); saveAirPinned(tk); renderAircraftBox(tk);
+  try{ const st = await gasCall("toggleSharedAirPin", tk, a); __sharedAirState = st || __sharedAirState; const pins = (__sharedAirState && __sharedAirState[tk] && Array.isArray(__sharedAirState[tk].pins)) ? __sharedAirState[tk].pins : []; airPinnedByTable[tk] = new Set(pins); saveAirPinned(tk); renderAircraftBox(tk); }catch(e){ try{ await syncSharedAllTables(); }catch(e2){} renderAircraftBox(tk); }
 }
 
-function togglePrio(tableKey, id){ const tk = String(tableKey||"").toLowerCase(); if(isSharedTable(tk)){ togglePrioShared(tk, id); return; } const set = priosByTable[tk]; if(set.has(id)) set.delete(id); else set.add(id); savePrios(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderPrios(tk); }
+
+function togglePrio(tableKey, id){ 
+  let tk = String(tableKey||"").toLowerCase(); 
+  const isCargo = (tk === "cargo");
+  if(isCargo) tk = "acompanhamento";
+
+  if(isSharedTable(tk)){ 
+    togglePrioShared(tk, id); 
+  } else { 
+    const set = priosByTable[tk]; 
+    if(set.has(id)) set.delete(id); else set.add(id); 
+    savePrios(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderPrios(tk); 
+  }
+
+  if(isCargo){
+    const btn = document.querySelector(".menu button[onclick*='acompanhamento']");
+    openTab('acompanhamento', btn);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+
 function removePrio(tableKey, id){ const tk = String(tableKey||"").toLowerCase(); if(isSharedTable(tk)){ togglePrioShared(tk, id); return; } const set = priosByTable[tk]; if(set.has(id)) set.delete(id); savePrios(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderPrios(tk); }
-function toggleAirPinned(tableKey, aircraft){ const tk = String(tableKey||"").toLowerCase(); const a = cleanVal(aircraft); if(!a) return; if(isSharedTable(tk)){ toggleAirShared(tk, a); return; } const set = airPinnedByTable[tk]; if(set.has(a)) set.delete(a); else set.add(a); saveAirPinned(tk); renderAircraftBox(tk); }
+
+function toggleAirPinned(tableKey, aircraft){ 
+  let tk = String(tableKey||"").toLowerCase(); 
+  const isCargo = (tk === "cargo");
+  if(isCargo) tk = "acompanhamento";
+
+  const a = cleanVal(aircraft); if(!a) return; 
+  
+  if(isSharedTable(tk)){ 
+    toggleAirShared(tk, a); 
+  } else { 
+    const set = airPinnedByTable[tk]; 
+    if(set.has(a)) set.delete(a); else set.add(a); 
+    saveAirPinned(tk); renderAircraftBox(tk); 
+  }
+
+  if(isCargo){
+    const btn = document.querySelector(".menu button[onclick*='acompanhamento']");
+    openTab('acompanhamento', btn);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+
 function setAirFocus(tableKey, aircraft){ const tk = String(tableKey||"").toLowerCase(); const a = cleanVal(aircraft); if(!a) return; clearFilters(tk); airFocusByTable[tk] = a; const tbl = document.getElementById(`tbl-${tk}`); if(tbl){ const inputs = tbl.querySelectorAll("input.filter"); const idx = cols.indexOf(AIR_COL); if(idx >= 0 && inputs && inputs.length){ const inp = inputs[idx]; if(inp){ inp.value = a; filtersByTable[tk][AIR_COL] = a.toLowerCase(); } } } invalidateFilterCache(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderAircraftBox(tk); }
 function clearAirFocus(tableKey){ const tk = String(tableKey||"").toLowerCase(); const current = airFocusByTable[tk]; airFocusByTable[tk] = null; const f = filtersByTable[tk] || {}; const v = String(f[AIR_COL] || "").trim().toLowerCase(); if(current && v && normalizeText(v) === normalizeText(current)) delete filtersByTable[tk][AIR_COL]; const tbl = document.getElementById(`tbl-${tk}`); if(tbl){ const inputs = tbl.querySelectorAll("input.filter"); const idx = cols.indexOf(AIR_COL); if(idx >= 0 && inputs && inputs.length){ const inp = inputs[idx]; if(inp) inp.value = ""; } } invalidateFilterCache(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderAircraftBox(tk); }
 function airCardXAction(tableKey, aircraft){ const tk = String(tableKey||"").toLowerCase(); const a = cleanVal(aircraft); if(!a) return; if(airFocusByTable[tk] && normalizeText(airFocusByTable[tk]) === normalizeText(a)){ clearAirFocus(tk); return; } if(isSharedTable(tk)){ toggleAirShared(tk, a); return; } const set = airPinnedByTable[tk]; if(set.has(a)) set.delete(a); saveAirPinned(tk); renderAircraftBox(tk); }
 function countIdsForAircraft(tableKey, aircraft){ const tk = String(tableKey||"").toLowerCase(); const a = cleanVal(aircraft); if(!a) return 0; const mp = __airIdSetByTable[tk]; if(!mp) return 0; const set = mp.get(a); return set ? set.size : 0; }
-function toggleSolPinned(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return; const set = solPinnedByTable[tk]; if(set.has(s)) set.delete(s); else set.add(s); saveSolPinned(tk); renderSolBox(tk); }
+
+function toggleSolPinned(tableKey, sol){ 
+  let tk = String(tableKey||"").toLowerCase(); 
+  const isCargo = (tk === "cargo");
+  if(isCargo) tk = "acompanhamento";
+
+  const s = cleanVal(sol); if(!s) return; 
+  const set = solPinnedByTable[tk]; 
+  if(set.has(s)) set.delete(s); else set.add(s); 
+  saveSolPinned(tk); renderSolBox(tk); 
+
+  if(isCargo){
+    const btn = document.querySelector(".menu button[onclick*='acompanhamento']");
+    openTab('acompanhamento', btn);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+
 function setSolFocus(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return; clearFilters(tk); airFocusByTable[tk] = null; solFocusByTable[tk] = s; const tbl = document.getElementById(`tbl-${tk}`); if(tbl){ const inputs = tbl.querySelectorAll("input.filter"); const idx = cols.indexOf(SOL_COL); if(idx >= 0 && inputs && inputs.length){ const inp = inputs[idx]; if(inp){ inp.value = s; filtersByTable[tk][SOL_COL] = s.toLowerCase(); } } } invalidateFilterCache(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderAircraftBox(tk); renderSolBox(tk); }
 function clearSolFocus(tableKey){ const tk = String(tableKey||"").toLowerCase(); const current = solFocusByTable[tk]; solFocusByTable[tk] = null; const f = filtersByTable[tk] || {}; const v = String(f[SOL_COL] || "").trim().toLowerCase(); if(current && v && normalizeText(v) === normalizeText(current)) delete filtersByTable[tk][SOL_COL]; const tbl = document.getElementById(`tbl-${tk}`); if(tbl){ const inputs = tbl.querySelectorAll("input.filter"); const idx = cols.indexOf(SOL_COL); if(idx >= 0 && inputs && inputs.length){ const inp = inputs[idx]; if(inp) inp.value = ""; } } invalidateFilterCache(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderAircraftBox(tk); renderSolBox(tk); }
 function solCardXAction(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return; if(solFocusByTable[tk] && normalizeText(solFocusByTable[tk]) === normalizeText(s)){ clearSolFocus(tk); return; } const set = solPinnedByTable[tk]; if(set.has(s)) set.delete(s); saveSolPinned(tk); renderSolBox(tk); }
 function countIdsForSol(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return 0; const mp = __solIdSetByTable[tk]; if(!mp) return 0; const set = mp.get(s); return set ? set.size : 0; }
 
 function renderSolBox(tableKey){
-  const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", mro:"sol-mro", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools" }[tableKey];
-  const wrap = document.getElementById(wrapId); if(!wrap) return;
-  const set = solPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
-  const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
-  wrap.innerHTML = `<div class="solBox"><h3>📌 Solicitações destacadas</h3><div class="solGrid" id="solGrid-${tableKey}"></div></div>`;
-  const grid = document.getElementById(`solGrid-${tableKey}`); if(!grid) return;
-  const focus = solFocusByTable[tableKey] ? String(solFocusByTable[tableKey]) : "";
-  items.slice(0, 80).forEach(s=>{
-    const count = countIdsForSol(tableKey, s); const isFocused = focus && normalizeText(focus) === normalizeText(s);
-    const clickFn = isFocused ? `clearSolFocus('${tableKey}')` : `setSolFocus('${tableKey}','${escapeHtml(s)}')`;
-    const card = document.createElement("div"); card.className = "solCard";
-    card.innerHTML = `<button class="solCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}" onclick="solCardXAction('${tableKey}','${escapeHtml(s)}')">×</button><div class="solCardTitle">🧾 ${escapeHtml(s)}</div><div class="solCardMeta">Material_IDs: <b>${count}</b></div><div class="solCardActions"><button class="solFilterPill ${isFocused ? "on" : ""}" type="button" title="Filtrar esta aba por esta Solicitação" onclick="${clickFn}">${isFocused ? "Filtrando" : "Filtrar"}</button></div>`;
-    grid.appendChild(card);
-  });
+  const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", mro:"sol-mro", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools" }[tableKey];
+  const wrap = document.getElementById(wrapId); if(!wrap) return;
+  const set = solPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+  const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  wrap.innerHTML = `<div class="solBox"><h3>📌 Solicitações destacadas</h3><div class="solGrid" id="solGrid-${tableKey}"></div></div>`;
+  const grid = document.getElementById(`solGrid-${tableKey}`); if(!grid) return;
+  const focus = solFocusByTable[tableKey] ? String(solFocusByTable[tableKey]) : "";
+  items.slice(0, 80).forEach(s=>{
+    const count = countIdsForSol(tableKey, s); const isFocused = focus && normalizeText(focus) === normalizeText(s);
+    const clickFn = isFocused ? `clearSolFocus('${tableKey}')` : `setSolFocus('${tableKey}','${escapeHtml(s)}')`;
+    const card = document.createElement("div"); card.className = "solCard";
+    card.innerHTML = `<button class="solCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}" onclick="solCardXAction('${tableKey}','${escapeHtml(s)}')">×</button><div class="solCardTitle">🧾 ${escapeHtml(s)}</div><div class="solCardMeta">Material_IDs: <b>${count}</b></div><div class="solCardActions"><button class="solFilterPill ${isFocused ? "on" : ""}" type="button" title="Filtrar esta aba por esta Solicitação" onclick="${clickFn}">${isFocused ? "Filtrando" : "Filtrar"}</button></div>`;
+    grid.appendChild(card);
+  });
 }
 
 function renderAircraftBox(tableKey){
-  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", mro:"air-mro", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools" }[tableKey];
-  const wrap = document.getElementById(wrapId); if(!wrap) return;
-  const set = airPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
-  const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
-  wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`;
-  const grid = document.getElementById(`airGrid-${tableKey}`); if(!grid) return;
-  const focus = airFocusByTable[tableKey] ? String(airFocusByTable[tableKey]) : "";
-  items.slice(0, 60).forEach(a=>{
-    const count = countIdsForAircraft(tableKey, a); const isFocused = focus && normalizeText(focus) === normalizeText(a);
-    let marked = ""; try{ if(isSharedTable(tableKey) && __sharedAirState && __sharedAirState[tableKey] && __sharedAirState[tableKey].meta){ const meta = __sharedAirState[tableKey].meta[a]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){}
-    const card = document.createElement("div"); card.className = "airCard";
-    card.innerHTML = `<button class="airCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}" onclick="airCardXAction('${tableKey}','${escapeHtml(a)}')">×</button><div class="airCardTitle">✈️ ${escapeHtml(a)}</div><div class="airCardMeta">IDs pendentes: <b>${count}</b></div>${marked}<div class="airCardActions"><button class="airFilterPill ${isFocused ? "on" : ""}" type="button" title="Filtrar esta aba por esta aeronave" onclick="setAirFocus('${tableKey}','${escapeHtml(a)}')">${isFocused ? "Filtrando" : "Filtrar"}</button></div>`;
-    grid.appendChild(card);
-  });
+  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", mro:"air-mro", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools" }[tableKey];
+  const wrap = document.getElementById(wrapId); if(!wrap) return;
+  const set = airPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+  const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`;
+  const grid = document.getElementById(`airGrid-${tableKey}`); if(!grid) return;
+  const focus = airFocusByTable[tableKey] ? String(airFocusByTable[tableKey]) : "";
+  items.slice(0, 60).forEach(a=>{
+    const count = countIdsForAircraft(tableKey, a); const isFocused = focus && normalizeText(focus) === normalizeText(a);
+    let marked = ""; try{ if(isSharedTable(tableKey) && __sharedAirState && __sharedAirState[tableKey] && __sharedAirState[tableKey].meta){ const meta = __sharedAirState[tableKey].meta[a]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){}
+    const card = document.createElement("div"); card.className = "airCard";
+    card.innerHTML = `<button class="airCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}" onclick="airCardXAction('${tableKey}','${escapeHtml(a)}')">×</button><div class="airCardTitle">✈️ ${escapeHtml(a)}</div><div class="airCardMeta">IDs pendentes: <b>${count}</b></div>${marked}<div class="airCardActions"><button class="airFilterPill ${isFocused ? "on" : ""}" type="button" title="Filtrar esta aba por esta aeronave" onclick="setAirFocus('${tableKey}','${escapeHtml(a)}')">${isFocused ? "Filtrando" : "Filtrar"}</button></div>`;
+    grid.appendChild(card);
+  });
 }
 
 function renderPrios(tableKey){
-  const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", mro:"prio-mro", acompanhamento:"prio-acompanhamento", cargas:"prio-cargas", hotlist:"prio-hotlist", tools:"prio-tools" }[tableKey];
-  const wrap = document.getElementById(wrapId); if(!wrap) return;
-  const set = priosByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
-  const baseRows = getBaseRows(tableKey); const prioRows = baseRows.filter(r => __prioHas__(tableKey, rowId(r))); if(prioRows.length === 0){ wrap.innerHTML = ""; return; }
-  wrap.innerHTML = `<div class="prioBox"><h3>🔔 Detalhes ID</h3><div class="prioGrid" id="grid-${tableKey}"></div></div>`;
-  const grid = document.getElementById(`grid-${tableKey}`);
-  prioRows.slice(0, 60).forEach(r=>{
-    const id = rowId(r); const vID = cleanVal(r.Material_ID); const vSOL = cleanVal(r.Numero_de_solicitacao); const vNF = cleanVal(r.Nota_fiscal); const vAWB = cleanVal(r.AWB); const vPN = cleanVal(r.PN); const vORG = cleanVal(r.Origem); const vDST = cleanVal(r.Destino); const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : ""; const vLOG = cleanVal(r.Descricao_logistica); const vSTATUS = cleanVal(r[STATUS_COL]); const vEMB_RAW = (r && (r.Data_de_embarque_logistica ?? r["Data_de_embarque_logistica"])) ?? ""; const vPOUSO_RAW = (r && (r.Data_do_pouso_logistica ?? r["Data_do_pouso_logistica"])) ?? ""; const tEMB = fmtTimeHM(parseMaybeDate(vEMB_RAW)); const tPOUSO = fmtTimeHM(parseMaybeDate(vPOUSO_RAW)); const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : "";
-    let marked = ""; try{ if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){ const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){}
-    
-    // 🚨 REGRA MAJOR PART TAMBÉM NO BALÃO (SE ESTIVER NO ACOMPANHAMENTO)
-    const cleanPn = String(vPN || "").replace(/[^A-Z0-9]/ig, '').toUpperCase();
-    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.includes(cleanPn));
-    const pnDisplay = isMajor ? `<span style="color:#ef4444; font-weight:800;" title="Major Part">🚨 ${escapeHtml(vPN)}</span>` : escapeHtml(vPN);
+  const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", mro:"prio-mro", acompanhamento:"prio-acompanhamento", cargas:"prio-cargas", hotlist:"prio-hotlist", tools:"prio-tools" }[tableKey];
+  const wrap = document.getElementById(wrapId); if(!wrap) return;
+  const set = priosByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+  const baseRows = getBaseRows(tableKey); const prioRows = baseRows.filter(r => __prioHas__(tableKey, rowId(r))); if(prioRows.length === 0){ wrap.innerHTML = ""; return; }
+  wrap.innerHTML = `<div class="prioBox"><h3>🔔 Detalhes ID</h3><div class="prioGrid" id="grid-${tableKey}"></div></div>`;
+  const grid = document.getElementById(`grid-${tableKey}`);
+  prioRows.slice(0, 60).forEach(r=>{
+    const id = rowId(r); const vID = cleanVal(r.Material_ID); const vSOL = cleanVal(r.Numero_de_solicitacao); const vNF = cleanVal(r.Nota_fiscal); const vAWB = cleanVal(r.AWB); const vPN = cleanVal(r.PN); const vORG = cleanVal(r.Origem); const vDST = cleanVal(r.Destino); const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : ""; const vLOG = cleanVal(r.Descricao_logistica); const vSTATUS = cleanVal(r[STATUS_COL]); const vEMB_RAW = (r && (r.Data_de_embarque_logistica ?? r["Data_de_embarque_logistica"])) ?? ""; const vPOUSO_RAW = (r && (r.Data_do_pouso_logistica ?? r["Data_do_pouso_logistica"])) ?? ""; const tEMB = fmtTimeHM(parseMaybeDate(vEMB_RAW)); const tPOUSO = fmtTimeHM(parseMaybeDate(vPOUSO_RAW)); const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : "";
+    let marked = ""; try{ if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){ const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){}
+    
+    // 🚨 REGRA MAJOR PART TAMBÉM NO BALÃO (SE ESTIVER NO ACOMPANHAMENTO)
+    const cleanPn = String(vPN || "").replace(/[^A-Z0-9]/ig, '').toUpperCase();
+    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.includes(cleanPn));
+    const pnDisplay = isMajor ? `<span style="color:#ef4444; font-weight:800;" title="Major Part">🚨 ${escapeHtml(vPN)}</span>` : escapeHtml(vPN);
 
-    const card = document.createElement("div"); card.className = "prioCard";
-    card.innerHTML = `<div class="prioLine1 prioNoWrap">ID: ${escapeHtml(vID)} / ${escapeHtml(vSOL)}</div>${vROUTE ? `<div class="prioLine prioNoWrap">${escapeHtml(vROUTE)}</div>` : ""}<div class="prioLine prioNoWrap">PN: ${pnDisplay}</div>${tLine ? `<div class="prioLine prioNoWrap">${escapeHtml(tLine)}</div>` : ""}<div class="prioLine prioNoWrap">NF:${escapeHtml(vNF)} / AWB:${escapeHtml(vAWB)}</div><div class="prioLine prioNoWrap">LOG:${escapeHtml(vLOG)}</div><div class="prioLine">${statusTagHtml(vSTATUS)}</div>${marked}<button class="prioRemove" type="button" onclick="removePrio('${tableKey}','${escapeHtml(id)}')">Remover</button>`;
-    grid.appendChild(card);
-  });
+    const card = document.createElement("div"); card.className = "prioCard";
+    card.innerHTML = `<div class="prioLine1 prioNoWrap">ID: ${escapeHtml(vID)} / ${escapeHtml(vSOL)}</div>${vROUTE ? `<div class="prioLine prioNoWrap">${escapeHtml(vROUTE)}</div>` : ""}<div class="prioLine prioNoWrap">PN: ${pnDisplay}</div>${tLine ? `<div class="prioLine prioNoWrap">${escapeHtml(tLine)}</div>` : ""}<div class="prioLine prioNoWrap">NF:${escapeHtml(vNF)} / AWB:${escapeHtml(vAWB)}</div><div class="prioLine prioNoWrap">LOG:${escapeHtml(vLOG)}</div><div class="prioLine">${statusTagHtml(vSTATUS)}</div>${marked}<button class="prioRemove" type="button" onclick="removePrio('${tableKey}','${escapeHtml(id)}')">Remover</button>`;
+    grid.appendChild(card);
+  });
 }
 
 const PAGER_STORE_KEY = { aog:"AOG_PAGER_AOG_V1", war:"AOG_PAGER_WAR_V1", fast:"AOG_PAGER_FAST_V1", cargo:"AOG_PAGER_CARGO_V1", mro:"AOG_PAGER_MRO_V1", acompanhamento:"AOG_PAGER_ACOMPANHAMENTO_V1", cargas:"AOG_PAGER_CARGAS_V1", hotlist:"AOG_PAGER_HOTLIST_V1", tools:"AOG_PAGER_TOOLS_V1" };
@@ -796,45 +859,45 @@ document.addEventListener("mouseup", ()=>{ if(!__resizeState) return; __resizeSt
 // 🚨 MUDANÇA 2: FUNÇÃO RENDER TABLE (INSERE A CLASSE major-part-row E A SIRENE)
 // =========================================================================
 function renderTable(tableKey){
-  const el = document.getElementById(`tbl-${tableKey}`); if(!el) return;
-  const filteredSorted = getFilteredBaseRows(tableKey);
-  const prioRows = [], restRows = []; 
-  for(let i=0;i<filteredSorted.length;i++){ const r = filteredSorted[i]; if(__prioHas__(tableKey, rowId(r))) prioRows.push(r); else restRows.push(r); }
-  const rowsOrdered = prioRows.concat(restRows); const pageRows = paginateRows(rowsOrdered, tableKey);
-  
-  let html = `<thead><tr><th style="min-width:60px"></th>`;
-  html += cols.map(c=>{ const cls = (c==="PN") ? `class="th-pn th-resize"` : ""; return `<th ${cls}>${colLabel(c)}</th>`; }).join(""); html += `</tr></thead>`;
-  html += `<thead class="filterRow"><tr><th></th>`;
-  html += cols.map(c=>{
-    const focusAction = (c === STATUS_COL) ? `showStatusFilter(event,'${tableKey}','${c}')` : `showDatePickerFilter(event,'${tableKey}','${c}')`;
-    return `<th><input class="filter" placeholder="filtrar... (ENTER aplica)" value="${escapeHtml(getFilterInputValue(tableKey, c))}" oninput="setFilterDraft('${tableKey}','${c}',this.value)" onfocus="${focusAction}" onkeydown="if(event.key==='Enter'){applyFilter('${tableKey}','${c}',this.value)}"></th>`;
-  }).join(""); html += `</tr></thead><tbody>`;
-  
-  html += pageRows.map(r=>{
-    const rid = rowId(r); const on = __prioHas__(tableKey, rid); const stCat = statusCategory(r[STATUS_COL]); const sharedTitle = isSharedTable(tableKey) ? "Prioridade compartilhada (todas as abas)" : "Prioridade (somente nesta aba)";
-    
-    // 🚨 Detecção de Major Part com base na variável global limpa 🚨
-    const cleanPn = String(r.PN || "").replace(/[^A-Z0-9]/ig, '').toUpperCase();
-    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.includes(cleanPn));
-    const rowClass = isMajor ? 'class="major-part-row"' : '';
+  const el = document.getElementById(`tbl-${tableKey}`); if(!el) return;
+  const filteredSorted = getFilteredBaseRows(tableKey);
+  const prioRows = [], restRows = []; 
+  for(let i=0;i<filteredSorted.length;i++){ const r = filteredSorted[i]; if(__prioHas__(tableKey, rowId(r))) prioRows.push(r); else restRows.push(r); }
+  const rowsOrdered = prioRows.concat(restRows); const pageRows = paginateRows(rowsOrdered, tableKey);
+  
+  let html = `<thead><tr><th style="min-width:60px"></th>`;
+  html += cols.map(c=>{ const cls = (c==="PN") ? `class="th-pn th-resize"` : ""; return `<th ${cls}>${colLabel(c)}</th>`; }).join(""); html += `</tr></thead>`;
+  html += `<thead class="filterRow"><tr><th></th>`;
+  html += cols.map(c=>{
+    const focusAction = (c === STATUS_COL) ? `showStatusFilter(event,'${tableKey}','${c}')` : `showDatePickerFilter(event,'${tableKey}','${c}')`;
+    return `<th><input class="filter" placeholder="filtrar... (ENTER aplica)" value="${escapeHtml(getFilterInputValue(tableKey, c))}" oninput="setFilterDraft('${tableKey}','${c}',this.value)" onfocus="${focusAction}" onkeydown="if(event.key==='Enter'){applyFilter('${tableKey}','${c}',this.value)}"></th>`;
+  }).join(""); html += `</tr></thead><tbody>`;
+  
+  html += pageRows.map(r=>{
+    const rid = rowId(r); const on = __prioHas__(tableKey, rid); const stCat = statusCategory(r[STATUS_COL]); const sharedTitle = isSharedTable(tableKey) ? "Prioridade compartilhada (todas as abas)" : "Prioridade (somente nesta aba)";
+    
+    // 🚨 Detecção de Major Part com base na variável global limpa 🚨
+    const cleanPn = String(r.PN || "").replace(/[^A-Z0-9]/ig, '').toUpperCase();
+    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.includes(cleanPn));
+    const rowClass = isMajor ? 'class="major-part-row"' : '';
 
-    return `<tr ${rowClass} data-rid="${escapeHtml(rid)}"><td><button class="bellBtn status-${stCat} ${on ? 'on' : ''}" data-table="${escapeHtml(tableKey)}" data-rid="${escapeHtml(rid)}" type="button" title="${escapeHtml(sharedTitle)}" onclick="togglePrio('${tableKey}','${escapeHtml(rid)}')">🔔</button></td>
-      ${cols.map(c=>{
-        const displayed = displayCell(c, r[c], tableKey, r);
-        if(c === STATUS_COL) return `<td>${statusTagHtml(displayed)}</td>`;
-        if(c === SOL_COL){ const s = cleanVal(displayed); if(!s) return `<td>${escapeHtml(displayed)}</td>`; return `<td><div class="solCell"><span>${escapeHtml(s)}</span><button class="solBtn" type="button" data-table="${escapeHtml(tableKey)}" data-sol="${escapeHtml(s)}" title="Destacar Solicitação" onclick="toggleSolPinned('${tableKey}','${escapeHtml(s)}'); try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){}">📌</button></div></td>`; }
-        if(c === AIR_COL){ const a = cleanVal(displayed); if(!a) return `<td>${escapeHtml(displayed)}</td>`; return `<td><div class="airCell"><span>${escapeHtml(a)}</span><button class="airWarnBtn" type="button" data-table="${escapeHtml(tableKey)}" data-air="${escapeHtml(a)}" title="Marcar aeronave" onclick="toggleAirPinned('${tableKey}','${escapeHtml(a)}')">⚠️</button></div></td>`; }
-        if(c === DATE_COL || c === EMB_COL || c === LAND_COL){ const parts = getDatePartsForDisplay(r[c], (c===EMB_COL || c===LAND_COL)); if(!parts.date) return `<td></td>`; const timeHtml = parts.time ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(parts.time)}</div>` : ""; return `<td><div>${escapeHtml(parts.date)}</div>${timeHtml}</td>`; }
-        if(c === "OBS"){ const mid = cleanVal(r.Material_ID); const txt = getObsTextForCell(tableKey, mid); return `<td><textarea class="obsArea" data-mid="${escapeHtml(mid)}" placeholder="OBS (ENTER salva)" oninput="obsInput(event,'${tableKey}','${escapeHtml(mid)}')" onkeydown="obsKeyDown(event,'${tableKey}','${escapeHtml(mid)}')">${escapeHtml(txt)}</textarea></td>`; }
-        
-        // 🚨 Aplica a Sirene vermelha apenas se for a coluna de PN e for Major Part
-        if(c === "PN" && isMajor) {
-          return `<td style="color: #ef4444; font-weight: 800;" title="Major Part">🚨 ${escapeHtml(displayed)}</td>`;
-        }
+    return `<tr ${rowClass} data-rid="${escapeHtml(rid)}"><td><button class="bellBtn status-${stCat} ${on ? 'on' : ''}" data-table="${escapeHtml(tableKey)}" data-rid="${escapeHtml(rid)}" type="button" title="${escapeHtml(sharedTitle)}" onclick="togglePrio('${tableKey}','${escapeHtml(rid)}')">🔔</button></td>
+      ${cols.map(c=>{
+        const displayed = displayCell(c, r[c], tableKey, r);
+        if(c === STATUS_COL) return `<td>${statusTagHtml(displayed)}</td>`;
+        if(c === SOL_COL){ const s = cleanVal(displayed); if(!s) return `<td>${escapeHtml(displayed)}</td>`; return `<td><div class="solCell"><span>${escapeHtml(s)}</span><button class="solBtn" type="button" data-table="${escapeHtml(tableKey)}" data-sol="${escapeHtml(s)}" title="Destacar Solicitação" onclick="toggleSolPinned('${tableKey}','${escapeHtml(s)}'); try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){}">📌</button></div></td>`; }
+        if(c === AIR_COL){ const a = cleanVal(displayed); if(!a) return `<td>${escapeHtml(displayed)}</td>`; return `<td><div class="airCell"><span>${escapeHtml(a)}</span><button class="airWarnBtn" type="button" data-table="${escapeHtml(tableKey)}" data-air="${escapeHtml(a)}" title="Marcar aeronave" onclick="toggleAirPinned('${tableKey}','${escapeHtml(a)}')">⚠️</button></div></td>`; }
+        if(c === DATE_COL || c === EMB_COL || c === LAND_COL){ const parts = getDatePartsForDisplay(r[c], (c===EMB_COL || c===LAND_COL)); if(!parts.date) return `<td></td>`; const timeHtml = parts.time ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${escapeHtml(parts.time)}</div>` : ""; return `<td><div>${escapeHtml(parts.date)}</div>${timeHtml}</td>`; }
+        if(c === "OBS"){ const mid = cleanVal(r.Material_ID); const txt = getObsTextForCell(tableKey, mid); return `<td><textarea class="obsArea" data-mid="${escapeHtml(mid)}" placeholder="OBS (ENTER salva)" oninput="obsInput(event,'${tableKey}','${escapeHtml(mid)}')" onkeydown="obsKeyDown(event,'${tableKey}','${escapeHtml(mid)}')">${escapeHtml(txt)}</textarea></td>`; }
+        
+        // 🚨 Aplica a Sirene vermelha apenas se for a coluna de PN e for Major Part
+        if(c === "PN" && isMajor) {
+          return `<td style="color: #ef4444; font-weight: 800;" title="Major Part">🚨 ${escapeHtml(displayed)}</td>`;
+        }
 
-        return `<td>${escapeHtml(displayed)}</td>`;
-      }).join("")}</tr>`;
-  }).join(""); html += `</tbody>`; el.innerHTML = html; enableColumnResize(el); try{ updateObsVisibleForTable(tableKey); }catch(e){}
+        return `<td>${escapeHtml(displayed)}</td>`;
+      }).join("")}</tr>`;
+  }).join(""); html += `</tbody>`; el.innerHTML = html; enableColumnResize(el); try{ updateObsVisibleForTable(tableKey); }catch(e){}
 }
 
 function makeStatusHtml(line1){ return `<div>${line1}</div><div class="statusLine"><span class="pill" id="pillLastFetch">Refresh = tentativa: —</span><span class="pill" id="pillSuccess">Sucesso = atualização concluída: —</span><span class="pill" id="pillNext">Próx refresh em: —</span><span class="pill" id="pillUpdatedAt">Atualizado = frescor do dado: —</span><span class="pill warn" id="pillState">Estado: OK</span></div>`; }
@@ -851,65 +914,65 @@ function scheduleNextRefresh(ms){ if(__refreshTimeout) clearTimeout(__refreshTim
 function stopAutoRefresh(){ if(__refreshTimeout) clearTimeout(__refreshTimeout); __refreshTimeout = null; __nextRefreshAt = null; }
 
 function paintRefreshInfo(){
-  if(!__ADMIN_MODE) return;
-  const pSuccess = document.getElementById("pillSuccess"); const pLast = document.getElementById("pillLastFetch"); const pNext = document.getElementById("pillNext"); const pState = document.getElementById("pillState");
-  if(pLast) pLast.innerText = __lastFetchAt ? `Refresh = tentativa: ${fmtBR(__lastFetchAt)}` : "Refresh = tentativa: —";
-  if(pSuccess) pSuccess.innerText = __lastSuccessAt ? `Sucesso = atualização concluída: ${fmtBR(__lastSuccessAt)}` : "Sucesso = atualização concluída: —";
-  if(pNext) pNext.innerText = __nextRefreshAt ? `Próx refresh em: ${__fmtCountdown__(__nextRefreshAt - Date.now())}` : "Próx refresh em: —";
-  if(pState){ if(__lastRefreshError){ pState.classList.add("warn"); pState.innerText = `Estado: ERRO • ${__lastRefreshError}`; } else{ pState.classList.remove("warn"); pState.innerText = "Estado: OK"; } }
+  if(!__ADMIN_MODE) return;
+  const pSuccess = document.getElementById("pillSuccess"); const pLast = document.getElementById("pillLastFetch"); const pNext = document.getElementById("pillNext"); const pState = document.getElementById("pillState");
+  if(pLast) pLast.innerText = __lastFetchAt ? `Refresh = tentativa: ${fmtBR(__lastFetchAt)}` : "Refresh = tentativa: —";
+  if(pSuccess) pSuccess.innerText = __lastSuccessAt ? `Sucesso = atualização concluída: ${fmtBR(__lastSuccessAt)}` : "Sucesso = atualização concluída: —";
+  if(pNext) pNext.innerText = __nextRefreshAt ? `Próx refresh em: ${__fmtCountdown__(__nextRefreshAt - Date.now())}` : "Próx refresh em: —";
+  if(pState){ if(__lastRefreshError){ pState.classList.add("warn"); pState.innerText = `Estado: ERRO • ${__lastRefreshError}`; } else{ pState.classList.remove("warn"); pState.innerText = "Estado: OK"; } }
 }
 
 function rerenderAll(opts){
-  const onlyActive = !!(opts && opts.onlyActive); prepareDataCache(); __lastUpdateDate = computeLastUpdateFromData();
-  if(onlyActive){ const active = document.querySelector(".section.active"); const tk = active ? tableKeysBySection[active.id] : null; if(tk){ renderAircraftBox(tk); renderSolBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); } renderLinksUteis(); }
-  else{ for(const tk of SHARED_TABLE_KEYS){ renderAircraftBox(tk); renderSolBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); } renderLinksUteis(); }
-  const st = document.getElementById("status"); if(st && __ADMIN_MODE){ st.innerHTML = makeStatusHtml(`✅ Dados carregados. Total: ${dados.length} | ESC limpa filtros | 📝 OBS salva no ENTER`); }
-  paintUpdateInfo(); paintRefreshInfo(); updateStatusVisibility();
+  const onlyActive = !!(opts && opts.onlyActive); prepareDataCache(); __lastUpdateDate = computeLastUpdateFromData();
+  if(onlyActive){ const active = document.querySelector(".section.active"); const tk = active ? tableKeysBySection[active.id] : null; if(tk){ renderAircraftBox(tk); renderSolBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); } renderLinksUteis(); }
+  else{ for(const tk of SHARED_TABLE_KEYS){ renderAircraftBox(tk); renderSolBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); } renderLinksUteis(); }
+  const st = document.getElementById("status"); if(st && __ADMIN_MODE){ st.innerHTML = makeStatusHtml(`✅ Dados carregados. Total: ${dados.length} | ESC limpa filtros | 📝 OBS salva no ENTER`); }
+  paintUpdateInfo(); paintRefreshInfo(); updateStatusVisibility();
 }
 
 async function __gasGetDadosFull__(){
-  const t0 = performance.now(); const resp = await gasCall("getDadosBaseAOG"); if(!Array.isArray(resp)) throw new Error("getDadosBaseAOG não retornou Array"); return { data: resp, ms: Math.round(performance.now() - t0) };
+  const t0 = performance.now(); const resp = await gasCall("getDadosBaseAOG"); if(!Array.isArray(resp)) throw new Error("getDadosBaseAOG não retornou Array"); return { data: resp, ms: Math.round(performance.now() - t0) };
 }
 async function __gasGetDadosChunked__(onProgress){
-  const all = []; let offset = 0; let total = null; let safety = 0; const t0 = performance.now();
-  while(true){
-    safety++; if(safety > 200) throw new Error("Chunk loop: limite excedido");
-    const chunk = await gasCall("getDadosChunk", "BASE_AOG", offset, 250); if(!chunk || chunk.ok !== true) throw new Error(chunk && chunk.error ? chunk.error : "getDadosChunk erro");
-    const rows = Array.isArray(chunk.rows) ? chunk.rows : []; if(total == null) total = Number(chunk.total || 0); for(const r of rows) all.push(r);
-    if(typeof onProgress === "function"){ const pct = total ? Math.min(100, Math.round((all.length / total) * 100)) : 0; onProgress({ doneCount: all.length, total, pct }); }
-    if(chunk.done === true) break; const next = Number(chunk.nextOffset); if(!isFinite(next) || next <= offset) break; offset = next;
-  }
-  return { data: all, ms: Math.round(performance.now() - t0) };
+  const all = []; let offset = 0; let total = null; let safety = 0; const t0 = performance.now();
+  while(true){
+    safety++; if(safety > 200) throw new Error("Chunk loop: limite excedido");
+    const chunk = await gasCall("getDadosChunk", "BASE_AOG", offset, 250); if(!chunk || chunk.ok !== true) throw new Error(chunk && chunk.error ? chunk.error : "getDadosChunk erro");
+    const rows = Array.isArray(chunk.rows) ? chunk.rows : []; if(total == null) total = Number(chunk.total || 0); for(const r of rows) all.push(r);
+    if(typeof onProgress === "function"){ const pct = total ? Math.min(100, Math.round((all.length / total) * 100)) : 0; onProgress({ doneCount: all.length, total, pct }); }
+    if(chunk.done === true) break; const next = Number(chunk.nextOffset); if(!isFinite(next) || next <= offset) break; offset = next;
+  }
+  return { data: all, ms: Math.round(performance.now() - t0) };
 }
 
 async function refreshData(){
-  if(__refreshInFlight) return;
-  if(__ACCESS_BLOCKED__ && Date.now() < __accessBlockedUntil){ __lastRefreshError = __lastRefreshError || "Acesso bloqueado (Google). Tentando novamente automaticamente…"; try{ paintRefreshInfo(); }catch(e){} try{ renderFrescorBanner(); }catch(e){} return; }
-  if(__ACCESS_BLOCKED__ && Date.now() >= __accessBlockedUntil){ __ACCESS_BLOCKED__ = false; }
-  __refreshInFlight = true; __lastFetchAt = new Date(); __lastRefreshError = ""; __lastRefreshSource = "—"; __lastRefreshMs = null; paintRefreshInfo(); renderFrescorBanner();
-  let newData = null; const erros = [];
-  try{
-    if(!hasGAS()){ __lastRefreshError = "google.script.run indisponível"; return; }
-    try{ __lastRefreshSource = "gas-full"; const out = await __gasGetDadosFull__(); newData = out.data; __lastRefreshMs = out.ms; }catch(e1){ const msg = e1 && e1.message ? e1.message : String(e1); erros.push("gas-full: " + msg); newData = null; }
-    if(!newData){ try{ __lastRefreshSource = "gas-chunk"; const out = await __gasGetDadosChunked__((p)=>{ try{ const st = document.getElementById("status"); if(st && __ADMIN_MODE){ st.style.display = "block"; st.innerHTML = makeStatusHtml(`⏳ Carregando chunks... ${p.doneCount}/${p.total} (${p.pct}%)`); } }catch(e){} }); newData = out.data; __lastRefreshMs = out.ms; }catch(e2){ const msg = e2 && e2.message ? e2.message : String(e2); erros.push("gas-chunk: " + msg); newData = null; } }
-    if(!Array.isArray(newData) || newData.length === 0){ __lastRefreshError = erros.length ? erros.join(" | ") : "Sem dados"; return; }
-    dados = newData; __lastSuccessAt = new Date(); __lastRefreshError = "";
-    try{ await syncSharedAllTables(); }catch(e){} try{ await syncSharedObs(); }catch(e){} try{ await syncSharedTurno(); }catch(e){} try{ await syncSharedAvisos(); }catch(e){} try{ await syncSharedLinks(); }catch(e){}
-    __dataVersion++; __sortedBaseVersion = -1; for(const tk of SHARED_TABLE_KEYS) invalidateFilterCache(tk); markAllTablesDirty(); prepareDataCache(); __lastUpdateDate = computeLastUpdateFromData();
-    if(__isUserTyping__()){ __pendingRerender = true; setTimeout(()=>{ if(__pendingRerender){ __pendingRerender = false; rerenderAll({ onlyActive: true }); } }, 3000); }else{ rerenderAll({ onlyActive: true }); }
-  }catch(err){ __lastRefreshError = (err && err.message) ? err.message : String(err); }finally{ __refreshInFlight = false; paintUpdateInfo(); paintRefreshInfo(); try{ renderFrescorBanner(); }catch(e){} }
+  if(__refreshInFlight) return;
+  if(__ACCESS_BLOCKED__ && Date.now() < __accessBlockedUntil){ __lastRefreshError = __lastRefreshError || "Acesso bloqueado (Google). Tentando novamente automaticamente…"; try{ paintRefreshInfo(); }catch(e){} try{ renderFrescorBanner(); }catch(e){} return; }
+  if(__ACCESS_BLOCKED__ && Date.now() >= __accessBlockedUntil){ __ACCESS_BLOCKED__ = false; }
+  __refreshInFlight = true; __lastFetchAt = new Date(); __lastRefreshError = ""; __lastRefreshSource = "—"; __lastRefreshMs = null; paintRefreshInfo(); renderFrescorBanner();
+  let newData = null; const erros = [];
+  try{
+    if(!hasGAS()){ __lastRefreshError = "google.script.run indisponível"; return; }
+    try{ __lastRefreshSource = "gas-full"; const out = await __gasGetDadosFull__(); newData = out.data; __lastRefreshMs = out.ms; }catch(e1){ const msg = e1 && e1.message ? e1.message : String(e1); erros.push("gas-full: " + msg); newData = null; }
+    if(!newData){ try{ __lastRefreshSource = "gas-chunk"; const out = await __gasGetDadosChunked__((p)=>{ try{ const st = document.getElementById("status"); if(st && __ADMIN_MODE){ st.style.display = "block"; st.innerHTML = makeStatusHtml(`⏳ Carregando chunks... ${p.doneCount}/${p.total} (${p.pct}%)`); } }catch(e){} }); newData = out.data; __lastRefreshMs = out.ms; }catch(e2){ const msg = e2 && e2.message ? e2.message : String(e2); erros.push("gas-chunk: " + msg); newData = null; } }
+    if(!Array.isArray(newData) || newData.length === 0){ __lastRefreshError = erros.length ? erros.join(" | ") : "Sem dados"; return; }
+    dados = newData; __lastSuccessAt = new Date(); __lastRefreshError = "";
+    try{ await syncSharedAllTables(); }catch(e){} try{ await syncSharedObs(); }catch(e){} try{ await syncSharedTurno(); }catch(e){} try{ await syncSharedAvisos(); }catch(e){} try{ await syncSharedLinks(); }catch(e){}
+    __dataVersion++; __sortedBaseVersion = -1; for(const tk of SHARED_TABLE_KEYS) invalidateFilterCache(tk); markAllTablesDirty(); prepareDataCache(); __lastUpdateDate = computeLastUpdateFromData();
+    if(__isUserTyping__()){ __pendingRerender = true; setTimeout(()=>{ if(__pendingRerender){ __pendingRerender = false; rerenderAll({ onlyActive: true }); } }, 3000); }else{ rerenderAll({ onlyActive: true }); }
+  }catch(err){ __lastRefreshError = (err && err.message) ? err.message : String(err); }finally{ __refreshInFlight = false; paintUpdateInfo(); paintRefreshInfo(); try{ renderFrescorBanner(); }catch(e){} }
 }
 
 function renderFrescorBanner(){
-  const texto = document.getElementById("frescorTexto"); const banner = document.getElementById("frescorBanner"); if(!texto || !banner) return;
-  if(__lastRefreshError){ banner.style.borderColor = "#ef4444"; banner.style.background = "#1a0000"; texto.innerHTML = `<span style="color:#ef4444">🔴</span> <b>Erro no refresh automático:</b> <span style="color:#f87171">${escapeHtml(__lastRefreshError)}</span><br><span style="font-size:11px;color:#94a3b8">Clique em "Atualizar agora" ou aguarde</span>`; const ctr = document.getElementById("frescorContador"); if(ctr && __nextRefreshAt){ const s = Math.max(0, Math.floor((__nextRefreshAt - Date.now()) / 1000)); ctr.innerText = `Próx tentativa: ${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`; } return; }
-  const dt = __lastSuccessAt; if(!dt){ texto.innerText = "Aguardando primeira atualização…"; return; }
-  const now = Date.now(); const diffMs = now - dt.getTime(); const diffMin = Math.floor(diffMs / 60000); const diffSec = Math.floor((diffMs % 60000) / 1000);
-  let cor = "#22c55e"; if(diffMin >= 10){ cor = "#ef4444"; } else if(diffMin >= 5){ cor = "#f59e0b"; }
-  banner.style.borderColor = cor; banner.style.background = diffMin >= 10 ? "#1a0000" : (diffMin >= 5 ? "#1a1000" : "#0f172a");
-  const tempoStr = diffMin > 0 ? `há ${diffMin}min ${diffSec}s` : `há ${diffSec}s`; const alerta = diffMin >= 10 ? " — DADOS POSSIVELMENTE DESATUALIZADOS" : (diffMin >= 5 ? " — atualizando em breve" : ""); const emoji = diffMin >= 10 ? "🔴" : (diffMin >= 5 ? "🟡" : "🟢");
-  texto.innerHTML = `<span style="color:${cor}">${emoji}</span> <b>Última atualização:</b> <span style="color:#38bdf8">${fmtBR(dt)}</span> <span style="color:${cor}">(${tempoStr}${alerta})</span>`;
-  const ctr = document.getElementById("frescorContador"); if(ctr && __nextRefreshAt){ const s = Math.max(0, Math.floor((__nextRefreshAt - Date.now()) / 1000)); ctr.innerText = `Próx. refresh: ${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`; } else if(ctr){ ctr.innerText = ""; }
+  const texto = document.getElementById("frescorTexto"); const banner = document.getElementById("frescorBanner"); if(!texto || !banner) return;
+  if(__lastRefreshError){ banner.style.borderColor = "#ef4444"; banner.style.background = "#1a0000"; texto.innerHTML = `<span style="color:#ef4444">🔴</span> <b>Erro no refresh automático:</b> <span style="color:#f87171">${escapeHtml(__lastRefreshError)}</span><br><span style="font-size:11px;color:#94a3b8">Clique em "Atualizar agora" ou aguarde</span>`; const ctr = document.getElementById("frescorContador"); if(ctr && __nextRefreshAt){ const s = Math.max(0, Math.floor((__nextRefreshAt - Date.now()) / 1000)); ctr.innerText = `Próx tentativa: ${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`; } return; }
+  const dt = __lastSuccessAt; if(!dt){ texto.innerText = "Aguardando primeira atualização…"; return; }
+  const now = Date.now(); const diffMs = now - dt.getTime(); const diffMin = Math.floor(diffMs / 60000); const diffSec = Math.floor((diffMs % 60000) / 1000);
+  let cor = "#22c55e"; if(diffMin >= 10){ cor = "#ef4444"; } else if(diffMin >= 5){ cor = "#f59e0b"; }
+  banner.style.borderColor = cor; banner.style.background = diffMin >= 10 ? "#1a0000" : (diffMin >= 5 ? "#1a1000" : "#0f172a");
+  const tempoStr = diffMin > 0 ? `há ${diffMin}min ${diffSec}s` : `há ${diffSec}s`; const alerta = diffMin >= 10 ? " — DADOS POSSIVELMENTE DESATUALIZADOS" : (diffMin >= 5 ? " — atualizando em breve" : ""); const emoji = diffMin >= 10 ? "🔴" : (diffMin >= 5 ? "🟡" : "🟢");
+  texto.innerHTML = `<span style="color:${cor}">${emoji}</span> <b>Última atualização:</b> <span style="color:#38bdf8">${fmtBR(dt)}</span> <span style="color:${cor}">(${tempoStr}${alerta})</span>`;
+  const ctr = document.getElementById("frescorContador"); if(ctr && __nextRefreshAt){ const s = Math.max(0, Math.floor((__nextRefreshAt - Date.now()) / 1000)); ctr.innerText = `Próx. refresh: ${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`; } else if(ctr){ ctr.innerText = ""; }
 }
 setInterval(()=>{ try{ renderFrescorBanner(); }catch(e){} }, 1000);
 async function refreshNowUrl(){ await refreshData(); }
@@ -925,26 +988,26 @@ function __setLinkCol__(id, colKey){ const st = __loadLinkBoardState__(); const 
 function __setLinkNote__(id, note){ const st = __loadLinkBoardState__(); const rid = String(id||"").trim(); if(!rid) return; if(!st.items[rid]) st.items[rid] = { col:"sem", note:"" }; st.items[rid].note = String(note||""); __saveLinkBoardState__(); }
 function __buildAllLinksForBoard__(){ const list = []; (Array.isArray(LINKS_UTEIS) ? LINKS_UTEIS : []).forEach(url=>{ const id = __linkIdForStatic__(url); list.push({ id, name: friendlySiteName(url), url, isStatic:true }); }); const shared = (__sharedLinksState && Array.isArray(__sharedLinksState.items)) ? __sharedLinksState.items : []; shared.filter(it => it && !it.deleted && it.url).forEach(it=>{ const nm = (it.name && String(it.name).trim()) ? String(it.name).trim() : friendlySiteName(it.url); list.push({ id: String(it.id||""), name: nm, url: String(it.url||""), isStatic:false }); }); const seen = {}; const out = []; for(const it of list){ const k = String(it.id||"").trim(); if(!k || seen[k]) continue; seen[k] = true; out.push(it); } return out; }
 function __renderLinkBoard__(){
-  const board = document.getElementById("linkBoard"); if(!board) return;
-  const all = __buildAllLinksForBoard__(); const cols = __LINK_COLS.slice(); const byCol = {}; cols.forEach(c=> byCol[c.key] = []);
-  all.forEach(it=>{ const meta = __getLinkMeta__(it.id); const ck = (meta && meta.col) ? meta.col : "sem"; if(!byCol[ck]) byCol[ck] = []; byCol[ck].push(it); });
-  Object.keys(byCol).forEach(k=>{ byCol[k].sort((a,b)=> String(a.name||"").localeCompare(String(b.name||""))); });
-  board.innerHTML = cols.map(c=>`<div class="linkCol" id="linkCol-${c.key}" data-col="${c.key}"><div class="linkColHead"><div class="linkColTitle">${escapeHtml(c.title)}</div><div class="linkColCount">${(byCol[c.key]||[]).length}</div></div><div class="linkDropZone" id="linkDrop-${c.key}" data-col="${c.key}"></div></div>`).join("");
-  cols.forEach(c=>{
-    const zone = document.getElementById(`linkDrop-${c.key}`); if(!zone) return;
-    zone.addEventListener("dragover", (ev)=>{ ev.preventDefault(); const colEl = document.getElementById(`linkCol-${c.key}`); if(colEl) colEl.classList.add("dragOver"); });
-    zone.addEventListener("dragleave", ()=>{ const colEl = document.getElementById(`linkCol-${c.key}`); if(colEl) colEl.classList.remove("dragOver"); });
-    zone.addEventListener("drop", (ev)=>{ ev.preventDefault(); const colEl = document.getElementById(`linkCol-${c.key}`); if(colEl) colEl.classList.remove("dragOver"); const rid = String(ev.dataTransfer.getData("text/plain") || "").trim(); if(!rid) return; __setLinkCol__(rid, c.key); __renderLinkBoard__(); });
-    const items = byCol[c.key] || [];
-    items.forEach(it=>{
-      const card = document.createElement("div"); card.className = "linkCard"; card.setAttribute("draggable","true"); card.dataset.id = String(it.id||"");
-      card.innerHTML = `<div class="linkCardTop"><div style="min-width:0;flex:1"><div class="linkCardName" title="${escapeHtml(it.name||"")}">${escapeHtml(it.name||"")}</div><div class="linkCardSite" title="${escapeHtml(it.url||"")}">${escapeHtml(friendlySiteName(it.url||""))}</div></div><div class="linkCardActions"><button class="linkTinyBtn gray" type="button" title="Abrir link" onclick="window.open('${escapeHtml(it.url||"")}','_blank','noopener');">↗</button>${it.isStatic ? "" : `<button class="linkTinyBtn" type="button" title="Excluir link" onclick="deleteSharedLinkById_('${escapeHtml(it.id)}','${escapeHtml(it.name||"")}','${escapeHtml(it.url||"")}')">×</button>`}</div></div>`;
-      card.addEventListener("dragstart", (ev)=>{ card.classList.add("dragging"); ev.dataTransfer.setData("text/plain", String(it.id||"")); ev.dataTransfer.effectAllowed = "move"; });
-      card.addEventListener("dragend", ()=>{ card.classList.remove("dragging"); });
-      card.style.cursor = "pointer"; card.addEventListener("click", (ev)=>{ try{ if(ev && ev.target && ev.target.closest && ev.target.closest("button")) return; if(card.classList.contains("dragging")) return; const url = String(it.url || "").trim(); if(!url) return; window.open(url, "_blank", "noopener"); }catch(e){} });
-      zone.appendChild(card);
-    });
-  });
+  const board = document.getElementById("linkBoard"); if(!board) return;
+  const all = __buildAllLinksForBoard__(); const cols = __LINK_COLS.slice(); const byCol = {}; cols.forEach(c=> byCol[c.key] = []);
+  all.forEach(it=>{ const meta = __getLinkMeta__(it.id); const ck = (meta && meta.col) ? meta.col : "sem"; if(!byCol[ck]) byCol[ck] = []; byCol[ck].push(it); });
+  Object.keys(byCol).forEach(k=>{ byCol[k].sort((a,b)=> String(a.name||"").localeCompare(String(b.name||""))); });
+  board.innerHTML = cols.map(c=>`<div class="linkCol" id="linkCol-${c.key}" data-col="${c.key}"><div class="linkColHead"><div class="linkColTitle">${escapeHtml(c.title)}</div><div class="linkColCount">${(byCol[c.key]||[]).length}</div></div><div class="linkDropZone" id="linkDrop-${c.key}" data-col="${c.key}"></div></div>`).join("");
+  cols.forEach(c=>{
+    const zone = document.getElementById(`linkDrop-${c.key}`); if(!zone) return;
+    zone.addEventListener("dragover", (ev)=>{ ev.preventDefault(); const colEl = document.getElementById(`linkCol-${c.key}`); if(colEl) colEl.classList.add("dragOver"); });
+    zone.addEventListener("dragleave", ()=>{ const colEl = document.getElementById(`linkCol-${c.key}`); if(colEl) colEl.classList.remove("dragOver"); });
+    zone.addEventListener("drop", (ev)=>{ ev.preventDefault(); const colEl = document.getElementById(`linkCol-${c.key}`); if(colEl) colEl.classList.remove("dragOver"); const rid = String(ev.dataTransfer.getData("text/plain") || "").trim(); if(!rid) return; __setLinkCol__(rid, c.key); __renderLinkBoard__(); });
+    const items = byCol[c.key] || [];
+    items.forEach(it=>{
+      const card = document.createElement("div"); card.className = "linkCard"; card.setAttribute("draggable","true"); card.dataset.id = String(it.id||"");
+      card.innerHTML = `<div class="linkCardTop"><div style="min-width:0;flex:1"><div class="linkCardName" title="${escapeHtml(it.name||"")}">${escapeHtml(it.name||"")}</div><div class="linkCardSite" title="${escapeHtml(it.url||"")}">${escapeHtml(friendlySiteName(it.url||""))}</div></div><div class="linkCardActions"><button class="linkTinyBtn gray" type="button" title="Abrir link" onclick="window.open('${escapeHtml(it.url||"")}','_blank','noopener');">↗</button>${it.isStatic ? "" : `<button class="linkTinyBtn" type="button" title="Excluir link" onclick="deleteSharedLinkById_('${escapeHtml(it.id)}','${escapeHtml(it.name||"")}','${escapeHtml(it.url||"")}')">×</button>`}</div></div>`;
+      card.addEventListener("dragstart", (ev)=>{ card.classList.add("dragging"); ev.dataTransfer.setData("text/plain", String(it.id||"")); ev.dataTransfer.effectAllowed = "move"; });
+      card.addEventListener("dragend", ()=>{ card.classList.remove("dragging"); });
+      card.style.cursor = "pointer"; card.addEventListener("click", (ev)=>{ try{ if(ev && ev.target && ev.target.closest && ev.target.closest("button")) return; if(card.classList.contains("dragging")) return; const url = String(it.url || "").trim(); if(!url) return; window.open(url, "_blank", "noopener"); }catch(e){} });
+      zone.appendChild(card);
+    });
+  });
 }
 (function __hookLinksBoardRender__(){ if(window.__LINK_BOARD_HOOKED__) return; window.__LINK_BOARD_HOOKED__ = true; const __origRenderLinksUteis = (typeof renderLinksUteis === "function") ? renderLinksUteis : null; window.renderLinksUteis = function(){ try{ if(__origRenderLinksUteis) __origRenderLinksUteis(); }catch(e){} try{ if(!window.__LINK_ADD_MOVED__){ const dock = document.getElementById("linkAddDock"); const row = document.querySelector("#links .linkAddRow"); if(dock && row){ dock.appendChild(row); row.style.marginTop = "0"; } window.__LINK_ADD_MOVED__ = true; } }catch(e){} try{ __renderLinkBoard__(); }catch(e){} }; })();
 
@@ -953,10 +1016,10 @@ function friendlySiteName(url){ try{ const u = new URL(url); const host = (u.hos
 async function syncSharedLinks(){ try{ const st = await gasCall("getSharedLinksState"); __sharedLinksState = st || __sharedLinksState; }catch(e){} }
 async function deleteSharedLinkById_(id, label, url){ const rid = String(id || "").trim(); if(!rid) return; if(!confirm(`Excluir este link?\n\n${label || ""}\n${url || ""}`)) return; try{ let st = null; try { st = await gasCall("deleteSharedLink", rid); } catch(e1){ try { st = await gasCall("deleteSharedLinkItem", rid); } catch(e2){ try { st = await gasCall("deleteLink", rid); } catch(e3){ throw e1; } } } __sharedLinksState = st || __sharedLinksState; renderLinksUteis(); }catch(err){ alert("Não foi possível excluir o link."); } }
 function renderLinksUteis(){
-  const wrap = document.getElementById("linksPills"); if(!wrap) return; wrap.innerHTML = "";
-  LINKS_UTEIS.forEach((url)=>{ const name = friendlySiteName(url); const a = document.createElement("a"); a.className = "linkPill"; a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = url; a.innerHTML = `<span class="linkPillIcon"></span><span>${escapeHtml(name)}</span>`; wrap.appendChild(a); });
-  const list = (__sharedLinksState && Array.isArray(__sharedLinksState.items)) ? __sharedLinksState.items : [];
-  list.filter(it => it && !it.deleted && it.url).slice(0, 80).forEach(it=>{ const nm = (it.name && String(it.name).trim()) ? String(it.name).trim() : friendlySiteName(it.url); const pillWrap = document.createElement("span"); pillWrap.className = "linkPillWrap"; const a = document.createElement("a"); a.className = "linkPill"; a.href = it.url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = it.url; a.innerHTML = `<span class="linkPillIcon"></span><span>${escapeHtml(nm)}</span>`; const x = document.createElement("button"); x.className = "linkPillX"; x.type = "button"; x.title = "Excluir link"; x.innerText = "×"; x.addEventListener("click", (ev)=>{ ev.preventDefault(); ev.stopPropagation(); deleteSharedLinkById_(it.id, nm, it.url); }); pillWrap.appendChild(a); pillWrap.appendChild(x); wrap.appendChild(pillWrap); });
+  const wrap = document.getElementById("linksPills"); if(!wrap) return; wrap.innerHTML = "";
+  LINKS_UTEIS.forEach((url)=>{ const name = friendlySiteName(url); const a = document.createElement("a"); a.className = "linkPill"; a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = url; a.innerHTML = `<span class="linkPillIcon"></span><span>${escapeHtml(name)}</span>`; wrap.appendChild(a); });
+  const list = (__sharedLinksState && Array.isArray(__sharedLinksState.items)) ? __sharedLinksState.items : [];
+  list.filter(it => it && !it.deleted && it.url).slice(0, 80).forEach(it=>{ const nm = (it.name && String(it.name).trim()) ? String(it.name).trim() : friendlySiteName(it.url); const pillWrap = document.createElement("span"); pillWrap.className = "linkPillWrap"; const a = document.createElement("a"); a.className = "linkPill"; a.href = it.url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = it.url; a.innerHTML = `<span class="linkPillIcon"></span><span>${escapeHtml(nm)}</span>`; const x = document.createElement("button"); x.className = "linkPillX"; x.type = "button"; x.title = "Excluir link"; x.innerText = "×"; x.addEventListener("click", (ev)=>{ ev.preventDefault(); ev.stopPropagation(); deleteSharedLinkById_(it.id, nm, it.url); }); pillWrap.appendChild(a); pillWrap.appendChild(x); wrap.appendChild(pillWrap); });
 }
 function toggleLinkAdd(){ const inp = document.getElementById("linkAddInput"); if(!inp) return; const show = inp.style.display === "none"; inp.style.display = show ? "block" : "none"; if(show){ inp.value=""; inp.focus(); } }
 function parseNameAndUrl(line){ const s = String(line||"").trim(); const m = s.match(/(https?:\/\/\S+)/i); if(!m) return { name:"", url:"" }; const url = m[1]; return { name: s.replace(url, "").trim(), url }; }
@@ -967,15 +1030,15 @@ function sanitizeHtmlLight(html){ let s = String(html || "").replace(/<script[\s
 async function syncSharedTurno(){ try{ const st = await gasCall("getSharedTurnoState"); __sharedTurnoState = st || __sharedTurnoState; }catch(e){} }
 async function syncSharedAvisos(){ try{ const st = await gasCall("getSharedAvisosState"); __sharedAvisosState = st || __sharedAvisosState; }catch(e){} }
 function renderSharedList(kind){
-  const wrap = document.getElementById(kind === "turno" ? "turnoList" : "avisosList"); if(!wrap) return;
-  const state = (kind === "turno") ? __sharedTurnoState : __sharedAvisosState; const items = (state && Array.isArray(state.items)) ? state.items : []; wrap.innerHTML = "";
-  items.filter(it => it && !it.deleted).slice(0, 120).forEach(it=>{
-    const row = document.createElement("div"); row.className = "itemRow" + (it.done ? " done" : ""); row.dataset.id = it.id;
-    const body = document.createElement("div"); body.className = "itemBody"; body.setAttribute("contenteditable", "true"); body.innerHTML = it.html || "";
-    body.addEventListener("blur", async ()=>{ const html = sanitizeHtmlLight(body.innerHTML); try{ if(kind === "turno"){ const st = await gasCall("updateSharedTurnoItem", it.id, html); __sharedTurnoState = st || __sharedTurnoState; }else{ const st = await gasCall("updateSharedAvisoItem", it.id, html); __sharedAvisosState = st || __sharedAvisosState; } }catch(e){} });
-    row.innerHTML = `<input type="checkbox" ${it.done ? "checked" : ""} onchange="toggleDone('${kind}','${escapeHtml(it.id)}')"><button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')"><span class="trashIcon" aria-hidden="true"></span></button>`; row.appendChild(body);
-    if(it.by && it.t){ const meta = document.createElement("div"); meta.className = "markedBy"; meta.innerHTML = `Criado por: <b>${escapeHtml(it.by)}</b> • ${escapeHtml(fmtBR(parseMaybeDate(it.t) || new Date(it.t)))}`; wrap.appendChild(row); wrap.appendChild(meta); }else{ wrap.appendChild(row); }
-  });
+  const wrap = document.getElementById(kind === "turno" ? "turnoList" : "avisosList"); if(!wrap) return;
+  const state = (kind === "turno") ? __sharedTurnoState : __sharedAvisosState; const items = (state && Array.isArray(state.items)) ? state.items : []; wrap.innerHTML = "";
+  items.filter(it => it && !it.deleted).slice(0, 120).forEach(it=>{
+    const row = document.createElement("div"); row.className = "itemRow" + (it.done ? " done" : ""); row.dataset.id = it.id;
+    const body = document.createElement("div"); body.className = "itemBody"; body.setAttribute("contenteditable", "true"); body.innerHTML = it.html || "";
+    body.addEventListener("blur", async ()=>{ const html = sanitizeHtmlLight(body.innerHTML); try{ if(kind === "turno"){ const st = await gasCall("updateSharedTurnoItem", it.id, html); __sharedTurnoState = st || __sharedTurnoState; }else{ const st = await gasCall("updateSharedAvisoItem", it.id, html); __sharedAvisosState = st || __sharedAvisosState; } }catch(e){} });
+    row.innerHTML = `<input type="checkbox" ${it.done ? "checked" : ""} onchange="toggleDone('${kind}','${escapeHtml(it.id)}')"><button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')"><span class="trashIcon" aria-hidden="true"></span></button>`; row.appendChild(body);
+    if(it.by && it.t){ const meta = document.createElement("div"); meta.className = "markedBy"; meta.innerHTML = `Criado por: <b>${escapeHtml(it.by)}</b> • ${escapeHtml(fmtBR(parseMaybeDate(it.t) || new Date(it.t)))}`; wrap.appendChild(row); wrap.appendChild(meta); }else{ wrap.appendChild(row); }
+  });
 }
 async function toggleDone(kind, id){ try{ if(kind === "turno"){ const st = await gasCall("toggleSharedTurnoDone", id); __sharedTurnoState = st || __sharedTurnoState; } else{ const st = await gasCall("toggleSharedAvisoDone", id); __sharedAvisosState = st || __sharedAvisosState; } renderSharedList(kind); }catch(e){} }
 async function deleteItem(kind, id){ try{ if(kind === "turno"){ const st = await gasCall("deleteSharedTurnoItem", id); __sharedTurnoState = st || __sharedTurnoState; } else{ const st = await gasCall("deleteSharedAvisoItem", id); __sharedAvisosState = st || __sharedAvisosState; } renderSharedList(kind); }catch(e){} }
@@ -993,81 +1056,81 @@ function ctxHide(){ const m = ctxEl(); if(m) m.style.display = "none"; __ctxMenu
 function ctxShow(x,y){ const m = ctxEl(); if(!m) return; const pad = 10, w = m.offsetWidth || 300, h = m.offsetHeight || 90; const vw = window.innerWidth, vh = window.innerHeight; let left = Math.min(x, vw - w - pad), top = Math.min(y, vh - h - pad); if(left < pad) left = pad; if(top < pad) top = pad; m.style.left = left + "px"; m.style.top = top + "px"; m.style.display = "block"; __ctxMenuOpen = true; }
 function isSelectionInsideAllowedArea(){ try{ const sel = window.getSelection(); if(!sel || sel.rangeCount === 0) return false; const node = sel.anchorNode; if(!node) return false; const el = (node.nodeType === 1) ? node : node.parentElement; if(!el) return false; const turno = document.getElementById("turno"); const avisos = document.getElementById("avisos"); if(turno && turno.contains(el)) return true; if(avisos && avisos.contains(el)) return true; return false; }catch(e){ return false; } }
 function initCtxMenuHandlers(){
-  const boldBtn = document.getElementById("ctxBold"); const fontSel = document.getElementById("ctxFont"); const colorIn = document.getElementById("ctxColor"); const applyBtn = document.getElementById("ctxApply");
-  if(boldBtn) boldBtn.onclick = (e)=>{ e.preventDefault(); __ctxPending.bold = !__ctxPending.bold; boldBtn.classList.toggle("on", __ctxPending.bold); };
-  if(fontSel) fontSel.onchange = ()=>{ __ctxPending.fontPx = Number(fontSel.value || 12); };
-  if(colorIn) colorIn.oninput = ()=>{ __ctxPending.color = String(colorIn.value || "#0f172a"); };
-  if(applyBtn){ applyBtn.onclick = (e)=>{ e.preventDefault(); if(!__ctxStoredRange) return; restoreRange(__ctxStoredRange); const styles = []; if(__ctxPending.bold) styles.push("font-weight:700"); if(__ctxPending.fontPx) styles.push(`font-size:${__ctxPending.fontPx}px`); if(__ctxPending.color) styles.push(`color:${__ctxPending.color}`); if(styles.length) wrapSelectionWithSpan(styles.join(";")); ctxHide(); }; }
-  document.addEventListener("click", (e)=>{ if(!__ctxMenuOpen) return; const m = ctxEl(); if(m && (e.target === m || m.contains(e.target))) return; ctxHide(); }); document.addEventListener("scroll", ()=>{ if(__ctxMenuOpen) ctxHide(); }, true); document.addEventListener("keydown", (e)=>{ if(e.key === "Escape" && __ctxMenuOpen) ctxHide(); });
-  document.addEventListener("contextmenu", (e)=>{ const rng = getSelectionRangeSafe(); if(!rng) return; if(!isSelectionInsideAllowedArea()) return; __ctxStoredRange = rng.cloneRange(); e.preventDefault(); const bb = document.getElementById("ctxBold"); if(bb) bb.classList.toggle("on", __ctxPending.bold); const fs = document.getElementById("ctxFont"); if(fs) fs.value = String(__ctxPending.fontPx || 12); const cc = document.getElementById("ctxColor"); if(cc) cc.value = String(__ctxPending.color || "#0f172a"); ctxShow(e.clientX, e.clientY); }, true);
+  const boldBtn = document.getElementById("ctxBold"); const fontSel = document.getElementById("ctxFont"); const colorIn = document.getElementById("ctxColor"); const applyBtn = document.getElementById("ctxApply");
+  if(boldBtn) boldBtn.onclick = (e)=>{ e.preventDefault(); __ctxPending.bold = !__ctxPending.bold; boldBtn.classList.toggle("on", __ctxPending.bold); };
+  if(fontSel) fontSel.onchange = ()=>{ __ctxPending.fontPx = Number(fontSel.value || 12); };
+  if(colorIn) colorIn.oninput = ()=>{ __ctxPending.color = String(colorIn.value || "#0f172a"); };
+  if(applyBtn){ applyBtn.onclick = (e)=>{ e.preventDefault(); if(!__ctxStoredRange) return; restoreRange(__ctxStoredRange); const styles = []; if(__ctxPending.bold) styles.push("font-weight:700"); if(__ctxPending.fontPx) styles.push(`font-size:${__ctxPending.fontPx}px`); if(__ctxPending.color) styles.push(`color:${__ctxPending.color}`); if(styles.length) wrapSelectionWithSpan(styles.join(";")); ctxHide(); }; }
+  document.addEventListener("click", (e)=>{ if(!__ctxMenuOpen) return; const m = ctxEl(); if(m && (e.target === m || m.contains(e.target))) return; ctxHide(); }); document.addEventListener("scroll", ()=>{ if(__ctxMenuOpen) ctxHide(); }, true); document.addEventListener("keydown", (e)=>{ if(e.key === "Escape" && __ctxMenuOpen) ctxHide(); });
+  document.addEventListener("contextmenu", (e)=>{ const rng = getSelectionRangeSafe(); if(!rng) return; if(!isSelectionInsideAllowedArea()) return; __ctxStoredRange = rng.cloneRange(); e.preventDefault(); const bb = document.getElementById("ctxBold"); if(bb) bb.classList.toggle("on", __ctxPending.bold); const fs = document.getElementById("ctxFont"); if(fs) fs.value = String(__ctxPending.fontPx || 12); const cc = document.getElementById("ctxColor"); if(cc) cc.value = String(__ctxPending.color || "#0f172a"); ctxShow(e.clientX, e.clientY); }, true);
 }
 
 (function bindSafeClickHandlers(){
-  if(window.__SAFE_CLICK_BINDED__) return; window.__SAFE_CLICK_BINDED__ = true;
-  document.addEventListener("click", (e)=>{
-    const bell = e.target && e.target.closest ? e.target.closest("button.bellBtn") : null;
-    if(bell){ e.preventDefault(); e.stopImmediatePropagation(); const tk = bell.getAttribute("data-table"); const rid = bell.getAttribute("data-rid"); if(tk && rid) togglePrio(tk, rid); return; }
-    const air = e.target && e.target.closest ? e.target.closest("button.airWarnBtn") : null;
-    if(air){ e.preventDefault(); e.stopImmediatePropagation(); const tk = air.getAttribute("data-table"); const a = air.getAttribute("data-air"); if(tk && a) toggleAirPinned(tk, a); return; }
-  }, true);
+  if(window.__SAFE_CLICK_BINDED__) return; window.__SAFE_CLICK_BINDED__ = true;
+  document.addEventListener("click", (e)=>{
+    const bell = e.target && e.target.closest ? e.target.closest("button.bellBtn") : null;
+    if(bell){ e.preventDefault(); e.stopImmediatePropagation(); const tk = bell.getAttribute("data-table"); const rid = bell.getAttribute("data-rid"); if(tk && rid) togglePrio(tk, rid); return; }
+    const air = e.target && e.target.closest ? e.target.closest("button.airWarnBtn") : null;
+    if(air){ e.preventDefault(); e.stopImmediatePropagation(); const tk = air.getAttribute("data-table"); const a = air.getAttribute("data-air"); if(tk && a) toggleAirPinned(tk, a); return; }
+  }, true);
 })();
 
 // =====================================================
 // ✅ 3. INICIALIZAÇÃO (DOIS SET INTERVALS SEPARADOS)
 // =====================================================
 (async function init(){
-  window.addEventListener("unhandledrejection", ()=>{ const st = document.getElementById("status"); if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada)."); });
-  window.addEventListener("error", ()=>{ const st = document.getElementById("status"); if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno no script."); });
-  
-  if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("✅ Inicializando e buscando PNs...");
-  
-  // Tenta puxar Major Parts se estiver configurado
-  await puxarMajorPartsDiretoDoSheets();
+  window.addEventListener("unhandledrejection", ()=>{ const st = document.getElementById("status"); if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno (promessa rejeitada)."); });
+  window.addEventListener("error", ()=>{ const st = document.getElementById("status"); if(st && __ADMIN_MODE) st.innerHTML = makeStatusHtml("⚠️ Erro interno no script."); });
+  
+  if(__ADMIN_MODE) document.getElementById("status").innerHTML = makeStatusHtml("✅ Inicializando e buscando PNs...");
+  
+  // Tenta puxar Major Parts se estiver configurado
+  await puxarMajorPartsDiretoDoSheets();
 
-  __lastUpdateDate = computeLastUpdateFromData(); __lastSuccessAt = new Date(); __lastFetchAt = new Date();
-  
-  prepareDataCache();
-  try{ await presenceTick(); }catch(e){}
-  if(hasGAS()){
-    try{ await syncSharedAllTables(); }catch(e){} try{ await syncSharedObs(); }catch(e){} try{ await syncSharedTurno(); }catch(e){} try{ await syncSharedAvisos(); }catch(e){} try{ await syncSharedLinks(); }catch(e){}
-  }else{ renderConnected([]); }
-  
-  renderLinksUteis(); renderSharedList("turno"); renderSharedList("avisos");
-  rerenderAll({ onlyActive: true });
-  
-  setInterval(paintUpdateInfo, 1000); 
-  setInterval(paintRefreshInfo, 1000); 
-  setInterval(__tryRerenderPending__, 700);
-  
-  document.addEventListener("focusout", ()=>{ setTimeout(__tryRerenderPending__, 150); }, true);
-  
-  // Refresh Automático da Planilha (A cada 2min 30s)
-  scheduleNextRefresh(getAutoRefreshMs()); 
-  setTimeout(()=>{ refreshData(); }, 1500);
-  
-  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshData(); }); 
-  window.addEventListener("focus", ()=>{ refreshData(); });
-  initCtxMenuHandlers();
+  __lastUpdateDate = computeLastUpdateFromData(); __lastSuccessAt = new Date(); __lastFetchAt = new Date();
+  
+  prepareDataCache();
+  try{ await presenceTick(); }catch(e){}
+  if(hasGAS()){
+    try{ await syncSharedAllTables(); }catch(e){} try{ await syncSharedObs(); }catch(e){} try{ await syncSharedTurno(); }catch(e){} try{ await syncSharedAvisos(); }catch(e){} try{ await syncSharedLinks(); }catch(e){}
+  }else{ renderConnected([]); }
+  
+  renderLinksUteis(); renderSharedList("turno"); renderSharedList("avisos");
+  rerenderAll({ onlyActive: true });
+  
+  setInterval(paintUpdateInfo, 1000); 
+  setInterval(paintRefreshInfo, 1000); 
+  setInterval(__tryRerenderPending__, 700);
+  
+  document.addEventListener("focusout", ()=>{ setTimeout(__tryRerenderPending__, 150); }, true);
+  
+  // Refresh Automático da Planilha (A cada 2min 30s)
+  scheduleNextRefresh(getAutoRefreshMs()); 
+  setTimeout(()=>{ refreshData(); }, 1500);
+  
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshData(); }); 
+  window.addEventListener("focus", ()=>{ refreshData(); });
+  initCtxMenuHandlers();
 
-  // Sync colaborativo leve (30s) — apenas chats, links, avisos (não busca planilha)
-  setInterval(async ()=>{
-    try{ await presenceTick(); }catch(e){}
-    if(hasGAS()){ 
-      try{ await syncSharedAllTables(); }catch(e){} 
-      try{ await syncSharedObs(); }catch(e){} 
-      try{ await syncSharedTurno(); }catch(e){} 
-      try{ await syncSharedAvisos(); }catch(e){} 
-      try{ await syncSharedLinks(); }catch(e){} 
-    }
-    renderSharedList("turno"); renderSharedList("avisos"); renderLinksUteis();
-    try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){}
-  }, 30000);
-  
-  // FAST: auto-marcar aeronaves do dia a cada 15min
-  setInterval(()=>{ try{ runFastAutoPinNow("timer"); }catch(e){} }, FAST_AUTO_PIN_INTERVAL_MS);
-  setTimeout(()=>{ try{ runFastAutoPinNow("boot"); }catch(e){} }, 5000);
-  
-  updateStatusVisibility();
+  // Sync colaborativo leve (30s) — apenas chats, links, avisos (não busca planilha)
+  setInterval(async ()=>{
+    try{ await presenceTick(); }catch(e){}
+    if(hasGAS()){ 
+      try{ await syncSharedAllTables(); }catch(e){} 
+      try{ await syncSharedObs(); }catch(e){} 
+      try{ await syncSharedTurno(); }catch(e){} 
+      try{ await syncSharedAvisos(); }catch(e){} 
+      try{ await syncSharedLinks(); }catch(e){} 
+    }
+    renderSharedList("turno"); renderSharedList("avisos"); renderLinksUteis();
+    try{ if(!__isUserTyping__()) updateObsVisibleActiveTable(); }catch(e){}
+  }, 30000);
+  
+  // FAST: auto-marcar aeronaves do dia a cada 15min
+  setInterval(()=>{ try{ runFastAutoPinNow("timer"); }catch(e){} }, FAST_AUTO_PIN_INTERVAL_MS);
+  setTimeout(()=>{ try{ runFastAutoPinNow("boot"); }catch(e){} }, 5000);
+  
+  updateStatusVisibility();
 })();
 </script>
 </body>
