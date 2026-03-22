@@ -1070,6 +1070,8 @@ let __sharedTurnoState = null; let __sharedAvisosState = null;
 function sanitizeHtmlLight(html){ let s = String(html || "").replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "").replace(/\son\w+="[^"]*"/gi, "").replace(/\son\w+='[^']*'/gi, "").replace(/javascript:/gi, ""); const allowed = ["b","strong","span","br","div"]; return s.replace(/<\/?([a-z0-9]+)(\s[^>]*)?>/gi, (m, tag, attrs)=>{ tag = String(tag||"").toLowerCase(); if(!allowed.includes(tag)) return ""; if(tag === "span" || tag === "div"){ const st = (attrs||"").match(/style\s*=\s*("([^"]*)"|'([^']*)')/i); if(st){ const val = st[2] || st[3] || ""; const safe = val.replace(/position\s*:\s*fixed/gi,"").replace(/position\s*:\s*absolute/gi,"").replace(/z-index\s*:\s*\d+/gi,""); return m.startsWith("</") ? `</${tag}>` : `<${tag} style="${escapeHtml(safe)}">`; } } return m.startsWith("</") ? `</${tag}>` : `<${tag}>`; }); }
 async function syncSharedTurno(){ try{ const st = await gasCall("getSharedTurnoState"); __sharedTurnoState = st || __sharedTurnoState; }catch(e){} }
 async function syncSharedAvisos(){ try{ const st = await gasCall("getSharedAvisosState"); __sharedAvisosState = st || __sharedAvisosState; }catch(e){} }
+
+// 👇 A MÁGICA DA LIXEIRA ACONTECE AQUI 👇
 function renderSharedList(kind){
   const wrap = document.getElementById(kind === "turno" ? "turnoList" : "avisosList"); if(!wrap) return;
   const state = (kind === "turno") ? __sharedTurnoState : __sharedAvisosState; const items = (state && Array.isArray(state.items)) ? state.items : []; wrap.innerHTML = "";
@@ -1077,10 +1079,16 @@ function renderSharedList(kind){
     const row = document.createElement("div"); row.className = "itemRow" + (it.done ? " done" : ""); row.dataset.id = it.id;
     const body = document.createElement("div"); body.className = "itemBody"; body.setAttribute("contenteditable", "true"); body.innerHTML = it.html || "";
     body.addEventListener("blur", async ()=>{ const html = sanitizeHtmlLight(body.innerHTML); try{ if(kind === "turno"){ const st = await gasCall("updateSharedTurnoItem", it.id, html); __sharedTurnoState = st || __sharedTurnoState; }else{ const st = await gasCall("updateSharedAvisoItem", it.id, html); __sharedAvisosState = st || __sharedAvisosState; } }catch(e){} });
-    row.innerHTML = `<input type="checkbox" ${it.done ? "checked" : ""} onchange="toggleDone('${kind}','${escapeHtml(it.id)}')"><button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')"><span class="trashIcon" aria-hidden="true"></span></button>`; row.appendChild(body);
+    
+    // A lixeira só é desenhada se a aba for a de "turno"
+    const lixeiraHtml = (kind === "turno") ? `<button class="iconBtn" title="Excluir" type="button" onclick="deleteItem('${kind}','${escapeHtml(it.id)}')"><span class="trashIcon" aria-hidden="true"></span></button>` : "";
+    
+    row.innerHTML = `<input type="checkbox" ${it.done ? "checked" : ""} onchange="toggleDone('${kind}','${escapeHtml(it.id)}')">${lixeiraHtml}`; row.appendChild(body);
+    
     if(it.by && it.t){ const meta = document.createElement("div"); meta.className = "markedBy"; meta.innerHTML = `Criado por: <b>${escapeHtml(it.by)}</b> • ${escapeHtml(fmtBR(parseMaybeDate(it.t) || new Date(it.t)))}`; wrap.appendChild(row); wrap.appendChild(meta); }else{ wrap.appendChild(row); }
   });
 }
+
 async function toggleDone(kind, id){ try{ if(kind === "turno"){ const st = await gasCall("toggleSharedTurnoDone", id); __sharedTurnoState = st || __sharedTurnoState; } else{ const st = await gasCall("toggleSharedAvisoDone", id); __sharedAvisosState = st || __sharedAvisosState; } renderSharedList(kind); }catch(e){} }
 async function deleteItem(kind, id){ try{ if(kind === "turno"){ const st = await gasCall("deleteSharedTurnoItem", id); __sharedTurnoState = st || __sharedTurnoState; } else{ const st = await gasCall("deleteSharedAvisoItem", id); __sharedAvisosState = st || __sharedAvisosState; } renderSharedList(kind); }catch(e){} }
 function getRichHtmlFromInput(kind){ const el = document.getElementById(kind === "turno" ? "turnoInput" : "avisoInput"); if(!el) return ""; return sanitizeHtmlLight(el.innerHTML); }
