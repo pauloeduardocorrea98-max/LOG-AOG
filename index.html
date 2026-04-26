@@ -26,6 +26,7 @@
     <button onclick="openTab('cargo',this)">📦 Cargo Heroes</button>
     <button onclick="openTab('mro',this)">🧰 MRO</button>
     <button onclick="openTab('acompanhamento',this)">📍 Acompanhamento</button>
+    <button onclick="openTab('conexao',this)">🔀 Conexão</button>
     <button onclick="openTab('cargas',this)">🚚 Cargas</button>
     <button onclick="openTab('hotlist',this)">🔥 Hot List</button>
     <button onclick="openTab('tools',this)">🛠️ Ferramentas</button>
@@ -376,6 +377,15 @@ function applyStatusOption(val){
 const STATUS_COL = "Status_material_ferramenta"; const AIR_COL = "Aeronave"; const SOL_COL = "Numero_de_solicitacao"; const TYPE_COL = "Tipo";
 function hasCargasKeyword(text){ return normalizeText(text || "").includes("carga"); }
 function isCargasRow(r){ if(!r) return false; return hasCargasKeyword(r["Descricao_logistica"]); }
+
+function isConexaoRow(r){
+  if(!r) return false;
+  return Object.values(r)
+    .join(" ")
+    .toLowerCase()
+    .includes("conexao");
+}
+
 function isFerramentaType(typeRaw){ const raw = String(typeRaw ?? "").trim(); if(!raw) return false; const n = Number(raw); if(!isNaN(n) && n === 2) return true; const s = normalizeText(raw); if(s.includes("ferramenta") || s.includes("tool")) return true; return false; }
 function isFerramentaStatus(statusRaw){ const s = normalizeText(statusRaw || ""); if(!s) return false; return s.includes("ferramenta"); }
 function isFerramentaRow(r){ const tipo = r ? (r[TYPE_COL] ?? r.Tipo ?? "") : ""; if(isFerramentaType(tipo)) return true; return isFerramentaStatus(r ? r[STATUS_COL] : ""); }
@@ -390,8 +400,8 @@ const COL_LABELS = { "Numero_de_solicitacao": "Solicitação", "Base": "Base", "
 function colLabel(col){ return COL_LABELS[col] || col; }
 
 const tableKeysBySection = { aog:"aog", war:"war", fast:"fast", cargo:"cargo", mro:"mro", acompanhamento:"acompanhamento", cargas:"cargas", hotlist:"hotlist", tools:"tools" };
-const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, acompanhamento:{}, cargas:{}, hotlist:{}, mro:{}, tools:{} };
-const __filterDraftByTable = { aog:{}, war:{}, fast:{}, cargo:{}, mro:{}, acompanhamento:{}, cargas:{}, hotlist:{}, tools:{} };
+const filtersByTable = { aog:{}, war:{}, fast:{}, cargo:{}, acompanhamento:{}, conexao:{}, cargas:{}, hotlist:{}, mro:{}, tools:{} };
+const __filterDraftByTable = { aog:{}, war:{}, fast:{}, cargo:{}, mro:{}, acompanhamento:{}, conexao:{}, cargas:{}, hotlist:{}, tools:{} };
 function setFilterDraft(tableKey, col, value){ const v = String(value || ""); if(!__filterDraftByTable[tableKey]) __filterDraftByTable[tableKey] = {}; __filterDraftByTable[tableKey][col] = v; markDirty(tableKey); }
 function clearFilterDraft(tableKey, col){ if(__filterDraftByTable[tableKey] && Object.prototype.hasOwnProperty.call(__filterDraftByTable[tableKey], col)){ delete __filterDraftByTable[tableKey][col]; } }
 function clearAllFilterDraft(tableKey){ __filterDraftByTable[tableKey] = {}; }
