@@ -25,7 +25,8 @@
     <button onclick="openTab('fast',this)">⚡ Fast Pass</button>
     <button onclick="openTab('cargo',this)">📦 Cargo Heroes</button>
     <button onclick="openTab('mro',this)">🧰 MRO</button>
-    <button onclick="openTab('acompanhamento',this)">📍 Acompanhamento</button>
+    <button onclick="openTab('acompanhamento',this)
+    <button onclick="openTab('conexao',this)">🔀 Conexão</button>">📍 Acompanhamento</button>
     <button onclick="openTab('cargas',this)">🚚 Cargas</button>
     <button onclick="openTab('hotlist',this)">🔥 Hot List</button>
     <button onclick="openTab('tools',this)">🛠️ Ferramentas</button>
@@ -452,7 +453,7 @@ function buildSortedBaseCache(){
   __sortedBaseVersion = __dataVersion;
 }
 
-function isConexaoRow(r){ return normalizeText(r["Descricao_logistica"]).includes("conexao"); }
+function isConexaoRow(r){ return Object.values(r).join(" ").toLowerCase().includes("conexao"); }
 function prepareDataCache(){
   const out = { aog:[], war:[], fast:[], cargo:[], mro:[], acompanhamento:[],
   conexao:[], cargas:[], hotlist:[], tools:[] }; let maxDt = null;
@@ -1195,3 +1196,4 @@ function initCtxMenuHandlers(){
 </script>
 </body>
 </html>
+<div id="conexao" class="section"><h1>Conexão</h1><div id="air-conexao"></div><div id="sol-conexao"></div><div id="prio-conexao"></div><div class="tableWrap"><table id="tbl-conexao"></table></div></div>
