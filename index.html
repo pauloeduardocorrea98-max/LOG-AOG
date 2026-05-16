@@ -954,7 +954,7 @@ function renderTable(tableKey){
 
         return `<td>${escapeHtml(displayed)}</td>`;
       }).join("")}</tr>`;
-  }).join(""); html += `</tbody>`; el.innerHTML = html; enableColumnResize(el); try{ updateObsVisibleForTable(tableKey); }catch(e){}
+  }).join(""); html += </tbody>`; el.style.minHeight = el.offsetHeight + 'px'; el.innerHTML = html; setTimeout(() => el.style.minHeight = '', 50); enableColumnResize(el); try{ updateObsVisibleForTable(tableKey); }catch(e){}
 }
 
 function makeStatusHtml(line1){ return `<div>${line1}</div><div class="statusLine"><span class="pill" id="pillLastFetch">Refresh = tentativa: —</span><span class="pill" id="pillSuccess">Sucesso = atualização concluída: —</span><span class="pill" id="pillNext">Próx refresh em: —</span><span class="pill" id="pillUpdatedAt">Atualizado = frescor do dado: —</span><span class="pill warn" id="pillState">Estado: OK</span></div>`; }
