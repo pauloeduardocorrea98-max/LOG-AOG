@@ -821,7 +821,7 @@ function solCardXAction(tableKey, sol){ const tk = String(tableKey||"").toLowerC
 function countIdsForSol(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return 0; const mp = __solIdSetByTable[tk]; if(!mp) return 0; const set = mp.get(s); return set ? set.size : 0; }
 
 function renderSolBox(tableKey){
-  const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", mro:"sol-mro", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools", conexao:"sol-conexao" }[tableKey];
+  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", mro:"air-mro", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools", conexao:"air-conexao" }[tableKey];
   const wrap = document.getElementById(wrapId); if(!wrap) return;
   const set = solPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
   const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
@@ -838,18 +838,9 @@ function renderSolBox(tableKey){
 }
 
 function renderAircraftBox(tableKey){
-  const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", mro:"sol-mro", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools" }[tableKey];
+  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", mro:"air-mro", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools" }[tableKey];
   const wrap = document.getElementById(wrapId); if(!wrap) return;
-  const set = airPinnedByTable[tableKey];
-
-if(typeof set === "undefined" || set === null){
-  return;
-}
-
-if(set.size === 0){
-  wrap.innerHTML = "";
-  return;
-}
+  const set = airPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
   const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
   wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`;
   const grid = document.getElementById(`airGrid-${tableKey}`); if(!grid) return;
@@ -963,60 +954,7 @@ function renderTable(tableKey){
 
         return `<td>${escapeHtml(displayed)}</td>`;
       }).join("")}</tr>`;
-  }).join(""); html += `</tbody>`;
-
-try{
-
-if(!el){
-console.warn("Tabela não encontrada:", tableKey);
-return;
-}
-
-var __oldMinHeight = "";
-var __currentHeight = 0;
-
-try{
-__currentHeight = Number(el.offsetHeight || 0);
-
-if(__currentHeight > 100){
-__oldMinHeight = el.style.minHeight || "";
-el.style.minHeight = __currentHeight + "px";
-}
-}catch(heightErr){
-console.warn("Erro ao medir altura:", heightErr);
-}
-
-try{
-el.innerHTML = html;
-}catch(renderErr){
-console.error("Erro renderizando tabela:", renderErr);
-}
-
-setTimeout(function(){
-try{
-if(el){
-el.style.minHeight = __oldMinHeight;
-}
-}catch(releaseErr){
-console.warn("Erro liberando altura:", releaseErr);
-}
-},80);
-
-try{
-enableColumnResize(el);
-}catch(resizeErr){
-console.warn("Erro resize:", resizeErr);
-}
-
-try{
-updateObsVisibleForTable(tableKey);
-}catch(obsErr){
-console.warn("Erro OBS:", obsErr);
-}
-
-}catch(globalRenderErr){
-console.error("Falha crítica render:", globalRenderErr);
-}
+  }).join(""); html += `</tbody>`;var h=el.offsetHeight;if(h>50){el.style.minHeight=h+"px";}el.innerHTML=html;setTimeout(function(){el.style.minHeight="";},50);enableColumnResize(el);try{updateObsVisibleForTable(tableKey);}catch(e){}
 }
 
 function makeStatusHtml(line1){ return `<div>${line1}</div><div class="statusLine"><span class="pill" id="pillLastFetch">Refresh = tentativa: —</span><span class="pill" id="pillSuccess">Sucesso = atualização concluída: —</span><span class="pill" id="pillNext">Próx refresh em: —</span><span class="pill" id="pillUpdatedAt">Atualizado = frescor do dado: —</span><span class="pill warn" id="pillState">Estado: OK</span></div>`; }
