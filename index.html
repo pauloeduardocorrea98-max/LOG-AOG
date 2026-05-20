@@ -840,7 +840,16 @@ function renderSolBox(tableKey){
 function renderAircraftBox(tableKey){
   const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", mro:"sol-mro", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools" }[tableKey];
   const wrap = document.getElementById(wrapId); if(!wrap) return;
-  const set = airPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+  const set = airPinnedByTable[tableKey];
+
+if(typeof set === "undefined" || set === null){
+  return;
+}
+
+if(set.size === 0){
+  wrap.innerHTML = "";
+  return;
+}
   const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
   wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`;
   const grid = document.getElementById(`airGrid-${tableKey}`); if(!grid) return;
