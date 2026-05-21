@@ -823,7 +823,16 @@ function countIdsForSol(tableKey, sol){ const tk = String(tableKey||"").toLowerC
 function renderSolBox(tableKey){
   const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", mro:"air-mro", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools", conexao:"air-conexao" }[tableKey];
   const wrap = document.getElementById(wrapId); if(!wrap) return;
-  const set = solPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+  const set = solPinnedByTable[tableKey];
+
+if(typeof set === "undefined" || set === null){
+  return;
+}
+
+if(set.size === 0){
+  wrap.innerHTML = "";
+  return;
+}
   const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
   wrap.innerHTML = `<div class="solBox"><h3>📌 Solicitações destacadas</h3><div class="solGrid" id="solGrid-${tableKey}"></div></div>`;
   const grid = document.getElementById(`solGrid-${tableKey}`); if(!grid) return;
@@ -840,7 +849,16 @@ function renderSolBox(tableKey){
 function renderAircraftBox(tableKey){
   const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", mro:"air-mro", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools" }[tableKey];
   const wrap = document.getElementById(wrapId); if(!wrap) return;
-  const set = airPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+  const set = airPinnedByTable[tableKey];
+
+if(typeof set === "undefined" || set === null){
+  return;
+}
+
+if(set.size === 0){
+  wrap.innerHTML = "";
+  return;
+}
   const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
   wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`;
   const grid = document.getElementById(`airGrid-${tableKey}`); if(!grid) return;
@@ -954,7 +972,7 @@ function renderTable(tableKey){
 
         return `<td>${escapeHtml(displayed)}</td>`;
       }).join("")}</tr>`;
-  }).join(""); html += `</tbody>`;var h=el.offsetHeight;if(h>50){el.style.minHeight=h+"px";}el.innerHTML=html;setTimeout(function(){el.style.minHeight="";},50);enableColumnResize(el);try{updateObsVisibleForTable(tableKey);}catch(e){}
+  }).join(""); html += `</tbody>`; el.innerHTML = html; enableColumnResize(el); try{ updateObsVisibleForTable(tableKey); }catch(e){}
 }
 
 function makeStatusHtml(line1){ return `<div>${line1}</div><div class="statusLine"><span class="pill" id="pillLastFetch">Refresh = tentativa: —</span><span class="pill" id="pillSuccess">Sucesso = atualização concluída: —</span><span class="pill" id="pillNext">Próx refresh em: —</span><span class="pill" id="pillUpdatedAt">Atualizado = frescor do dado: —</span><span class="pill warn" id="pillState">Estado: OK</span></div>`; }
