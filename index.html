@@ -461,8 +461,6 @@ function prepareDataCache(){
       }
       if(isConexaoRow(r)){
         out.conexao.push(r);
-        __pushAirId__("conexao", r);
-        __pushSolId__("conexao", r);
       }
       if(isCargasRow(r)){ 
       const airUpper = String(r[AIR_COL] || "").toUpperCase();
@@ -485,7 +483,7 @@ function prepareDataCache(){
     
     if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r); __pushSolId__("tools", r); }
     const logDesc = normalizeText(r.Descricao_logistica || "");
-    if(logDesc.includes("conexao")&&!isConexaoRow(r)){
+    if(logDesc.includes("conexao")){
       out.conexao.push(r); 
       __pushAirId__("conexao", r); 
       __pushSolId__("conexao", r);
@@ -1045,7 +1043,8 @@ function __linkIdForStatic__(url){ const s = String(url||""); let h = 0; for(let
 function __getLinkMeta__(id){ const st = __loadLinkBoardState__(); const rid = String(id||"").trim(); if(!rid) return { col:"sem", note:"" }; if(!st.items[rid]) st.items[rid] = { col:"sem", note:"" }; const it = st.items[rid] || { col:"sem", note:"" }; if(!it.col) it.col = "sem"; if(typeof it.note !== "string") it.note = String(it.note||""); return it; }
 function __setLinkCol__(id, colKey){ const st = __loadLinkBoardState__(); const rid = String(id||"").trim(); if(!rid) return; if(!st.items[rid]) st.items[rid] = { col:"sem", note:"" }; st.items[rid].col = String(colKey||"sem"); __saveLinkBoardState__(); }
 function __setLinkNote__(id, note){ const st = __loadLinkBoardState__(); const rid = String(id||"").trim(); if(!rid) return; if(!st.items[rid]) st.items[rid] = { col:"sem", note:"" }; st.items[rid].note = String(note||""); __saveLinkBoardState__(); }
-function __buildAllLinksForBoard__(){ const list = []; (Array.isArray(LINKS_UTEIS) ? LINKS_UTEIS : []).forEach(url=>{ const id = __linkIdForStatic__(url); list.push({ id, name: friendlySiteName(url), url, isStatic:true }); }); const shared = (__sharedLinksState && Array.isArray(__sharedLinksState.items)) ? __sharedLinksState.items : []; shared.filter(it => it && !it.deleted && it.url).forEach(it=>{ const nm = (it.name && String(it.name).trim()) ? String(it.name).trim() : friendlySiteName(it.url); list.push({ id: String(it.id||""), name: nm, url: String(it.url||""), isStatic:false }); }); const seen = {}; const out = []; for(const it of list){ const k = String(it.id||"").trim(); if(!k || seen[k]) continue; seen[k] = true; out.push(it); } return out; }
+function __buildAllLinksForBoard__(){ const list = []; (Array.isArray(LINKS_UTEIS) ? LINKS_UTEIS : []).forEach(url=>{ const id = __linkIdForStatic__(url); list.push({ id, name: friendlySiteName(url), url, isStatic:true }); }); const shared = (__sharedLinksState && Array.isArray(__sharedLinksState.items)) ? __sharedLinksState.items : []; shared.filter(it => it && !it.deleted && it.url).forEach(it=>{ const nm = (it.name && String(it.name).trim()) ? String(it.name).trim() : friendlySiteName(it.url); list.push({ id: String(it.id||""), name: nm, url: String(it.url||""), isStatic:false }); }); const seen = {}; const out = []; for(const it of list){ const k = String(it.id||"").trim(); if(!k || seen[k]) continue; seen[k] = true; out.push(it); } 
+const __seenConexao__=new Set();out.conexao=out.conexao.filter(r=>{const __k=[r.Material_ID||"",r.Solicitacao||"",r.PN||"",r.Aeronave||""].join("|");if(__seenConexao__.has(__k))return false;__seenConexao__.add(__k);return true;});return out; }
 function __renderLinkBoard__(){
   const board = document.getElementById("linkBoard"); if(!board) return;
   const all = __buildAllLinksForBoard__(); const cols = __LINK_COLS.slice(); const byCol = {}; cols.forEach(c=> byCol[c.key] = []);
