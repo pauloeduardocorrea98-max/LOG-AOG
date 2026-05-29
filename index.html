@@ -461,6 +461,8 @@ function prepareDataCache(){
       }
       if(isConexaoRow(r)){
         out.conexao.push(r);
+        __pushAirId__("conexao", r);
+        __pushSolId__("conexao", r);
       }
       if(isCargasRow(r)){ 
       const airUpper = String(r[AIR_COL] || "").toUpperCase();
@@ -483,7 +485,7 @@ function prepareDataCache(){
     
     if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r); __pushSolId__("tools", r); }
     const logDesc = normalizeText(r.Descricao_logistica || "");
-    if(logDesc.includes("conexao")){
+    if(logDesc.includes("conexao")&&!isConexaoRow(r)){
       out.conexao.push(r); 
       __pushAirId__("conexao", r); 
       __pushSolId__("conexao", r);
