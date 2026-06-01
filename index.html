@@ -736,6 +736,8 @@ function gasCall(fnName, ...args){
   if(fn === "addSharedLink") return jsonpCall({ sharedLinksAdd: 1, name: args[0] || "", url: args[1] || "" });
   if(fn === "deleteSharedLink" || fn === "deleteSharedLinkItem" || fn === "deleteLink") return jsonpCall({ sharedLinksDelete: 1, id: args[0] || "" });
   if(fn === "getLastProgress") return jsonpCall({ progressGet: 1 });
+  if(fn === "getDisputaRecursosState") return jsonpCall({ disputaGet: 1 }, 25000);
+  if(fn === "atualizarDisputaRecursos") return jsonpCall({ disputaUpdate: 1 }, 60000);
   return Promise.reject(new Error("Função não mapeada no GitHub: " + fn));
 }
 
@@ -1274,21 +1276,28 @@ function normalizeDisputaRows(rows){
     .map(normalizeDisputaRow)
     .filter(r => r && (cleanVal(r["ID protegido"]) || cleanVal(r["PN protegido"]) || cleanVal(r["Bloco visual"])));
 }
+function disputaItemsFromResponse_(resp){
+  if(Array.isArray(resp)) return resp;
+  if(resp && resp.ok === false) throw new Error(resp.message || resp.error || "Apps Script retornou erro");
+  if(resp && Array.isArray(resp.items)) return resp.items;
+  if(resp && Array.isArray(resp.rows)) return resp.rows;
+  throw new Error("retorno inválido da API de disputa");
+}
 async function fetchDisputaRows_(){
   const tentativas = [];
+  try{
+    const resp = await gasCall("getDisputaRecursosState");
+    return disputaItemsFromResponse_(resp);
+  }catch(e){ tentativas.push("JSONP disputaGet: " + ((e && e.message) ? e.message : String(e))); }
   if(hasGoogleScriptRun()){
     try{
       const resp = await googleScriptRunCall("getDisputaRecursosState");
-      if(Array.isArray(resp)) return resp;
-      if(resp && resp.ok === false) throw new Error(resp.message || resp.error || "Apps Script retornou erro");
-      if(resp && Array.isArray(resp.items)) return resp.items;
-      if(resp && Array.isArray(resp.rows)) return resp.rows;
-      throw new Error("retorno inválido do Apps Script getDisputaRecursosState");
-    }catch(e){ tentativas.push((e && e.message) ? e.message : String(e)); }
+      return disputaItemsFromResponse_(resp);
+    }catch(e){ tentativas.push("google.script.run: " + ((e && e.message) ? e.message : String(e))); }
   }
   try{
     return await gvizSheetRows(DISPUTA_SHEET_NAME, 25000);
-  }catch(e){ tentativas.push((e && e.message) ? e.message : String(e)); }
+  }catch(e){ tentativas.push("gviz direto: " + ((e && e.message) ? e.message : String(e))); }
   throw new Error(tentativas.join(" | ") || "não foi possível ler DISPUTA DE RECURSOS");
 }
 async function syncDisputaRecursos(forceRender){
@@ -1297,8 +1306,18 @@ async function syncDisputaRecursos(forceRender){
   __disputaError = "";
   try{
     if(forceRender) renderDisputaRecursos();
-    if(forceRender && hasGoogleScriptRun()){
-      try{ await googleScriptRunCall("atualizarDisputaRecursos"); }catch(e){ console.warn("Atualização manual da disputa falhou, tentando ler a aba mesmo assim:", e); }
+    if(forceRender){
+      const errosUpdate = [];
+      try{
+        await gasCall("atualizarDisputaRecursos");
+      }catch(e1){
+        errosUpdate.push("JSONP disputaUpdate: " + ((e1 && e1.message) ? e1.message : String(e1)));
+        if(hasGoogleScriptRun()){
+          try{ await googleScriptRunCall("atualizarDisputaRecursos"); }
+          catch(e2){ errosUpdate.push("google.script.run: " + ((e2 && e2.message) ? e2.message : String(e2))); }
+        }
+      }
+      if(errosUpdate.length) console.warn("Atualização manual da disputa falhou, tentando ler a aba mesmo assim:", errosUpdate.join(" | "));
     }
     const rowsRaw = await fetchDisputaRows_();
     __disputaRows = normalizeDisputaRows(rowsRaw);
@@ -1423,7 +1442,7 @@ function renderDisputaRecursos(){
     return;
   }
   if(__disputaError && total === 0){
-    list.innerHTML = `<div class="disputaEmpty">Não consegui carregar a aba <b>DISPUTA DE RECURSOS</b>.<br>${escapeHtml(__disputaError)}<br><br><b>Correção aplicada:</b> agora o HTML tenta ler primeiro pelo Apps Script <code>getDisputaRecursosState()</code> e só depois tenta leitura direta da planilha.</div>`;
+    list.innerHTML = `<div class="disputaEmpty">Não consegui carregar a aba <b>DISPUTA DE RECURSOS</b>.<br>${escapeHtml(__disputaError)}<br><br><b>Correção necessária:</b> o HTML agora chama primeiro o endpoint JSONP <code>disputaGet=1</code>. Se aparecer erro de retorno inválido, adicione os 2 IFs de disputa no <code>doGet(e)</code> do Code.gs.</div>`;
     return;
   }
   if(rows.length === 0){
