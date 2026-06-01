@@ -122,13 +122,32 @@ let MAJOR_PARTS = [];
 
 // ==========================================
 // 🚨 LISTA DE MAJOR PARTS COMPACTA 🚨
-// Adicionado o D53132010000 por garantia
+// Cole os PNs em UMA ÚNICA LINHA, separados por vírgula.
+// Ex.: "113T6100-89G,113T6100-89SP,D5547100400000 H"
+// O código ignora maiúsculas/minúsculas, hífen, espaço e caracteres especiais.
 // ==========================================
-const MAJOR_PARTS_RAW = "D53132010000, COLE_AQUI_SUA_LISTA_SEPARADA_POR_VIRGULA_TUDO_EM_UMA_LINHA";
+const MAJOR_PARTS_RAW = "D53132010000";
 
-window.__MAJOR_PARTS_CLEAN__ = MAJOR_PARTS_RAW.split(/[\n\r\s,;\/]+/)
-  .map(p => String(p).replace(/[^A-Z0-9]/ig, '').toUpperCase())
-  .filter(p => p !== "" && p !== "PN");
+function normalizeMajorPartPN(v){
+  return String(v || "").replace(/[^A-Z0-9]/ig, "").toUpperCase();
+}
+
+function rebuildMajorPartSet(){
+  window.__MAJOR_PARTS_CLEAN__ = Array.from(new Set((window.__MAJOR_PARTS_CLEAN__ || []).map(normalizeMajorPartPN).filter(p => p !== "" && p !== "PN" && p !== "MAJORPART")));
+  window.__MAJOR_PARTS_SET__ = new Set(window.__MAJOR_PARTS_CLEAN__);
+}
+
+window.__MAJOR_PARTS_CLEAN__ = MAJOR_PARTS_RAW
+  .split(/[\n\r,;]+/)
+  .map(normalizeMajorPartPN)
+  .filter(p => p !== "" && p !== "PN" && p !== "MAJORPART");
+rebuildMajorPartSet();
+
+function isMajorPartPN(pn){
+  const cleanPn = normalizeMajorPartPN(pn);
+  if(!cleanPn) return false;
+  return !!(window.__MAJOR_PARTS_SET__ && window.__MAJOR_PARTS_SET__.has(cleanPn));
+}
 
 
 function puxarMajorPartsDiretoDoSheets() {
@@ -145,11 +164,12 @@ function puxarMajorPartsDiretoDoSheets() {
         if (data && data.table && data.table.rows) {
           
           const sheetParts = data.table.rows
-            .map(r => r.c[0] ? String(r.c[0].v).replace(/[^A-Z0-9]/ig, '').toUpperCase() : "")
+            .map(r => normalizeMajorPartPN(r.c[0] ? r.c[0].v : ""))
             .filter(v => v !== "" && v !== "PN" && v !== "MAJORPART");
             
           // Adiciona os PNs do Google Sheets na lista GLOBAL
           window.__MAJOR_PARTS_CLEAN__ = [...new Set([...window.__MAJOR_PARTS_CLEAN__, ...sheetParts])];
+          rebuildMajorPartSet();
           
           console.log("✅ Major Parts carregadas direto via Google: " + sheetParts.length + " PNs.");
         }
@@ -911,9 +931,8 @@ function renderPrios(tableKey){
     const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : "";
     let marked = ""; try{ if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){ const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){}
     
-    // 🚨 REGRA MAJOR PART NO BALÃO (BUSCA APROXIMADA E LIMPEZA)
-    const cleanPn = String(vPN || "").replace(/[^A-Z0-9]/ig, '').toUpperCase();
-    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.some(mp => mp.length > 2 && (cleanPn.includes(mp) || mp.includes(cleanPn))));
+    // 🚨 REGRA MAJOR PART NO BALÃO
+    const isMajor = isMajorPartPN(vPN);
     const pnDisplay = isMajor ? `<span style="color:#ef4444; font-weight:800;" title="Major Part">🚨 ${escapeHtml(vPN)}</span>` : escapeHtml(vPN);
 
     const card = document.createElement("div"); card.className = "prioCard";
@@ -964,9 +983,8 @@ function renderTable(tableKey){
   html += pageRows.map(r=>{
     const rid = rowId(r); const on = __prioHas__(tableKey, rid); const stCat = statusCategory(r[STATUS_COL]); const sharedTitle = isSharedTable(tableKey) ? "Prioridade compartilhada (todas as abas)" : "Prioridade (somente nesta aba)";
     
-    // 🚨 Detecção de Major Part aproximada 🚨
-    const cleanPn = String(r.PN || "").replace(/[^A-Z0-9]/ig, '').toUpperCase();
-    const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.some(mp => mp.length > 2 && (cleanPn.includes(mp) || mp.includes(cleanPn))));
+    // 🚨 Detecção de Major Part
+    const isMajor = isMajorPartPN(r.PN);
 
     return `<tr data-rid="${escapeHtml(rid)}"><td><button class="bellBtn status-${stCat} ${on ? 'on' : ''}" data-table="${escapeHtml(tableKey)}" data-rid="${escapeHtml(rid)}" type="button" title="${escapeHtml(sharedTitle)}" onclick="togglePrio('${tableKey}','${escapeHtml(rid)}')">🔔</button></td>
       ${cols.map(c=>{
