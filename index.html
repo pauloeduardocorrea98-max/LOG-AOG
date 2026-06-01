@@ -8,6 +8,8 @@
 
 .disputaToolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:10px 0 12px;color:#0f172a}.disputaToolbar .title{font-weight:800;color:#0f172a}.disputaSearch{min-width:280px;flex:1;padding:10px;border:1px solid #e5e7eb;border-radius:10px;outline:none}.disputaSearch:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.18)}.disputaMeta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}.disputaPill{display:inline-flex;align-items:center;gap:6px;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:999px;padding:7px 10px;font-size:12px}.disputaPill b{color:#38bdf8}.disputaList{display:flex;flex-direction:column;gap:10px}.disputaEmpty{background:#ffffff;color:#0f172a;border:1px solid #e5e7eb;border-radius:12px;padding:14px}.disputaCard{background:#ffffff;color:#0f172a;border:1px solid #e5e7eb;border-radius:14px;padding:10px 12px;box-shadow:0 6px 16px rgba(15,23,42,.10)}.disputaCard.pinned{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.14),0 6px 16px rgba(15,23,42,.10)}.disputaCardHead{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}.disputaBell{border:none;background:#0ea5e9;color:#fff;border-radius:9px;padding:6px 8px;cursor:pointer;font-size:12px;line-height:1}.disputaBell.on{background:#f59e0b;color:#111827;box-shadow:0 0 0 3px rgba(245,158,11,.18)}.disputaPn{font-weight:900;font-size:13px;color:#0f172a}.disputaSmall{font-size:12px;color:#64748b}.disputaLine{font-size:12px;line-height:1.45;white-space:nowrap;overflow-x:auto;overflow-y:hidden;padding:8px 10px;border-radius:10px;border:1px solid #e5e7eb;background:#f8fafc;margin-top:6px}.disputaLine.protegido{border-left:4px solid #10b981}.disputaLine.disputando{border-left:4px solid #f59e0b}.disputaLine.acao{border-left:4px solid #ef4444;background:#fff7ed;color:#7c2d12}.disputaLine b{color:#0f172a}.disputaLine::-webkit-scrollbar{height:7px}.disputaLine::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}.disputaRefreshBtn{padding:9px 11px;border:none;background:#0ea5e9;color:#fff;border-radius:10px;cursor:pointer}.disputaRefreshBtn:hover{filter:brightness(.95)}
 
+
+.disputaDate{width:170px;padding:10px;border:1px solid #e5e7eb;border-radius:10px;outline:none;background:#fff;color:#0f172a}.disputaDate:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.18)}.disputaClearBtn{padding:9px 11px;border:none;background:#334155;color:#fff;border-radius:10px;cursor:pointer}.disputaClearBtn:hover{filter:brightness(.95)}.disputaLine .disputaBell{margin-right:8px;vertical-align:middle}.disputaSep{display:inline-block;margin:0 10px;color:#64748b;font-weight:800}.disputaMuted{color:#64748b;font-size:12px}.disputaLine.protegido b{color:#065f46}.disputaLine.disputando b{color:#92400e}
 </style>
 </head>
 <body>
@@ -72,6 +74,8 @@
     <div class="disputaToolbar">
       <div class="title">🤝 Disputas agrupadas por ID protegido</div>
       <input id="disputaFiltro" class="disputaSearch" placeholder="Filtrar por ID, PN, Barcode, Base, Aeronave ou Criticidade..." oninput="renderDisputaRecursos()">
+      <input id="disputaDataFiltro" class="disputaDate" type="date" title="Filtrar disputas por data" onchange="renderDisputaRecursos()">
+      <button class="disputaClearBtn" type="button" onclick="document.getElementById('disputaFiltro').value='';document.getElementById('disputaDataFiltro').value='';renderDisputaRecursos();">Limpar filtros</button>
       <button class="disputaRefreshBtn" type="button" onclick="syncDisputaRecursos(true)">Atualizar Disputa</button>
     </div>
     <div class="disputaMeta" id="disputaMeta"></div>
@@ -1264,7 +1268,76 @@ function disputaPick_(raw, canonical){
   for(const k of keys){ const nk = normHeaderDisputa_(k); if(nk && (nk === cNorm || nk.includes(cNorm) || cNorm.includes(nk))) return raw[k]; }
   return "";
 }
+function disputaObjVal_(o, names){
+  const obj = (o && typeof o === "object") ? o : {};
+  for(const n of names){
+    if(Object.prototype.hasOwnProperty.call(obj, n) && cleanVal(obj[n])) return cleanVal(obj[n]);
+  }
+  const wanted = names.map(normHeaderDisputa_);
+  for(const k of Object.keys(obj)){
+    const nk = normHeaderDisputa_(k);
+    if(wanted.includes(nk) && cleanVal(obj[k])) return cleanVal(obj[k]);
+  }
+  return "";
+}
+function normalizePessoaDisputa_(p){
+  const o = (p && typeof p === "object") ? p : {};
+  const origem = disputaObjVal_(o, ["origem","Origem"]);
+  const destino = disputaObjVal_(o, ["destino","Destino"]);
+  const rota = disputaObjVal_(o, ["rota","Rota"]);
+  return {
+    id: disputaObjVal_(o, ["id","ID","Material_ID","Material ID"]),
+    status: disputaObjVal_(o, ["status","Status","Status_material_ferramenta"]),
+    criticidade: disputaObjVal_(o, ["criticidade","Criticidade","Crítica","Critica"]),
+    base: disputaObjVal_(o, ["base","Base"]),
+    data: disputaObjVal_(o, ["data","Data","Data_da_solicitacao"]),
+    barcode: disputaObjVal_(o, ["barcode","Barcode","BARCODE"]),
+    aeronave: disputaObjVal_(o, ["aeronave","Aeronave","ACFT","Acft"]),
+    pn: disputaObjVal_(o, ["pn","PN","Part Number"]),
+    qtd: disputaObjVal_(o, ["qtd","QTD","qtde","QTDE","Quantidade"]),
+    origem,
+    destino,
+    rota: rota || rotaTxt(origem, destino)
+  };
+}
 function normalizeDisputaRow(raw){
+  if(raw && typeof raw === "object" && (raw.protegido || raw.disputas || raw.disputaTexto || raw.protegidoTexto)){
+    const protegido = normalizePessoaDisputa_(raw.protegido || {});
+    let disputas = [];
+    if(Array.isArray(raw.disputas)) disputas = raw.disputas.map(normalizePessoaDisputa_);
+    else if(raw.disputa) disputas = [normalizePessoaDisputa_(raw.disputa)];
+    disputas = disputas.filter(d => d && (d.id || d.status || d.criticidade || d.base || d.barcode || d.aeronave || d.pn));
+    const out = {};
+    out["ID protegido"] = protegido.id;
+    out["Status protegido"] = protegido.status;
+    out["Criticidade protegido"] = protegido.criticidade;
+    out["Base protegida"] = protegido.base || cleanVal(raw.baseProtegida);
+    out["Data protegido"] = protegido.data;
+    out["Barcode protegido"] = protegido.barcode;
+    out["Aeronave protegida"] = protegido.aeronave;
+    out["PN protegido"] = protegido.pn || cleanVal(raw.pn);
+    out["QTD protegido"] = protegido.qtd;
+    out["Origem protegido"] = protegido.origem;
+    out["Destino protegido"] = protegido.destino;
+    out["ID disputa"] = disputas.map(d=>d.id).filter(Boolean).join(" / ");
+    out["Status disputa"] = disputas.map(d=>d.id && d.status ? `${d.id}: ${d.status}` : d.status).filter(Boolean).join("\n");
+    out["Criticidade disputa"] = disputas.map(d=>d.id && d.criticidade ? `${d.id}: ${d.criticidade}` : d.criticidade).filter(Boolean).join("\n");
+    out["Base disputa"] = disputas.map(d=>d.id && d.base ? `${d.id}: ${d.base}` : d.base).filter(Boolean).join("\n");
+    out["Data disputa"] = disputas.map(d=>d.id && d.data ? `${d.id}: ${d.data}` : d.data).filter(Boolean).join("\n");
+    out["Barcode disputa"] = disputas.map(d=>d.id && d.barcode ? `${d.id}: ${d.barcode}` : d.barcode).filter(Boolean).join("\n");
+    out["Aeronave disputa"] = disputas.map(d=>d.id && d.aeronave ? `${d.id}: ${d.aeronave}` : d.aeronave).filter(Boolean).join("\n");
+    out["PN disputa"] = disputas.map(d=>d.pn).filter(Boolean).join(" / ") || out["PN protegido"];
+    out["QTD disputa"] = disputas.map(d=>d.id && d.qtd ? `${d.id}: ${d.qtd}` : d.qtd).filter(Boolean).join("\n");
+    out["Origem disputa"] = disputas.map(d=>d.id && d.origem ? `${d.id}: ${d.origem}` : d.origem).filter(Boolean).join("\n");
+    out["Destino disputa"] = disputas.map(d=>d.id && d.destino ? `${d.id}: ${d.destino}` : d.destino).filter(Boolean).join("\n");
+    out["Estoque MARD base protegida"] = cleanVal(raw.estoqueMard || raw.estoqueMARD || raw["Estoque MARD base protegida"] || raw["Estoque MARD"] || raw.saldo || raw.Saldo);
+    out["Demandas abertas PN"] = cleanVal(raw.demandasAbertas || raw["Demandas abertas PN"] || raw["Demandas abertas para o PN"] || raw.demandas || raw.Demandas);
+    out["Ação sugerida"] = cleanVal(raw.acao || raw["Ação sugerida"] || raw["Acao sugerida"]) || (out["Base protegida"] ? `Não retirar da base ${out["Base protegida"]} sem validar.` : "Não retirar o material sem validar.");
+    out["Atualizado em"] = cleanVal(raw.updatedAt || raw["Atualizado em"] || raw["Atualizacao"]);
+    out.__protegido = protegido;
+    out.__disputas = disputas;
+    return out;
+  }
   const out = {};
   Object.keys(DISPUTA_ALIASES).forEach(k => out[k] = cleanVal(disputaPick_(raw, k)));
   if(!out["PN disputa"]) out["PN disputa"] = out["PN protegido"];
@@ -1274,7 +1347,7 @@ function normalizeDisputaRow(raw){
 function normalizeDisputaRows(rows){
   return (Array.isArray(rows) ? rows : [])
     .map(normalizeDisputaRow)
-    .filter(r => r && (cleanVal(r["ID protegido"]) || cleanVal(r["PN protegido"]) || cleanVal(r["Bloco visual"])));
+    .filter(r => r && (cleanVal(r["ID protegido"]) || cleanVal(r["PN protegido"]) || (Array.isArray(r.__disputas) && r.__disputas.length) || cleanVal(r["Bloco visual"])));
 }
 function disputaItemsFromResponse_(resp){
   if(Array.isArray(resp)) return resp;
@@ -1337,8 +1410,7 @@ function disputaRowKey(r){
     cleanVal(r["ID protegido"]),
     cleanVal(r["PN protegido"]),
     cleanVal(r["Base protegida"]),
-    cleanVal(r["Data protegido"]),
-    cleanVal(r["ID disputa"])
+    cleanVal(disputaDateOnlyKey_(r["Data protegido"]))
   ].join("__");
 }
 function toggleDisputaPin(key){
@@ -1366,6 +1438,21 @@ function splitDisputaIds(raw){
   return String(raw || "").split(/\s*\/\s*|\n+|,\s*/).map(s=>s.trim()).filter(Boolean);
 }
 function buildDisputaItems(r){
+  if(r && Array.isArray(r.__disputas) && r.__disputas.length){
+    return r.__disputas.map(d=>({
+      id: cleanVal(d.id),
+      status: cleanVal(d.status),
+      criticidade: cleanVal(d.criticidade),
+      base: cleanVal(d.base),
+      data: cleanVal(d.data),
+      barcode: cleanVal(d.barcode),
+      aeronave: cleanVal(d.aeronave),
+      pn: cleanVal(d.pn || r["PN protegido"]),
+      qtd: cleanVal(d.qtd),
+      origem: cleanVal(d.origem),
+      destino: cleanVal(d.destino)
+    })).filter(d => d.id || d.status || d.criticidade || d.base || d.barcode || d.aeronave || d.pn);
+  }
   const ids = splitDisputaIds(r["ID disputa"]);
   if(!ids.length && cleanVal(r["ID disputa"])) ids.push(cleanVal(r["ID disputa"]));
   const status = parseDisputaField(r["Status disputa"]);
@@ -1396,6 +1483,43 @@ function rotaTxt(o,d){
   if(oo && dd) return `${oo}→${dd}`;
   return oo || dd || "";
 }
+function disputaDateOnlyKey_(v){
+  const s = String(v || "").trim();
+  if(!s) return "";
+  let m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m) return `${m[3]}-${m[2]}-${m[1]}`;
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return `${m[1]}-${m[2]}-${m[3]}`;
+  const d = parseMaybeDate(s);
+  if(d && !isNaN(d.getTime())){
+    const pad = n => String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+  return "";
+}
+function disputaRowMatchesDate_(r, iso){
+  const wanted = String(iso || "").trim();
+  if(!wanted) return true;
+  if(disputaDateOnlyKey_(r["Data protegido"]) === wanted) return true;
+  const items = buildDisputaItems(r);
+  return items.some(d => disputaDateOnlyKey_(d.data) === wanted);
+}
+function disputaPessoaLineHtml_(label, p){
+  const pessoa = p || {};
+  const rt = rotaTxt(pessoa.origem, pessoa.destino);
+  const parts = [`<b>${escapeHtml(label)}:</b>`];
+  if(cleanVal(pessoa.id)) parts.push(escapeHtml(pessoa.id));
+  if(cleanVal(pessoa.status)) parts.push(escapeHtml(pessoa.status));
+  if(cleanVal(pessoa.criticidade)) parts.push(escapeHtml(pessoa.criticidade));
+  if(cleanVal(pessoa.base)) parts.push(escapeHtml(pessoa.base));
+  if(cleanVal(pessoa.data)) parts.push(escapeHtml(pessoa.data));
+  if(cleanVal(pessoa.barcode)) parts.push(escapeHtml(pessoa.barcode));
+  if(cleanVal(pessoa.aeronave)) parts.push(escapeHtml(pessoa.aeronave));
+  if(cleanVal(pessoa.pn)) parts.push(`PN ${escapeHtml(pessoa.pn)}`);
+  if(cleanVal(pessoa.qtd)) parts.push(`QTD ${escapeHtml(pessoa.qtd)}`);
+  if(cleanVal(rt)) parts.push(escapeHtml(rt));
+  return parts.join(" / ");
+}
 function disputaBuscaText(r){
   const items = buildDisputaItems(r);
   return [
@@ -1410,11 +1534,16 @@ function renderDisputaRecursos(){
   if(!meta || !list) return;
 
   const filtroEl = document.getElementById("disputaFiltro");
+  const dataEl = document.getElementById("disputaDataFiltro");
   const filtro = normalizeText(filtroEl ? filtroEl.value : "");
+  const dataFiltro = dataEl ? String(dataEl.value || "").trim() : "";
   let rows = (__disputaRows || []).slice();
 
   if(filtro){
     rows = rows.filter(r => normalizeText(disputaBuscaText(r)).includes(filtro));
+  }
+  if(dataFiltro){
+    rows = rows.filter(r => disputaRowMatchesDate_(r, dataFiltro));
   }
 
   rows.sort((a,b)=>{
@@ -1422,7 +1551,10 @@ function renderDisputaRecursos(){
     const pa = __disputaPins.has(ka) ? 0 : 1;
     const pb = __disputaPins.has(kb) ? 0 : 1;
     if(pa !== pb) return pa - pb;
-    return String(a["PN protegido"] || "").localeCompare(String(b["PN protegido"] || "")) || String(a["ID protegido"] || "").localeCompare(String(b["ID protegido"] || ""));
+    const da = disputaDateOnlyKey_(a["Data protegido"]);
+    const db = disputaDateOnlyKey_(b["Data protegido"]);
+    if(da !== db) return String(db).localeCompare(String(da));
+    return String(a["ID protegido"] || "").localeCompare(String(b["ID protegido"] || "")) || String(a["PN protegido"] || "").localeCompare(String(b["PN protegido"] || ""));
   });
 
   const total = (__disputaRows || []).length;
@@ -1432,6 +1564,7 @@ function renderDisputaRecursos(){
     `<span class="disputaPill">Total: <b>${total}</b></span>`,
     `<span class="disputaPill">PNs: <b>${pns}</b></span>`,
     `<span class="disputaPill">Exibindo: <b>${rows.length}</b></span>`,
+    dataFiltro ? `<span class="disputaPill">Data filtrada: <b>${escapeHtml(dataFiltro.split("-").reverse().join("/"))}</b></span>` : "",
     `<span class="disputaPill">Última leitura: <b>${escapeHtml(ult)}</b></span>`,
     __disputaLoading ? `<span class="disputaPill">Estado: <b>Carregando…</b></span>` : "",
     __disputaError ? `<span class="disputaPill">Erro: <b>${escapeHtml(__disputaError)}</b></span>` : ""
@@ -1442,7 +1575,7 @@ function renderDisputaRecursos(){
     return;
   }
   if(__disputaError && total === 0){
-    list.innerHTML = `<div class="disputaEmpty">Não consegui carregar a aba <b>DISPUTA DE RECURSOS</b>.<br>${escapeHtml(__disputaError)}<br><br><b>Correção necessária:</b> o HTML agora chama primeiro o endpoint JSONP <code>disputaGet=1</code>. Se aparecer erro de retorno inválido, adicione os 2 IFs de disputa no <code>doGet(e)</code> do Code.gs.</div>`;
+    list.innerHTML = `<div class="disputaEmpty">Não consegui carregar a aba <b>DISPUTA DE RECURSOS</b>.<br>${escapeHtml(__disputaError)}</div>`;
     return;
   }
   if(rows.length === 0){
@@ -1450,59 +1583,39 @@ function renderDisputaRecursos(){
     return;
   }
 
-  list.innerHTML = rows.slice(0, 250).map(r=>{
+  list.innerHTML = rows.slice(0, 300).map(r=>{
     const key = disputaRowKey(r);
     const pinned = __disputaPins.has(key);
-    const pn = cleanVal(r["PN protegido"]);
-    const protRota = rotaTxt(r["Origem protegido"], r["Destino protegido"]);
-    const protegido = [
-      `<b>Protegido:</b>`,
-      escapeHtml(r["ID protegido"]),
-      escapeHtml(r["Status protegido"]),
-      escapeHtml(r["Criticidade protegido"]),
-      escapeHtml(r["Base protegida"]),
-      escapeHtml(r["Data protegido"]),
-      escapeHtml(r["Barcode protegido"]),
-      escapeHtml(r["Aeronave protegida"]),
-      `PN ${escapeHtml(pn)}`,
-      `QTD ${escapeHtml(r["QTD protegido"])}`,
-      escapeHtml(protRota)
-    ].filter(Boolean).join(" / ");
-
+    const protegidoObj = (r.__protegido && typeof r.__protegido === "object") ? r.__protegido : {
+      id: r["ID protegido"],
+      status: r["Status protegido"],
+      criticidade: r["Criticidade protegido"],
+      base: r["Base protegida"],
+      data: r["Data protegido"],
+      barcode: r["Barcode protegido"],
+      aeronave: r["Aeronave protegida"],
+      pn: r["PN protegido"],
+      qtd: r["QTD protegido"],
+      origem: r["Origem protegido"],
+      destino: r["Destino protegido"]
+    };
     const disputas = buildDisputaItems(r);
-    const disputaLinha = disputas.map(d=>{
-      const rt = rotaTxt(d.origem, d.destino);
-      return [
-        escapeHtml(d.id),
-        escapeHtml(d.status),
-        escapeHtml(d.criticidade),
-        escapeHtml(d.base),
-        escapeHtml(d.data),
-        escapeHtml(d.barcode),
-        escapeHtml(d.aeronave),
-        `PN ${escapeHtml(d.pn)}`,
-        `QTD ${escapeHtml(d.qtd)}`,
-        escapeHtml(rt)
-      ].filter(Boolean).join(" / ");
-    }).join("  ||  ");
-
-    const baseProt = cleanVal(r["Base protegida"]);
+    const baseProt = cleanVal(r["Base protegida"] || protegidoObj.base);
     const saldo = cleanVal(r["Estoque MARD base protegida"]);
     const demandas = cleanVal(r["Demandas abertas PN"]);
     const acao = cleanVal(r["Ação sugerida"]) || (baseProt ? `Não retirar da base ${baseProt} sem validar.` : "Validar antes de retirar material.");
+    const protegidoLinha = disputaPessoaLineHtml_("Protegido", protegidoObj);
+    const disputaLinha = disputas.length
+      ? disputas.map(d => disputaPessoaLineHtml_("Disputa", d)).join(`<span class="disputaSep">||</span>`)
+      : `<b>Disputa:</b> ${escapeHtml(r["ID disputa"] || "—")}`;
     return `<div class="disputaCard ${pinned ? "pinned" : ""}">
-      <div class="disputaCardHead">
-        <button class="disputaBell ${pinned ? "on" : ""}" type="button" title="Sinalizar disputa" onclick="toggleDisputaPin('${escapeHtml(key)}')">🔔</button>
-        <div class="disputaPn">🤝 PN ${escapeHtml(pn || "—")}</div>
-        <div class="disputaSmall">Protegido ${escapeHtml(r["ID protegido"] || "—")} • Disputa ${escapeHtml(r["ID disputa"] || "—")}</div>
-      </div>
-      <div class="disputaLine protegido">${protegido}</div>
-      <div class="disputaLine disputando"><b>Disputa:</b> ${disputaLinha || escapeHtml(r["ID disputa"] || "")}</div>
+      <div class="disputaLine protegido"><button class="disputaBell ${pinned ? "on" : ""}" type="button" title="Sinalizar disputa" onclick="toggleDisputaPin('${escapeHtml(key)}')">🔔</button>🤝 ${protegidoLinha}</div>
+      <div class="disputaLine disputando">${disputaLinha}</div>
       <div class="disputaLine acao"><b>Estoque MARD em ${escapeHtml(baseProt || "—")}:</b> ${escapeHtml(saldo || "0")} | <b>Demandas:</b> ${escapeHtml(demandas || "—")} | ${escapeHtml(acao)}</div>
     </div>`;
   }).join("");
-  if(rows.length > 250){
-    list.innerHTML += `<div class="disputaEmpty">Mostrando 250 de ${rows.length}. Use o filtro para refinar.</div>`;
+  if(rows.length > 300){
+    list.innerHTML += `<div class="disputaEmpty">Mostrando 300 de ${rows.length}. Use o filtro ou a data para refinar.</div>`;
   }
 }
 
