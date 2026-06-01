@@ -1421,36 +1421,82 @@ function toggleDisputaPin(key){
   renderDisputaRecursos();
 }
 function stripDisputaIdPrefix_(value, id){
-  let s = cleanVal(value);
-  const ident = cleanVal(id);
+  let s = cleanVal(value)
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\u00A0/g, " ")
+    .trim();
+  const ident = cleanVal(id).replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
   if(!s || !ident) return s;
   const esc = ident.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  for(let i=0;i<8;i++){
+  for(let i=0;i<20;i++){
     const before = s;
     s = s
-      .replace(new RegExp("^\\s*(?:ID\\s*)?" + esc + "\\s*[:\\-]\\s*", "i"), "")
+      .replace(new RegExp("^\\s*(?:ID\\s*)?" + esc + "\\s*[:\\-–—]\\s*", "i"), "")
       .replace(new RegExp("^\\s*(?:ID\\s*)?" + esc + "\\s*\\/\\s*", "i"), "")
+      .replace(new RegExp("^\\s*(?:ID\\s*)?" + esc + "\\s+", "i"), "")
       .trim();
     if(s === before) break;
   }
   return s;
 }
+function stripDisputaIdEverywhere_(value, id){
+  let s = stripDisputaIdPrefix_(value, id);
+  const ident = cleanVal(id);
+  if(!s || !ident) return s;
+  const esc = ident.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  for(let i=0;i<12;i++){
+    const before = s;
+    s = s
+      .replace(new RegExp("(^|[\\s\\/|→>-])(?:ID\\s*)?" + esc + "\\s*[:\\-–—]\\s*", "gi"), "$1")
+      .replace(new RegExp("(^|[\\s\\/|→>-])(?:ID\\s*)?" + esc + "\\s+", "gi"), "$1")
+      .replace(/\s{2,}/g, " ")
+      .replace(/\s*→\s*/g, "→")
+      .replace(/^\s*[\/|]\s*/, "")
+      .trim();
+    if(s === before) break;
+  }
+  return s;
+}
+function extractDisputaValueById_(raw, id){
+  const txt = String(raw || "")
+    .replace(/\r/g, "\n")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\u00A0/g, " ");
+  const ident = cleanVal(id);
+  if(!txt || !ident) return "";
+  const esc = ident.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp("(?:^|[\\n\\/|])\\s*(?:ID\\s*)?" + esc + "\\s*[:\\-–—]\\s*([\\s\\S]*?)(?=(?:[\\n\\/|]\\s*(?:ID\\s*)?[^:\\n\/|]{1,80}\\s*[:\\-–—])|$)", "i");
+  const m = txt.match(re);
+  if(!m) return "";
+  return stripDisputaIdEverywhere_(m[1], ident);
+}
 function parseDisputaField(raw){
   const txt = String(raw || "").trim();
   if(!txt) return {};
   const map = {};
-  txt
+  const normalized = txt
     .replace(/\r/g, "\n")
-    .replace(/\s+(?:-\/-|\/|\|\|)\s+(?=(?:ID\s*)?[^:\n]{1,80}:\s*)/gi, "\n")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\u00A0/g, " ")
+    .replace(/\s+(?:-\/-|\|\|)\s+/g, "\n");
+  const re = /(?:^|[\n\/|])\s*(?:ID\s*)?([^:\n\/|]{1,80})\s*[:\-–—]\s*([\s\S]*?)(?=(?:[\n\/|]\s*(?:ID\s*)?[^:\n\/|]{1,80}\s*[:\-–—])|$)/gi;
+  let m;
+  while((m = re.exec(normalized)) !== null){
+    const k = cleanVal(m[1]).replace(/^ID\s+/i, "");
+    const v = stripDisputaIdEverywhere_(m[2], k);
+    if(k && v) map[k] = v;
+  }
+  if(Object.keys(map).length) return map;
+  normalized
     .split(/\n+/)
     .map(s=>s.trim())
     .filter(Boolean)
     .forEach(line=>{
-      const m = line.match(/^(?:ID\s*)?([^:]{1,80}):\s*(.*)$/i);
-      if(m){
-        const k = cleanVal(m[1]);
-        const v = cleanVal(m[2]);
-        if(k) map[k] = stripDisputaIdPrefix_(v, k);
+      const mm = line.match(/^(?:ID\s*)?([^:]{1,80}):\s*(.*)$/i);
+      if(mm){
+        const k = cleanVal(mm[1]).replace(/^ID\s+/i, "");
+        const v = stripDisputaIdEverywhere_(mm[2], k);
+        if(k) map[k] = v;
       }
     });
   return map;
@@ -1458,33 +1504,42 @@ function parseDisputaField(raw){
 function getDisputaValue(map, id, fallback){
   const ident = cleanVal(id);
   if(map && ident){
-    if(Object.prototype.hasOwnProperty.call(map, ident)) return stripDisputaIdPrefix_(map[ident], ident);
+    if(Object.prototype.hasOwnProperty.call(map, ident)) return stripDisputaIdEverywhere_(map[ident], ident);
     const wanted = normalizeText(ident);
     for(const k of Object.keys(map)){
-      if(normalizeText(k) === wanted) return stripDisputaIdPrefix_(map[k], ident);
+      if(normalizeText(k) === wanted) return stripDisputaIdEverywhere_(map[k], ident);
     }
   }
-  return stripDisputaIdPrefix_(fallback || "", ident);
+  const direct = extractDisputaValueById_(fallback || "", ident);
+  if(direct) return direct;
+  return stripDisputaIdEverywhere_(fallback || "", ident);
 }
 function splitDisputaIds(raw){
-  const seen = new Set();
-  return String(raw || "")
+  const text = String(raw || "")
     .replace(/\r/g,"\n")
-    .split(/\s*\/\s*|\n+|,\s*/ )
-    .map(s=>s.replace(/:.*/,"").replace(/^ID\s+/i,"").trim())
-    .filter(Boolean)
-    .filter(id=>{
-      const k = normalizeText(id);
-      if(!k || seen.has(k)) return false;
-      seen.add(k);
-      return true;
-    });
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .trim();
+  const seen = new Set();
+  const out = [];
+  const add = (id)=>{
+    const clean = cleanVal(id).replace(/:.*/,"").replace(/^ID\s+/i,"").trim();
+    const k = normalizeText(clean);
+    if(!clean || !k || seen.has(k)) return;
+    seen.add(k); out.push(clean);
+  };
+  const re = /(?:^|[\n\/|,])\s*(?:ID\s*)?([A-Z0-9._-]{3,})\s*(?=[:\-–—\/|,\n]|$)/gi;
+  let m;
+  while((m = re.exec(text)) !== null) add(m[1]);
+  if(!out.length){
+    text.split(/\s*\/\s*|\n+|,\s*/).forEach(add);
+  }
+  return out;
 }
 function buildDisputaItems(r){
   if(r && Array.isArray(r.__disputas) && r.__disputas.length){
     return r.__disputas.map(d=>{
       const id = cleanVal(d.id);
-      const limpa = v => stripDisputaIdPrefix_(v, id);
+      const limpa = v => stripDisputaIdEverywhere_(v, id);
       return {
         id,
         status: cleanVal(limpa(d.status)),
@@ -1524,8 +1579,9 @@ function buildDisputaItems(r){
     qtd: getDisputaValue(qtd, id, r["QTD disputa"]),
     origem: getDisputaValue(origem, id, r["Origem disputa"]),
     destino: getDisputaValue(destino, id, r["Destino disputa"])
-  }));
+  })).filter(d => d.id || d.status || d.criticidade || d.base || d.barcode || d.aeronave || d.pn);
 }
+
 function rotaTxt(o,d){
   const oo = cleanVal(o); const dd = cleanVal(d);
   if(oo && dd) return `${oo}→${dd}`;
@@ -1555,8 +1611,10 @@ function disputaRowMatchesDate_(r, iso){
 function disputaPessoaLineHtml_(label, p){
   const pessoa = p || {};
   const id = cleanVal(pessoa.id);
-  const limpa = v => stripDisputaIdPrefix_(v, id);
-  const rt = rotaTxt(limpa(pessoa.origem), limpa(pessoa.destino));
+  const limpa = v => stripDisputaIdEverywhere_(v, id);
+  const origem = limpa(pessoa.origem);
+  const destino = limpa(pessoa.destino);
+  const rt = rotaTxt(origem, destino);
   const parts = [`<b>${escapeHtml(label)}:</b>`];
   if(id) parts.push(escapeHtml(id));
   if(cleanVal(limpa(pessoa.status))) parts.push(escapeHtml(limpa(pessoa.status)));
@@ -1570,6 +1628,7 @@ function disputaPessoaLineHtml_(label, p){
   if(cleanVal(rt)) parts.push(escapeHtml(rt));
   return parts.join(" / ");
 }
+
 function disputaBuscaText(r){
   const items = buildDisputaItems(r);
   return [
