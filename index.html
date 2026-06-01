@@ -1069,7 +1069,7 @@ function paintRefreshInfo(){
 
 function rerenderAll(opts){
   const onlyActive = !!(opts && opts.onlyActive); prepareDataCache(); __lastUpdateDate = computeLastUpdateFromData();
-  if(onlyActive){ const active = document.querySelector(".section.active"); const tk = active ? tableKeysBySection[active.id] : null; if(tk){ renderAircraftBox(tk); renderSolBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); } renderLinksUteis(); }
+  if(onlyActive){ const active = document.querySelector(".section.active"); const tk = active ? tableKeysBySection[active.id] : null; if(tk){ renderAircraftBox(tk); renderSolBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); } else if(active && active.id === "disputa"){ renderDisputaRecursos(); clearDirty("disputa"); } renderLinksUteis(); }
   else{ for(const tk of SHARED_TABLE_KEYS){ renderAircraftBox(tk); renderSolBox(tk); renderPrios(tk); renderTable(tk); clearDirty(tk); } renderLinksUteis(); }
   const st = document.getElementById("status"); if(st && __ADMIN_MODE){ st.innerHTML = makeStatusHtml(`✅ Dados carregados. Total: ${dados.length} | ESC limpa filtros | 📝 OBS salva no ENTER`); }
   paintUpdateInfo(); paintRefreshInfo(); updateStatusVisibility();
@@ -1247,7 +1247,7 @@ const DISPUTA_ALIASES = {
   "Base protegida": ["Base protegida","Base protegido","Base"],
   "Data protegido": ["Data protegido","Data protegida","Data_da_solicitacao protegido","Data"],
   "Barcode protegido": ["Barcode protegido","Barcode 1","BARCODE 1"],
-  "Aeronave protegida": ["Aeronave protegida","Aeronave protegido","Aeronave B1","ACFT protegido","ACFT protegida","ACFT B1","ACFT PROTEGIDO","Aircraft protegido","Aircraft protegida","Aircraft B1","Aeronave","ACFT","Aircraft"],
+  "Aeronave protegida": ["Aeronave protegida","Aeronave protegido","Aeronave_protegida","Aeronave_protegido","Aeronave B1","ACFT protegido","ACFT protegida","ACFT_protegido","ACFT_protegida","ACFT B1","ACFT PROTEGIDO","Aircraft protegido","Aircraft protegida","Aircraft B1","aeronaveProtegida","aeronaveProtegido","acftProtegido","acftProtegida","acftB1","aircraftProtegido","aircraftProtegida","Aeronave","ACFT","Aircraft"],
   "PN protegido": ["PN protegido","PN","Material protegido"],
   "QTD protegido": ["QTD protegido","QTDE protegido","QTD - SOLICITADA B1","QTD"],
   "Origem protegido": ["Origem protegido","Origem protegida","Origem"],
@@ -1620,6 +1620,54 @@ function disputaRowMatchesDate_(r, iso){
   const items = buildDisputaItems(r);
   return items.some(d => disputaDateOnlyKey_(d.data) === wanted);
 }
+function pickAircraftFromBaseRow_(baseRow){
+  try{
+    if(!baseRow) return "";
+    return cleanVal(baseRow[AIR_COL] ?? baseRow.Aeronave ?? baseRow.ACFT ?? baseRow.Acft ?? baseRow.Aircraft ?? baseRow.aircraft ?? baseRow["ACFT"] ?? baseRow["Aircraft"]);
+  }catch(e){ return ""; }
+}
+function findAeronaveProtegidaFromDados_(row, rawProtegido){
+  try{
+    const arr = Array.isArray(dados) ? dados : [];
+    if(!arr.length) return "";
+    const raw = (rawProtegido && typeof rawProtegido === "object") ? rawProtegido : {};
+    const id = cleanVal(raw.id || raw.ID || raw.Material_ID || row["ID protegido"] || row["Material_ID protegido"]);
+    const barcode = cleanVal(raw.barcode || raw.Barcode || row["Barcode protegido"]);
+    const pn = cleanVal(raw.pn || raw.PN || row["PN protegido"]);
+    const base = cleanVal(raw.base || raw.Base || row["Base protegida"]);
+    const dataKey = disputaDateOnlyKey_(raw.data || raw.Data || row["Data protegido"]);
+    const idNorm = normalizeText(id);
+    if(idNorm){
+      for(const br of arr){
+        const brId = normalizeText(cleanVal(br && (br.Material_ID ?? br["Material_ID"] ?? br["Material ID"] ?? br.ID ?? br.id)));
+        if(brId && brId === idNorm){
+          const a = pickAircraftFromBaseRow_(br);
+          if(a) return a;
+        }
+      }
+    }
+    const barcodeNorm = normalizeText(barcode);
+    const pnNorm = normalizeText(pn);
+    const baseNorm = normalizeText(base);
+    if(barcodeNorm || pnNorm){
+      for(const br of arr){
+        const brBarcode = normalizeText(cleanVal(br && (br.Barcode ?? br.BARCODE ?? br.barcode)));
+        const brPn = normalizeText(cleanVal(br && (br.PN ?? br.pn ?? br["Part Number"])));
+        const brBase = normalizeText(cleanVal(br && (br.Base ?? br.base)));
+        const brDateKey = disputaDateOnlyKey_(br && (br.Data_da_solicitacao ?? br["Data_da_solicitacao"] ?? br.Data ?? br.data));
+        const okBarcode = barcodeNorm && brBarcode && brBarcode === barcodeNorm;
+        const okPn = pnNorm && brPn && brPn === pnNorm;
+        const okBase = !baseNorm || !brBase || brBase === baseNorm;
+        const okDate = !dataKey || !brDateKey || brDateKey === dataKey;
+        if((okBarcode || (okPn && okBase && okDate)) && okDate){
+          const a = pickAircraftFromBaseRow_(br);
+          if(a) return a;
+        }
+      }
+    }
+  }catch(e){}
+  return "";
+}
 function disputaPessoaLineHtml_(label, p){
   const pessoa = p || {};
   const id = cleanVal(pessoa.id);
@@ -1715,7 +1763,7 @@ function renderDisputaRecursos(){
       base: cleanVal(rawProtegido.base) || cleanVal(r["Base protegida"]),
       data: cleanVal(rawProtegido.data) || cleanVal(r["Data protegido"]),
       barcode: cleanVal(rawProtegido.barcode) || cleanVal(r["Barcode protegido"]),
-      aeronave: cleanVal(rawProtegido.aeronave) || disputaObjVal_(rawProtegido, ["Aeronave protegida","Aeronave protegido","Aeronave B1","ACFT protegido","ACFT protegida","ACFT B1","ACFT","Aircraft","aeronaveProtegida","aeronaveProtegido","acftProtegido","acftB1","aircraftProtegido"]) || cleanVal(r["Aeronave protegida"]),
+      aeronave: cleanVal(rawProtegido.aeronave) || disputaObjVal_(rawProtegido, ["Aeronave protegida","Aeronave protegido","Aeronave_protegida","Aeronave_protegido","Aeronave B1","ACFT protegido","ACFT protegida","ACFT_protegido","ACFT_protegida","ACFT B1","ACFT","Aircraft","aeronaveProtegida","aeronaveProtegido","acftProtegido","acftProtegida","acftB1","aircraftProtegido","aircraftProtegida"]) || cleanVal(r["Aeronave protegida"]) || findAeronaveProtegidaFromDados_(r, rawProtegido),
       pn: cleanVal(rawProtegido.pn) || cleanVal(r["PN protegido"]),
       qtd: cleanVal(rawProtegido.qtd) || cleanVal(r["QTD protegido"]),
       origem: cleanVal(rawProtegido.origem) || cleanVal(r["Origem protegido"]),
