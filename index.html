@@ -29,7 +29,7 @@
     <button onclick="openTab('cargo',this)">📦 Cargo Heroes</button>
     <button onclick="openTab('mro',this)">🧰 MRO</button>
     <button onclick="openTab('acompanhamento',this)">📍 Acompanhamento</button>
-    <button onclick="openTab('disputa',this)">🔔 Disputa de Recurso</button>
+    <button onclick="openTab('disputa',this)">🤝 Disputa de Recurso</button>
     <button onclick="openTab('conexao',this)">🔀 Conexão</button>
     <button onclick="openTab('cargas',this)">🚚 Cargas</button>
     <button onclick="openTab('hotlist',this)">🔥 Hot List</button>
@@ -70,7 +70,7 @@
   <div id="disputa" class="section">
     <h1>Disputa de Recurso</h1>
     <div class="disputaToolbar">
-      <div class="title">🔔 Disputas agrupadas por ID protegido</div>
+      <div class="title">🤝 Disputas agrupadas por ID protegido</div>
       <input id="disputaFiltro" class="disputaSearch" placeholder="Filtrar por ID, PN, Barcode, Base, Aeronave ou Criticidade..." oninput="renderDisputaRecursos()">
       <button class="disputaRefreshBtn" type="button" onclick="syncDisputaRecursos(true)">Atualizar Disputa</button>
     </div>
@@ -1163,6 +1163,17 @@ let __disputaLoading = false;
 let __disputaPins = new Set(JSON.parse(localStorage.getItem(DISPUTA_PIN_STORE_KEY) || "[]"));
 
 function saveDisputaPins(){ try{ localStorage.setItem(DISPUTA_PIN_STORE_KEY, JSON.stringify(Array.from(__disputaPins || []))); }catch(e){} }
+function hasGoogleScriptRun(){ try{ return !!(window.google && google.script && google.script.run); }catch(e){ return false; } }
+function googleScriptRunCall(fnName, ...args){
+  return new Promise((resolve, reject)=>{
+    try{
+      if(!hasGoogleScriptRun()) return reject(new Error("google.script.run indisponível"));
+      const runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+      if(typeof runner[fnName] !== "function") return reject(new Error("Função Apps Script não encontrada: " + fnName));
+      runner[fnName](...args);
+    }catch(e){ reject(e); }
+  });
+}
 function disputaCellText(cell){
   if(!cell) return "";
   if(cell.f != null) return String(cell.f);
@@ -1183,12 +1194,23 @@ function gvizSheetRows(sheetName, timeoutMs){
       done = true; cleanup();
       try{
         if(!data || !data.table) throw new Error("retorno inválido da aba " + sheetName);
-        const labels = (data.table.cols || []).map((c,i)=> String((c && (c.label || c.id)) || ("COL" + (i+1))).trim());
-        const rows = (data.table.rows || []).map(r=>{
+        let labels = (data.table.cols || []).map((c,i)=> String((c && (c.label || c.id)) || ("COL" + (i+1))).trim());
+        let rows = (data.table.rows || []).map(r=>{
           const obj = {};
           (r.c || []).forEach((cell,i)=>{ obj[labels[i] || ("COL" + (i+1))] = disputaCellText(cell); });
           return obj;
         });
+        const temCabecalho = labels.some(l => normalizeText(l).includes("idprotegido") || normalizeText(l).includes("pnprotegido"));
+        if(!temCabecalho && rows.length){
+          const firstVals = Object.keys(rows[0]).sort((a,b)=>Number(a.replace(/\D/g,""))-Number(b.replace(/\D/g,""))).map(k=>rows[0][k]);
+          if(firstVals.some(v => normalizeText(v).includes("idprotegido") || normalizeText(v).includes("pnprotegido"))){
+            labels = firstVals.map((v,i)=> String(v || ("COL" + (i+1))).trim());
+            rows = rows.slice(1).map(old=>{
+              const vals = Object.keys(old).sort((a,b)=>Number(a.replace(/\D/g,""))-Number(b.replace(/\D/g,""))).map(k=>old[k]);
+              const obj = {}; vals.forEach((v,i)=> obj[labels[i] || ("COL" + (i+1))] = v); return obj;
+            });
+          }
+        }
         resolve(rows);
       }catch(e){ reject(e); }
     };
@@ -1199,14 +1221,87 @@ function gvizSheetRows(sheetName, timeoutMs){
     document.head.appendChild(script);
   });
 }
+function normHeaderDisputa_(v){ return normalizeText(String(v || "").replace(/[🔔🤝]/g,"")); }
+const DISPUTA_ALIASES = {
+  "ID protegido": ["ID protegido","ID principal protegido","Material_ID protegido","ID PRINCIPAL","ID protegido ","ID_PROTEGIDO"],
+  "Status protegido": ["Status protegido","Status material protegido","Status_material_ferramenta protegido","Status"],
+  "Criticidade protegido": ["Criticidade protegido","Criticidade protegida","Criticidade"],
+  "Base protegida": ["Base protegida","Base protegido","Base"],
+  "Data protegido": ["Data protegido","Data protegida","Data_da_solicitacao protegido","Data"],
+  "Barcode protegido": ["Barcode protegido","Barcode 1","BARCODE 1"],
+  "Aeronave protegida": ["Aeronave protegida","ACFT protegido","ACFT B1","Aeronave"],
+  "PN protegido": ["PN protegido","PN","Material protegido"],
+  "QTD protegido": ["QTD protegido","QTDE protegido","QTD - SOLICITADA B1","QTD"],
+  "Origem protegido": ["Origem protegido","Origem protegida","Origem"],
+  "Destino protegido": ["Destino protegido","Destino protegida","Destino"],
+  "ID disputa": ["ID disputa","ID em disputa","IDs disputa","ID DISPUTA"],
+  "Status disputa": ["Status disputa","Status material disputa"],
+  "Criticidade disputa": ["Criticidade disputa"],
+  "Base disputa": ["Base disputa"],
+  "Data disputa": ["Data disputa","Data_da_solicitacao disputa"],
+  "Barcode disputa": ["Barcode disputa","Barcode 2","BARCODE 2"],
+  "Aeronave disputa": ["Aeronave disputa","ACFT disputa","ACFT B2"],
+  "PN disputa": ["PN disputa"],
+  "QTD disputa": ["QTD disputa","QTDE disputa","QTD - SOLICITADA B2"],
+  "Origem disputa": ["Origem disputa"],
+  "Destino disputa": ["Destino disputa"],
+  "Estoque MARD base protegida": ["Estoque MARD base protegida","Estoque MARD","Saldo MARD","Saldo"],
+  "Demandas abertas PN": ["Demandas abertas PN","Demandas abertas para o PN","Demandas","Total demandas"],
+  "Ação sugerida": ["Ação sugerida","Acao sugerida","Ação","Acao"],
+  "Bloco visual": ["Bloco visual","Resumo visual"],
+  "Atualizado em": ["Atualizado em","Atualização","Atualizacao"]
+};
+function disputaPick_(raw, canonical){
+  if(!raw) return "";
+  if(Object.prototype.hasOwnProperty.call(raw, canonical)) return raw[canonical];
+  const alias = DISPUTA_ALIASES[canonical] || [canonical];
+  const want = new Set(alias.map(normHeaderDisputa_));
+  const keys = Object.keys(raw);
+  for(const k of keys){ if(want.has(normHeaderDisputa_(k))) return raw[k]; }
+  const cNorm = normHeaderDisputa_(canonical);
+  for(const k of keys){ const nk = normHeaderDisputa_(k); if(nk && (nk === cNorm || nk.includes(cNorm) || cNorm.includes(nk))) return raw[k]; }
+  return "";
+}
+function normalizeDisputaRow(raw){
+  const out = {};
+  Object.keys(DISPUTA_ALIASES).forEach(k => out[k] = cleanVal(disputaPick_(raw, k)));
+  if(!out["PN disputa"]) out["PN disputa"] = out["PN protegido"];
+  if(!out["Ação sugerida"] && out["Base protegida"]) out["Ação sugerida"] = `Não retirar da base ${out["Base protegida"]} sem validar.`;
+  return out;
+}
+function normalizeDisputaRows(rows){
+  return (Array.isArray(rows) ? rows : [])
+    .map(normalizeDisputaRow)
+    .filter(r => r && (cleanVal(r["ID protegido"]) || cleanVal(r["PN protegido"]) || cleanVal(r["Bloco visual"])));
+}
+async function fetchDisputaRows_(){
+  const tentativas = [];
+  if(hasGoogleScriptRun()){
+    try{
+      const resp = await googleScriptRunCall("getDisputaRecursosState");
+      if(Array.isArray(resp)) return resp;
+      if(resp && resp.ok === false) throw new Error(resp.message || resp.error || "Apps Script retornou erro");
+      if(resp && Array.isArray(resp.items)) return resp.items;
+      if(resp && Array.isArray(resp.rows)) return resp.rows;
+      throw new Error("retorno inválido do Apps Script getDisputaRecursosState");
+    }catch(e){ tentativas.push((e && e.message) ? e.message : String(e)); }
+  }
+  try{
+    return await gvizSheetRows(DISPUTA_SHEET_NAME, 25000);
+  }catch(e){ tentativas.push((e && e.message) ? e.message : String(e)); }
+  throw new Error(tentativas.join(" | ") || "não foi possível ler DISPUTA DE RECURSOS");
+}
 async function syncDisputaRecursos(forceRender){
   if(__disputaLoading) return;
   __disputaLoading = true;
   __disputaError = "";
   try{
     if(forceRender) renderDisputaRecursos();
-    const rows = await gvizSheetRows(DISPUTA_SHEET_NAME, 25000);
-    __disputaRows = rows.filter(r => r && (cleanVal(r["ID protegido"]) || cleanVal(r["PN protegido"]) || cleanVal(r["Bloco visual"])));
+    if(forceRender && hasGoogleScriptRun()){
+      try{ await googleScriptRunCall("atualizarDisputaRecursos"); }catch(e){ console.warn("Atualização manual da disputa falhou, tentando ler a aba mesmo assim:", e); }
+    }
+    const rowsRaw = await fetchDisputaRows_();
+    __disputaRows = normalizeDisputaRows(rowsRaw);
     __disputaLastFetch = new Date();
     __disputaLastFetchMs = Date.now();
     markDirty("disputa");
@@ -1248,8 +1343,12 @@ function getDisputaValue(map, id, fallback){
   if(map && Object.prototype.hasOwnProperty.call(map, id)) return map[id];
   return fallback || "";
 }
+function splitDisputaIds(raw){
+  return String(raw || "").split(/\s*\/\s*|\n+|,\s*/).map(s=>s.trim()).filter(Boolean);
+}
 function buildDisputaItems(r){
-  const ids = String(r["ID disputa"] || "").split(/\s*\/\s*/).map(s=>s.trim()).filter(Boolean);
+  const ids = splitDisputaIds(r["ID disputa"]);
+  if(!ids.length && cleanVal(r["ID disputa"])) ids.push(cleanVal(r["ID disputa"]));
   const status = parseDisputaField(r["Status disputa"]);
   const crit = parseDisputaField(r["Criticidade disputa"]);
   const base = parseDisputaField(r["Base disputa"]);
@@ -1324,7 +1423,7 @@ function renderDisputaRecursos(){
     return;
   }
   if(__disputaError && total === 0){
-    list.innerHTML = `<div class="disputaEmpty">Não consegui carregar a aba <b>DISPUTA DE RECURSOS</b>.<br>${escapeHtml(__disputaError)}</div>`;
+    list.innerHTML = `<div class="disputaEmpty">Não consegui carregar a aba <b>DISPUTA DE RECURSOS</b>.<br>${escapeHtml(__disputaError)}<br><br><b>Correção aplicada:</b> agora o HTML tenta ler primeiro pelo Apps Script <code>getDisputaRecursosState()</code> e só depois tenta leitura direta da planilha.</div>`;
     return;
   }
   if(rows.length === 0){
@@ -1375,7 +1474,7 @@ function renderDisputaRecursos(){
     return `<div class="disputaCard ${pinned ? "pinned" : ""}">
       <div class="disputaCardHead">
         <button class="disputaBell ${pinned ? "on" : ""}" type="button" title="Sinalizar disputa" onclick="toggleDisputaPin('${escapeHtml(key)}')">🔔</button>
-        <div class="disputaPn">PN ${escapeHtml(pn || "—")}</div>
+        <div class="disputaPn">🤝 PN ${escapeHtml(pn || "—")}</div>
         <div class="disputaSmall">Protegido ${escapeHtml(r["ID protegido"] || "—")} • Disputa ${escapeHtml(r["ID disputa"] || "—")}</div>
       </div>
       <div class="disputaLine protegido">${protegido}</div>
