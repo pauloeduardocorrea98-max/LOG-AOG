@@ -144,7 +144,7 @@ let MAJOR_PARTS = [];
 // Ex.: "113T6100-89G,113T6100-89SP,D5547100400000 H"
 // O código ignora maiúsculas/minúsculas, hífen, espaço e caracteres especiais.
 // ==========================================
-const MAJOR_PARTS_RAW = "D53132010000";
+const MAJOR_PARTS_RAW = "D53132010000,98D53103500000";
 
 function normalizeMajorPartPN(v){
   return String(v || "").replace(/[^A-Z0-9]/ig, "").toUpperCase();
@@ -165,6 +165,18 @@ function isMajorPartPN(pn){
   const cleanPn = normalizeMajorPartPN(pn);
   if(!cleanPn) return false;
   return !!(window.__MAJOR_PARTS_SET__ && window.__MAJOR_PARTS_SET__.has(cleanPn));
+}
+function isMajorPartText(pnText){
+  const raw = String(pnText || "").trim();
+  if(!raw) return false;
+  if(isMajorPartPN(raw)) return true;
+  return raw.split(/[\s,;\/|]+/).map(normalizeMajorPartPN).filter(Boolean).some(isMajorPartPN);
+}
+function majorPartPnHtml(pnText){
+  const txt = cleanVal(pnText);
+  if(!txt) return "";
+  const label = `PN ${escapeHtml(txt)}`;
+  return isMajorPartText(txt) ? `<span style="color:#ef4444;font-weight:900;" title="Major Part">🚨 ${label}</span>` : label;
 }
 
 
@@ -1235,7 +1247,7 @@ const DISPUTA_ALIASES = {
   "Base protegida": ["Base protegida","Base protegido","Base"],
   "Data protegido": ["Data protegido","Data protegida","Data_da_solicitacao protegido","Data"],
   "Barcode protegido": ["Barcode protegido","Barcode 1","BARCODE 1"],
-  "Aeronave protegida": ["Aeronave protegida","ACFT protegido","ACFT B1","Aeronave"],
+  "Aeronave protegida": ["Aeronave protegida","Aeronave protegido","Aeronave B1","ACFT protegido","ACFT protegida","ACFT B1","ACFT PROTEGIDO","Aircraft protegido","Aircraft protegida","Aircraft B1","Aeronave","ACFT","Aircraft"],
   "PN protegido": ["PN protegido","PN","Material protegido"],
   "QTD protegido": ["QTD protegido","QTDE protegido","QTD - SOLICITADA B1","QTD"],
   "Origem protegido": ["Origem protegido","Origem protegida","Origem"],
@@ -1292,7 +1304,7 @@ function normalizePessoaDisputa_(p){
     base: disputaObjVal_(o, ["base","Base"]),
     data: disputaObjVal_(o, ["data","Data","Data_da_solicitacao"]),
     barcode: disputaObjVal_(o, ["barcode","Barcode","BARCODE"]),
-    aeronave: disputaObjVal_(o, ["aeronave","Aeronave","ACFT","Acft"]),
+    aeronave: disputaObjVal_(o, ["aeronave","Aeronave","ACFT","Acft","Aircraft","aircraft","aeronave protegida","Aeronave protegida","aeronave protegido","Aeronave protegido","ACFT protegido","ACFT protegida","ACFT B1","Aeronave B1","aeronaveProtegida","aeronaveProtegido","acftProtegido","acftB1","aircraftProtegido"]),
     pn: disputaObjVal_(o, ["pn","PN","Part Number"]),
     qtd: disputaObjVal_(o, ["qtd","QTD","qtde","QTDE","Quantidade"]),
     origem,
@@ -1623,7 +1635,7 @@ function disputaPessoaLineHtml_(label, p){
   if(cleanVal(limpa(pessoa.data))) parts.push(escapeHtml(limpa(pessoa.data)));
   if(cleanVal(limpa(pessoa.barcode))) parts.push(escapeHtml(limpa(pessoa.barcode)));
   if(cleanVal(limpa(pessoa.aeronave))) parts.push(escapeHtml(limpa(pessoa.aeronave)));
-  if(cleanVal(limpa(pessoa.pn))) parts.push(`PN ${escapeHtml(limpa(pessoa.pn))}`);
+  if(cleanVal(limpa(pessoa.pn))) parts.push(majorPartPnHtml(limpa(pessoa.pn)));
   if(cleanVal(limpa(pessoa.qtd))) parts.push(`QTD ${escapeHtml(limpa(pessoa.qtd))}`);
   if(cleanVal(rt)) parts.push(escapeHtml(rt));
   return parts.join(" / ");
@@ -1695,18 +1707,19 @@ function renderDisputaRecursos(){
   list.innerHTML = rows.slice(0, 300).map(r=>{
     const key = disputaRowKey(r);
     const pinned = __disputaPins.has(key);
-    const protegidoObj = (r.__protegido && typeof r.__protegido === "object") ? r.__protegido : {
-      id: r["ID protegido"],
-      status: r["Status protegido"],
-      criticidade: r["Criticidade protegido"],
-      base: r["Base protegida"],
-      data: r["Data protegido"],
-      barcode: r["Barcode protegido"],
-      aeronave: r["Aeronave protegida"],
-      pn: r["PN protegido"],
-      qtd: r["QTD protegido"],
-      origem: r["Origem protegido"],
-      destino: r["Destino protegido"]
+    const rawProtegido = (r.__protegido && typeof r.__protegido === "object") ? r.__protegido : {};
+    const protegidoObj = {
+      id: cleanVal(rawProtegido.id) || cleanVal(r["ID protegido"]),
+      status: cleanVal(rawProtegido.status) || cleanVal(r["Status protegido"]),
+      criticidade: cleanVal(rawProtegido.criticidade) || cleanVal(r["Criticidade protegido"]),
+      base: cleanVal(rawProtegido.base) || cleanVal(r["Base protegida"]),
+      data: cleanVal(rawProtegido.data) || cleanVal(r["Data protegido"]),
+      barcode: cleanVal(rawProtegido.barcode) || cleanVal(r["Barcode protegido"]),
+      aeronave: cleanVal(rawProtegido.aeronave) || disputaObjVal_(rawProtegido, ["Aeronave protegida","Aeronave protegido","Aeronave B1","ACFT protegido","ACFT protegida","ACFT B1","ACFT","Aircraft","aeronaveProtegida","aeronaveProtegido","acftProtegido","acftB1","aircraftProtegido"]) || cleanVal(r["Aeronave protegida"]),
+      pn: cleanVal(rawProtegido.pn) || cleanVal(r["PN protegido"]),
+      qtd: cleanVal(rawProtegido.qtd) || cleanVal(r["QTD protegido"]),
+      origem: cleanVal(rawProtegido.origem) || cleanVal(r["Origem protegido"]),
+      destino: cleanVal(rawProtegido.destino) || cleanVal(r["Destino protegido"])
     };
     const disputas = buildDisputaItems(r);
     const baseProt = cleanVal(r["Base protegida"] || protegidoObj.base);
