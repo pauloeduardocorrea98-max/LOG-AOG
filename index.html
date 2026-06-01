@@ -220,10 +220,16 @@ function clearDirty(key){ if(Object.prototype.hasOwnProperty.call(__dirty, key))
 function markAllTablesDirty(){ markDirty("aog"); markDirty("war"); markDirty("fast"); markDirty("cargo"); markDirty("mro"); markDirty("cargas"); markDirty("hotlist"); markDirty("acompanhamento"); markDirty("tools"); markDirty("conexao"); }
 
 function openTab(id,btn){
+  const target = document.getElementById(id);
+  if(!target) return;
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  target.classList.add('active');
   document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn && btn.classList) btn.classList.add('active');
+  else{
+    const fallbackBtn = document.querySelector(`.menu button[onclick*="'${String(id).replace(/'/g,"\\'")}'"]`);
+    if(fallbackBtn) fallbackBtn.classList.add('active');
+  }
   updateStatusVisibility();
 
   try{ scheduleNextRefresh(getAutoRefreshMs()); }catch(e){}
@@ -231,7 +237,7 @@ function openTab(id,btn){
   try{
     const tk = tableKeysBySection[id];
     if(tk){
-      if(__dirty[tk]){ renderPrios(tk); renderAircraftBox(tk); renderTable(tk); clearDirty(tk); }
+      if(__dirty[tk]){ renderPrios(tk); renderAircraftBox(tk); renderSolBox(tk); renderTable(tk); clearDirty(tk); }
       else{ try{ updateObsVisibleForTable(tk); }catch(e){} }
       if(String(id||"").toLowerCase() === "fast"){ __autoPinFastTodayAircraft__().then(()=>{ try{ renderAircraftBox("fast"); }catch(e){} }).catch(()=>{}); }
     }else{
@@ -239,7 +245,7 @@ function openTab(id,btn){
       if(id === "turno") renderSharedList("turno");
       if(id === "avisos") renderSharedList("avisos");
     }
-  }catch(e){}
+  }catch(e){ console.error("Erro ao abrir aba:", id, e); }
 }
 
 function escapeHtml(v){ return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
@@ -444,59 +450,83 @@ function buildSortedBaseCache(){
   __sortedBaseVersion = __dataVersion;
 }
 
-function isConexaoRow(r){ return Object.values(r).join(" ").toLowerCase().includes("conexao"); }
+function isConexaoRow(r){ try{ return normalizeText(Object.values(r || {}).join(" ")).includes("conexao"); }catch(e){ return false; } }
 function prepareDataCache(){
   const out = { aog:[], war:[], fast:[], cargo:[], mro:[], acompanhamento:[], cargas:[], hotlist:[], tools:[], conexao:[] }; let maxDt = null;
   __airIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map(), conexao:new Map() };
   __solIdSetByTable = { aog:new Map(), war:new Map(), fast:new Map(), cargo:new Map(), acompanhamento:new Map(), cargas:new Map(), hotlist:new Map(), tools:new Map(), conexao:new Map() };
-  
+
+  function addRowToTable(tableKey, row){
+    if(!row || !out[tableKey]) return;
+    out[tableKey].push(row);
+    __pushAirId__(tableKey, row);
+    __pushSolId__(tableKey, row);
+  }
+
   const arr = Array.isArray(dados) ? dados : [];
   for(let i=0;i<arr.length;i++){
-    const r = arr[i]; rowId(r); if(r) r.__search = null;
-    if(r){ if(r.__stRank == null) r.__stRank = statusPriorityRank(r[STATUS_COL]); if(r.__midStr == null) r.__midStr = String(r.Material_ID ?? ""); if(r.__solStr == null) r.__solStr = String(r.Numero_de_solicitacao ?? ""); }
-    if(r && r.__dispDateLower == null){ const shown = displayCell(DATE_COL, r[DATE_COL], "aog", r); r.__dispDateLower = String(shown || "").toLowerCase(); }
-    
-    // 👇 Mudança para Aba Cargas não puxar "AIRCRAFT", "ACFT" ou "RA"
-    if(isCargasRow(r)){
-      }
-      if(isConexaoRow(r)){
-        out.conexao.push(r);
-      }
-      if(isCargasRow(r)){ 
-      const airUpper = String(r[AIR_COL] || "").toUpperCase();
-      const forbiddenCargas = airUpper.includes("AIRCRAFT") || airUpper.includes("ACFT") || /\bRA\b/.test(airUpper);
-      
-      if (!forbiddenCargas) {
-        out.cargas.push(r); 
-        __pushAirId__("cargas", r); 
-        __pushSolId__("cargas", r); 
-      }
-      // Hotlist continua puxando tudo que seja carga + outras lógicas se tiver
-      out.hotlist.push(r); 
-      __pushAirId__("hotlist", r); 
-      __pushSolId__("hotlist", r); 
+    const r = arr[i];
+    if(!r) continue;
+
+    rowId(r);
+    r.__search = null;
+
+    if(r.__stRank == null) r.__stRank = statusPriorityRank(r[STATUS_COL]);
+    if(r.__midStr == null) r.__midStr = String(r.Material_ID ?? "");
+    if(r.__solStr == null) r.__solStr = String(r.Numero_de_solicitacao ?? "");
+    if(r.__dispDateLower == null){
+      const shown = displayCell(DATE_COL, r[DATE_COL], "aog", r);
+      r.__dispDateLower = String(shown || "").toLowerCase();
     }
 
-    out.cargo.push(r); __pushAirId__("cargo", r); __pushSolId__("cargo", r);
-    try{ const b = String((r && (r.Base ?? r["Base"])) || "").trim().toUpperCase(); if(b === "MRO"){ out.mro.push(r); __pushAirId__("mro", r); __pushSolId__("mro", r); } }catch(e){}
-    if(!isConexaoRow(r)){ out.acompanhamento.push(r); } __pushAirId__("acompanhamento", r); __pushSolId__("acompanhamento", r);
-    
-    if(isFerramentaRow(r)){ out.tools.push(r); __pushAirId__("tools", r); __pushSolId__("tools", r); }
-    const logDesc = normalizeText(r.Descricao_logistica || "");
-    if(logDesc.includes("conexao")){
-      out.conexao.push(r); 
-      __pushAirId__("conexao", r); 
-      __pushSolId__("conexao", r);
+    const isConexao = isConexaoRow(r);
+    const isCarga = isCargasRow(r);
+
+    if(isConexao){
+      addRowToTable("conexao", r);
     }
+
+    // Aba Cargas não deve puxar aeronaves genéricas "AIRCRAFT", "ACFT" ou "RA".
+    if(isCarga){
+      const airUpper = String(r[AIR_COL] || "").toUpperCase();
+      const forbiddenCargas = airUpper.includes("AIRCRAFT") || airUpper.includes("ACFT") || /\bRA\b/.test(airUpper);
+
+      if(!forbiddenCargas){
+        addRowToTable("cargas", r);
+      }
+
+      // Hotlist continua puxando tudo que seja carga.
+      addRowToTable("hotlist", r);
+    }
+
+    addRowToTable("cargo", r);
+
+    try{
+      const b = String((r && (r.Base ?? r["Base"])) || "").trim().toUpperCase();
+      if(b === "MRO") addRowToTable("mro", r);
+    }catch(e){}
+
+    // Conexão sai da aba Acompanhamento e fica somente na aba Conexão.
+    if(!isConexao){
+      addRowToTable("acompanhamento", r);
+    }
+
+    if(isFerramentaRow(r)){
+      addRowToTable("tools", r);
+    }
+
     const c = String((r && r.Criticidade) || "").toUpperCase();
-    if(c.includes("WAR")){ out.war.push(r); __pushAirId__("war", r); __pushSolId__("war", r); }
-    if(c.includes("FAST PASS") || c.includes("FASTPASS") || c.includes("FAST")){ out.fast.push(r); __pushAirId__("fast", r); __pushSolId__("fast", r); }
-    
-    if(c.includes("AOG") && !c.includes("T-AOG")){ out.aog.push(r); __pushAirId__("aog", r); __pushSolId__("aog", r); }
-    
-    const dt = parseMaybeDate(r && r.Data_Ultima_Atualizacao); if(dt && (!maxDt || dt.getTime() > maxDt.getTime())) maxDt = dt;
+    if(c.includes("WAR")) addRowToTable("war", r);
+    if(c.includes("FAST PASS") || c.includes("FASTPASS") || c.includes("FAST")) addRowToTable("fast", r);
+    if(c.includes("AOG") && !c.includes("T-AOG")) addRowToTable("aog", r);
+
+    const dt = parseMaybeDate(r && r.Data_Ultima_Atualizacao);
+    if(dt && (!maxDt || dt.getTime() > maxDt.getTime())) maxDt = dt;
   }
-  __cacheByTable = out; __cacheLastUpdate = maxDt || new Date(); buildSortedBaseCache();
+
+  __cacheByTable = out;
+  __cacheLastUpdate = maxDt || new Date();
+  buildSortedBaseCache();
 }
 
 function __pushAirId__(tableKey, r){ const a = cleanVal(r && r[AIR_COL]); if(!a) return; const mid = cleanVal(r && r.Material_ID); const mp = __airIdSetByTable[tableKey]; if(!mp) return; let set = mp.get(a); if(!set){ set = new Set(); mp.set(a,set); } if(mid) set.add(mid); }
@@ -815,12 +845,73 @@ function toggleSolPinned(tableKey, sol){
   }
 }
 
-function setSolFocus(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return; clearFilters(tk); airFocusByTable[tk] = null; solFocusByTable[tk] = s; const tbl = document.getElementById(`tbl-${tk}`); if(tbl){ const inputs = tbl.querySelectorAll("input.filter"); const idx = cols.indexOf(SOL_COL); if(idx >= 0 && inputs && inputs.length){ const inp = inputs[idx]; if(inp){ inp.value = s; filtersByTable[tk][SOL_COL] = s.toLowerCase(); } } } invalidateFilterCache(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderAircraftBox(tk); renderSolBox(tk); } function clearSolFocus(tableKey){ const tk = String(tableKey||"").toLowerCase(); const current = solFocusByTable[tk]; solFocusByTable[tk] = null; const f = filtersByTable[tk] || {}; const v = String(f[SOL_COL] || "").trim().toLowerCase(); if(current && v && normalizeText(v) === normalizeText(current)) delete filtersByTable[tk][SOL_COL]; const tbl = document.getElementById(`tbl-${tk}`); if(tbl){ const inputs = tbl.querySelectorAll("input.filter"); const idx = cols.indexOf(SOL_COL); if(idx >= 0 && inputs && inputs.length){ const inp = inputs[idx]; if(inp) inp.value = ""; } } invalidateFilterCache(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderAircraftBox(tk); renderSolBox(tk); } function solCardXAction(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return; if(solFocusByTable[tk] && normalizeText(solFocusByTable[tk]) === normalizeText(s)){ clearSolFocus(tk); return; } const set = solPinnedByTable[tk]; if(set.has(s)) set.delete(s); saveSolPinned(tk); renderSolBox(tk); } function countIdsForSol(tableKey, sol){ try { const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return 0; const mp = __solIdSetByTable[tk]; if(!mp) return 0; const set = mp.get(s); return set ? set.size : 0; } catch(e) { return 0; } } function renderSolBox(tableKey){ const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", mro:"sol-mro", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools", conexao:"sol-conexao" }[tableKey]; const wrap = document.getElementById(wrapId); if(!wrap) return; const set = solPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; } const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b)); wrap.innerHTML = `<div class="solBox"><h3>📌 Solicitações destacadas</h3><div class="solGrid" id="solGrid-${tableKey}"></div></div>`; const grid = document.getElementById(`solGrid-${tableKey}`); if(!grid) return; const focus = solFocusByTable[tableKey] ? String(solFocusByTable[tableKey]) : ""; const allTabs = ["aog","war","fast","cargo","mro","acompanhamento","cargas","hotlist","tools","conexao"]; items.slice(0, 80).forEach(s=>{ let globalCount = 0; for(let i=0; i<allTabs.length; i++){ try { globalCount += countIdsForSol(allTabs[i], s); } catch(e){} } const count = globalCount; const isFocused = focus && normalizeText(focus) === normalizeText(s); const clickFn = isFocused ? `clearSolFocus('${tableKey}')` : `setSolFocus('${tableKey}','${escapeHtml(s)}')`; const card = document.createElement("div"); card.className = "solCard"; card.innerHTML = `<button class="solCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}" onclick="solCardXAction('${tableKey}','${escapeHtml(s)}')">×</button><div class="solCardTitle">🧾 ${escapeHtml(s)}</div><div class="solCardMeta">Material_IDs: <b>${count}</b></div><div class="solCardActions"><button class="solFilterPill ${isFocused ? "on" : ""}" type="button" title="Filtrar esta aba por esta Solicitação" onclick="${clickFn}">${isFocused ? "Filtrando" : "Filtrar"}</button></div>`; grid.appendChild(card); }); } function renderAircraftBox(tableKey){ const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", mro:"air-mro", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools", conexao:"air-conexao" }[tableKey]; const wrap = document.getElementById(wrapId); if(!wrap) return; const set = airPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; } const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b)); wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`; const grid = document.getElementById(`airGrid-${tableKey}`); if(!grid) return; const focus = airFocusByTable[tableKey] ? String(airFocusByTable[tableKey]) : ""; const allTabs = ["aog","war","fast","cargo","mro","acompanhamento","cargas","hotlist","tools","conexao"]; items.slice(0, 60).forEach(a=>{ let globalCount = 0; for(let i=0; i<allTabs.length; i++){ try { globalCount += countIdsForAircraft(allTabs[i], a); } catch(e){} } const isFocused = focus && normalizeText(focus) === normalizeText(a); let marked = ""; try{ if(isSharedTable(tableKey) && __sharedAirState && __sharedAirState[tableKey] && __sharedAirState[tableKey].meta){ const meta = __sharedAirState[tableKey].meta[a]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){} const card = document.createElement("div"); card.className = "airCard"; card.innerHTML = `<button class="airCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}" onclick="airCardXAction('${tableKey}','${escapeHtml(a)}')">×</button><div class="airCardTitle">✈️ ${escapeHtml(a)}</div><div class="airCardMeta">IDs pendentes: <b>${globalCount}</b></div>${marked}<div class="airCardActions"><button class="airFilterPill ${isFocused ? "on" : ""}" type="button" title="Filtrar esta aba por esta aeronave" onclick="setAirFocus('${tableKey}','${escapeHtml(a)}')">${isFocused ? "Filtrando" : "Filtrar"}</button></div>`; grid.appendChild(card); }); } function renderPrios(tableKey){ const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", mro:"prio-mro", acompanhamento:"prio-acompanhamento", cargas:"prio-cargas", hotlist:"prio-hotlist", tools:"prio-tools", conexao:"prio-conexao" }[tableKey]; const wrap = document.getElementById(wrapId); if(!wrap) return; const set = priosByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; } const prioRows = []; const allTabs = ["aog","war","fast","cargo","mro","acompanhamento","cargas","hotlist","tools","conexao"]; Array.from(set).forEach(id => { let foundRow = null; for(let i=0; i<allTabs.length; i++){ try { const tKey = allTabs[i]; if(!__cacheByTable[tKey]) continue; foundRow = __cacheByTable[tKey].find(r => r && String(rowId(r)).trim() === String(id).trim()); if(foundRow) break; } catch(e){} } if(foundRow) prioRows.push(foundRow); }); if(prioRows.length === 0){ wrap.innerHTML = ""; return; } wrap.innerHTML = `<div class="prioBox"><h3>🔔 Detalhes ID</h3><div class="prioGrid" id="grid-${tableKey}"></div></div>`; const grid = document.getElementById(`grid-${tableKey}`); prioRows.slice(0, 60).forEach(r=>{ try { const id = rowId(r); const vID = cleanVal(r.Material_ID); const vSOL = cleanVal(r.Numero_de_solicitacao); const vAIR = cleanVal(r[AIR_COL] || r.Aeronave); const vNF = cleanVal(r.Nota_fiscal); const vAWB = cleanVal(r.AWB); const vPN = cleanVal(r.PN); const vORG = cleanVal(r.Origem); const vDST = cleanVal(r.Destino); const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : ""; const vLOG = cleanVal(r.Descricao_logistica); const vSTATUS = cleanVal(r[STATUS_COL]); const vEMB_RAW = (r && (r.Data_de_embarque_logistica ?? r["Data_de_embarque_logistica"])) ?? ""; const vPOUSO_RAW = (r && (r.Data_do_pouso_logistica ?? r["Data_do_pouso_logistica"])) ?? ""; const tEMB = fmtTimeHM(parseMaybeDate(vEMB_RAW)); const tPOUSO = fmtTimeHM(parseMaybeDate(vPOUSO_RAW)); const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : ""; let marked = ""; try{ if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){ const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){} const card = document.createElement("div"); card.className = "prioCard"; card.innerHTML = `<button class="prioCardX" type="button" title="Remover prioridade" onclick="prioCardXAction('${tableKey}','${escapeHtml(id)}')">×</button><div class="prioCardTitle">ID: ${escapeHtml(vID)}</div><div class="prioCardBody"><p><b>Sol:</b> ${escapeHtml(vSOL)}</p><p><b>Air:</b> ${escapeHtml(vAIR)}</p><p><b>Status:</b> ${escapeHtml(vSTATUS)}</p><p><b>Rota:</b> ${escapeHtml(vROUTE)}</p><p><b>ETA:</b> ${escapeHtml(tLine)}</p><p class="prioLog">${escapeHtml(vLOG)}</p></div>${marked}`; grid.appendChild(card); } catch(err){} }); }function solCardXAction(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return; if(solFocusByTable[tk] && normalizeText(solFocusByTable[tk]) === normalizeText(s)){ clearSolFocus(tk); return; } const set = solPinnedByTable[tk]; if(set.has(s)) set.delete(s); saveSolPinned(tk); renderSolBox(tk); }
+function setSolFocus(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return; clearFilters(tk); airFocusByTable[tk] = null; solFocusByTable[tk] = s; const tbl = document.getElementById(`tbl-${tk}`); if(tbl){ const inputs = tbl.querySelectorAll("input.filter"); const idx = cols.indexOf(SOL_COL); if(idx >= 0 && inputs && inputs.length){ const inp = inputs[idx]; if(inp){ inp.value = s; filtersByTable[tk][SOL_COL] = s.toLowerCase(); } } } invalidateFilterCache(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderAircraftBox(tk); renderSolBox(tk); }
+function clearSolFocus(tableKey){ const tk = String(tableKey||"").toLowerCase(); const current = solFocusByTable[tk]; solFocusByTable[tk] = null; const f = filtersByTable[tk] || {}; const v = String(f[SOL_COL] || "").trim().toLowerCase(); if(current && v && normalizeText(v) === normalizeText(current)) delete filtersByTable[tk][SOL_COL]; const tbl = document.getElementById(`tbl-${tk}`); if(tbl){ const inputs = tbl.querySelectorAll("input.filter"); const idx = cols.indexOf(SOL_COL); if(idx >= 0 && inputs && inputs.length){ const inp = inputs[idx]; if(inp) inp.value = ""; } } invalidateFilterCache(tk); markDirty(tk); renderTable(tk); clearDirty(tk); renderAircraftBox(tk); renderSolBox(tk); }
+function solCardXAction(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return; if(solFocusByTable[tk] && normalizeText(solFocusByTable[tk]) === normalizeText(s)){ clearSolFocus(tk); return; } const set = solPinnedByTable[tk]; if(set.has(s)) set.delete(s); saveSolPinned(tk); renderSolBox(tk); }
 function countIdsForSol(tableKey, sol){ const tk = String(tableKey||"").toLowerCase(); const s = cleanVal(sol); if(!s) return 0; const mp = __solIdSetByTable[tk]; if(!mp) return 0; const set = mp.get(s); return set ? set.size : 0; }
-function renderSolBox(tableKey){ const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", mro:"sol-mro", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools", conexao:"sol-conexao" }[tableKey]; const wrap = document.getElementById(wrapId); if(!wrap) return; const set = solPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; } const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b)); wrap.innerHTML = `<div class="solBox"><h3>📌 Solicitações destacadas</h3><div class="solGrid" id="solGrid-${tableKey}"></div></div>`; const grid = document.getElementById(`solGrid-${tableKey}`); if(!grid) return; const focus = solFocusByTable[tableKey] ? String(solFocusByTable[tableKey]) : ""; const allTabs = ["aog","war","fast","cargo","mro","acompanhamento","cargas","hotlist","tools","conexao"]; items.slice(0, 80).forEach(s=>{ let globalCount = 0; for(let i=0; i<allTabs.length; i++){ globalCount += countIdsForSol(allTabs[i], s); } const count = globalCount; const isFocused = focus && normalizeText(focus) === normalizeText(s); const clickFn = isFocused ? `clearSolFocus('${tableKey}')` : `setSolFocus('${tableKey}','${escapeHtml(s)}')`; const card = document.createElement("div"); card.className = "solCard"; card.innerHTML = `<button class="solCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}" onclick="solCardXAction('${tableKey}','${escapeHtml(s)}')">×</button><div class="solCardTitle">🧾 ${escapeHtml(s)}</div><div class="solCardMeta">Material_IDs: <b>${count}</b></div><div class="solCardActions"><button class="solFilterPill ${isFocused ? "on" : ""}" type="button" title="Filtrar esta aba por esta Solicitação" onclick="${clickFn}">${isFocused ? "Filtrando" : "Filtrar"}</button></div>`; grid.appendChild(card); }); }function renderAircraftBox(tableKey){ const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", mro:"air-mro", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools", conexao:"air-conexao" }[tableKey]; const wrap = document.getElementById(wrapId); if(!wrap) return; const set = airPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; } const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b)); wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`; const grid = document.getElementById(`airGrid-${tableKey}`); if(!grid) return; const focus = airFocusByTable[tableKey] ? String(airFocusByTable[tableKey]) : ""; const allTabs = ["aog","war","fast","cargo","mro","acompanhamento","cargas","hotlist","tools","conexao"]; items.slice(0, 60).forEach(a=>{ let globalCount = 0; for(let i=0; i<allTabs.length; i++){ globalCount += countIdsForAircraft(allTabs[i], a); } const isFocused = focus && normalizeText(focus) === normalizeText(a); let marked = ""; try{ if(isSharedTable(tableKey) && __sharedAirState && __sharedAirState[tableKey] && __sharedAirState[tableKey].meta){ const meta = __sharedAirState[tableKey].meta[a]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){} const card = document.createElement("div"); card.className = "airCard"; card.innerHTML = `<button class="airCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}" onclick="airCardXAction('${tableKey}','${escapeHtml(a)}')">×</button><div class="airCardTitle">✈️ ${escapeHtml(a)}</div><div class="airCardMeta">IDs pendentes: <b>${globalCount}</b></div>${marked}<div class="airCardActions"><button class="airFilterPill ${isFocused ? "on" : ""}" type="button" title="Filtrar esta aba por esta aeronave" onclick="setAirFocus('${tableKey}','${escapeHtml(a)}')">${isFocused ? "Filtrando" : "Filtrar"}</button></div>`; grid.appendChild(card); }); }
-function renderPrios(tableKey){ const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", mro:"prio-mro", acompanhamento:"prio-acompanhamento", cargas:"prio-cargas", hotlist:"prio-hotlist", tools:"prio-tools", conexao:"prio-conexao" }[tableKey]; const wrap = document.getElementById(wrapId); if(!wrap) return; const set = priosByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; } const prioRows = []; const allTabs = ["aog","war","fast","cargo","mro","acompanhamento","cargas","hotlist","tools","conexao"]; Array.from(set).forEach(id => { let foundRow = null; for(let i=0; i<allTabs.length; i++){ const tKey = allTabs[i]; if(!__cacheByTable[tKey]) continue; foundRow = __cacheByTable[tKey].find(r => String(rowId(r)).trim() === String(id).trim()); if(foundRow) break; } if(foundRow) prioRows.push(foundRow); }); if(prioRows.length === 0){ wrap.innerHTML = ""; return; } wrap.innerHTML = `<div class="prioBox"><h3>🔔 Detalhes ID</h3><div class="prioGrid" id="grid-${tableKey}"></div></div>`; const grid = document.getElementById(`grid-${tableKey}`); prioRows.slice(0, 60).forEach(r=>{ const id = rowId(r); const vID = cleanVal(r.Material_ID); const vSOL = cleanVal(r.Numero_de_solicitacao); const vAIR = cleanVal(r[AIR_COL] || r.Aeronave); const vNF = cleanVal(r.Nota_fiscal); const vAWB = cleanVal(r.AWB); const vPN = cleanVal(r.PN); const vORG = cleanVal(r.Origem); const vDST = cleanVal(r.Destino); const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : ""; const vLOG = cleanVal(r.Descricao_logistica); const vSTATUS = cleanVal(r[STATUS_COL]); const vEMB_RAW = (r && (r.Data_de_embarque_logistica ?? r["Data_de_embarque_logistica"])) ?? ""; const vPOUSO_RAW = (r && (r.Data_do_pouso_logistica ?? r["Data_do_pouso_logistica"])) ?? ""; const tEMB = fmtTimeHM(parseMaybeDate(vEMB_RAW)); const tPOUSO = fmtTimeHM(parseMaybeDate(vPOUSO_RAW)); const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : ""; let marked = ""; try{ if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){ const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){} const card = document.createElement("div"); card.className = "prioCard"; card.innerHTML = `<button class="prioCardX" type="button" title="Remover prioridade" onclick="prioCardXAction('${tableKey}','${escapeHtml(id)}')">×</button><div class="prioCardTitle">ID: ${escapeHtml(vID)}</div><div class="prioCardBody"><p><b>Sol:</b> ${escapeHtml(vSOL)}</p><p><b>Air:</b> ${escapeHtml(vAIR)}</p><p><b>Status:</b> ${escapeHtml(vSTATUS)}</p><p><b>Rota:</b> ${escapeHtml(vROUTE)}</p><p><b>ETA:</b> ${escapeHtml(tLine)}</p><p class="prioLog">${escapeHtml(vLOG)}</p></div>${marked}`; grid.appendChild(card); }); }    
- 
-  // 🚨 REGRA MAJOR PART NO BALÃO (BUSCA APROXIMADA E LIMPEZA)
+
+function renderSolBox(tableKey){
+  const wrapId = { aog:"sol-aog", war:"sol-war", fast:"sol-fast", cargo:"sol-cargo", mro:"sol-mro", acompanhamento:"sol-acompanhamento", cargas:"sol-cargas", hotlist:"sol-hotlist", tools:"sol-tools", conexao:"sol-conexao" }[tableKey];
+  const wrap = document.getElementById(wrapId); if(!wrap) return;
+  const set = solPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+  const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  wrap.innerHTML = `<div class="solBox"><h3>📌 Solicitações destacadas</h3><div class="solGrid" id="solGrid-${tableKey}"></div></div>`;
+  const grid = document.getElementById(`solGrid-${tableKey}`); if(!grid) return;
+  const focus = solFocusByTable[tableKey] ? String(solFocusByTable[tableKey]) : "";
+  items.slice(0, 80).forEach(s=>{
+    const count = countIdsForSol(tableKey, s); const isFocused = focus && normalizeText(focus) === normalizeText(s);
+    const clickFn = isFocused ? `clearSolFocus('${tableKey}')` : `setSolFocus('${tableKey}','${escapeHtml(s)}')`;
+    const card = document.createElement("div"); card.className = "solCard";
+    card.innerHTML = `<button class="solCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}" onclick="solCardXAction('${tableKey}','${escapeHtml(s)}')">×</button><div class="solCardTitle">🧾 ${escapeHtml(s)}</div><div class="solCardMeta">Material_IDs: <b>${count}</b></div><div class="solCardActions"><button class="solFilterPill ${isFocused ? "on" : ""}" type="button" title="Filtrar esta aba por esta Solicitação" onclick="${clickFn}">${isFocused ? "Filtrando" : "Filtrar"}</button></div>`;
+    grid.appendChild(card);
+  });
+}
+
+function renderAircraftBox(tableKey){
+  const wrapId = { aog:"air-aog", war:"air-war", fast:"air-fast", cargo:"air-cargo", mro:"air-mro", acompanhamento:"air-acompanhamento", cargas:"air-cargas", hotlist:"air-hotlist", tools:"air-tools", conexao:"air-conexao" }[tableKey];
+  const wrap = document.getElementById(wrapId); if(!wrap) return;
+  const set = airPinnedByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+  const items = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  wrap.innerHTML = `<div class="airBox"><h3>⚠️ Aeronaves no quadro</h3><div class="airGrid" id="airGrid-${tableKey}"></div></div>`;
+  const grid = document.getElementById(`airGrid-${tableKey}`); if(!grid) return;
+  const focus = airFocusByTable[tableKey] ? String(airFocusByTable[tableKey]) : "";
+  items.slice(0, 60).forEach(a=>{
+    const count = countIdsForAircraft(tableKey, a); const isFocused = focus && normalizeText(focus) === normalizeText(a);
+    let marked = ""; try{ if(isSharedTable(tableKey) && __sharedAirState && __sharedAirState[tableKey] && __sharedAirState[tableKey].meta){ const meta = __sharedAirState[tableKey].meta[a]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){}
+    const card = document.createElement("div"); card.className = "airCard";
+    card.innerHTML = `<button class="airCardX" type="button" title="${isFocused ? "Remover filtro" : "Remover do balão"}" onclick="airCardXAction('${tableKey}','${escapeHtml(a)}')">×</button><div class="airCardTitle">✈️ ${escapeHtml(a)}</div><div class="airCardMeta">IDs pendentes: <b>${count}</b></div>${marked}<div class="airCardActions"><button class="airFilterPill ${isFocused ? "on" : ""}" type="button" title="Filtrar esta aba por esta aeronave" onclick="setAirFocus('${tableKey}','${escapeHtml(a)}')">${isFocused ? "Filtrando" : "Filtrar"}</button></div>`;
+    grid.appendChild(card);
+  });
+}
+
+function renderPrios(tableKey){
+  const wrapId = { aog:"prio-aog", war:"prio-war", fast:"prio-fast", cargo:"prio-cargo", mro:"prio-mro", acompanhamento:"prio-acompanhamento", cargas:"prio-cargas", hotlist:"prio-hotlist", tools:"prio-tools", conexao:"prio-conexao" }[tableKey];
+  const wrap = document.getElementById(wrapId); if(!wrap) return;
+  const set = priosByTable[tableKey]; if(!set || set.size === 0){ wrap.innerHTML = ""; return; }
+  const baseRows = getBaseRows(tableKey); const prioRows = baseRows.filter(r => __prioHas__(tableKey, rowId(r))); if(prioRows.length === 0){ wrap.innerHTML = ""; return; }
+  wrap.innerHTML = `<div class="prioBox"><h3>🔔 Detalhes ID</h3><div class="prioGrid" id="grid-${tableKey}"></div></div>`;
+  const grid = document.getElementById(`grid-${tableKey}`);
+  prioRows.slice(0, 60).forEach(r=>{
+    const id = rowId(r); 
+    const vID = cleanVal(r.Material_ID); 
+    const vSOL = cleanVal(r.Numero_de_solicitacao); 
+    const vAIR = cleanVal(r[AIR_COL] || r.Aeronave); // Puxando a aeronave
+    const vNF = cleanVal(r.Nota_fiscal); 
+    const vAWB = cleanVal(r.AWB); 
+    const vPN = cleanVal(r.PN); 
+    const vORG = cleanVal(r.Origem); 
+    const vDST = cleanVal(r.Destino); 
+    const vROUTE = (vORG || vDST) ? `${vORG} > ${vDST}` : ""; 
+    const vLOG = cleanVal(r.Descricao_logistica); 
+    const vSTATUS = cleanVal(r[STATUS_COL]); 
+    const vEMB_RAW = (r && (r.Data_de_embarque_logistica ?? r["Data_de_embarque_logistica"])) ?? ""; 
+    const vPOUSO_RAW = (r && (r.Data_do_pouso_logistica ?? r["Data_do_pouso_logistica"])) ?? ""; 
+    const tEMB = fmtTimeHM(parseMaybeDate(vEMB_RAW)); 
+    const tPOUSO = fmtTimeHM(parseMaybeDate(vPOUSO_RAW)); 
+    const tLine = (tEMB || tPOUSO) ? `${tEMB || "—"} → ${tPOUSO || "—"}` : "";
+    let marked = ""; try{ if(isSharedTable(tableKey) && __sharedPrioState && __sharedPrioState[tableKey] && __sharedPrioState[tableKey].meta){ const meta = __sharedPrioState[tableKey].meta[id] || __sharedPrioState[tableKey].meta[String(id).trim()]; if(meta && meta.by && meta.t){ const dt = parseMaybeDate(meta.t); marked = `<div class="markedBy">Marcado por: <b>${escapeHtml(meta.by)}</b> • ${escapeHtml(dt?fmtBR(dt):meta.t)}</div>`; } } }catch(e){}
+    
+    // 🚨 REGRA MAJOR PART NO BALÃO (BUSCA APROXIMADA E LIMPEZA)
     const cleanPn = String(vPN || "").replace(/[^A-Z0-9]/ig, '').toUpperCase();
     const isMajor = (tableKey === "acompanhamento" && window.__MAJOR_PARTS_CLEAN__.some(mp => mp.length > 2 && (cleanPn.includes(mp) || mp.includes(cleanPn))));
     const pnDisplay = isMajor ? `<span style="color:#ef4444; font-weight:800;" title="Major Part">🚨 ${escapeHtml(vPN)}</span>` : escapeHtml(vPN);
@@ -1131,4 +1222,3 @@ function initCtxMenuHandlers(){
 </script>
 </body>
 </html>
-<div id="conexao" class="section"><h1>Conexão</h1><div id="air-conexao"></div><div id="sol-conexao"></div><div id="prio-conexao"></div><div class="tableWrap"><table id="tbl-conexao"></table></div></div>
