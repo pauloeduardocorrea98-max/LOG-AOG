@@ -1420,22 +1420,50 @@ function toggleDisputaPin(key){
   saveDisputaPins();
   renderDisputaRecursos();
 }
+function stripDisputaIdPrefix_(value, id){
+  let s = cleanVal(value);
+  const ident = cleanVal(id);
+  if(!s || !ident) return s;
+  const esc = ident.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return s.replace(new RegExp("^\\s*" + esc + "\\s*:\\s*", "i"), "").trim();
+}
 function parseDisputaField(raw){
   const txt = String(raw || "").trim();
   if(!txt) return {};
   const map = {};
-  txt.split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(line=>{
-    const m = line.match(/^([^:]+):\s*(.*)$/);
-    if(m) map[String(m[1]).trim()] = String(m[2]).trim();
-  });
+  txt
+    .replace(/\r/g, "\n")
+    .replace(/\s+(?:\/|-\/-|\|\|)\s+(?=[^:\n]{1,80}:\s*)/g, "\n")
+    .split(/\n+/)
+    .map(s=>s.trim())
+    .filter(Boolean)
+    .forEach(line=>{
+      const m = line.match(/^([^:]{1,80}):\s*(.*)$/);
+      if(m){
+        const k = cleanVal(m[1]);
+        const v = cleanVal(m[2]);
+        if(k) map[k] = stripDisputaIdPrefix_(v, k);
+      }
+    });
   return map;
 }
 function getDisputaValue(map, id, fallback){
-  if(map && Object.prototype.hasOwnProperty.call(map, id)) return map[id];
-  return fallback || "";
+  const ident = cleanVal(id);
+  if(map && ident){
+    if(Object.prototype.hasOwnProperty.call(map, ident)) return stripDisputaIdPrefix_(map[ident], ident);
+    const wanted = normalizeText(ident);
+    for(const k of Object.keys(map)){
+      if(normalizeText(k) === wanted) return stripDisputaIdPrefix_(map[k], ident);
+    }
+  }
+  return stripDisputaIdPrefix_(fallback || "", ident);
 }
 function splitDisputaIds(raw){
-  return String(raw || "").split(/\s*\/\s*|\n+|,\s*/).map(s=>s.trim()).filter(Boolean);
+  return String(raw || "")
+    .replace(/\r/g,"\n")
+    .split(/\s*\/\s*|\n+|,\s*/ )
+    .map(s=>s.replace(/:.*/,"").trim())
+    .filter(Boolean);
 }
 function buildDisputaItems(r){
   if(r && Array.isArray(r.__disputas) && r.__disputas.length){
@@ -1606,7 +1634,7 @@ function renderDisputaRecursos(){
     const acao = cleanVal(r["Ação sugerida"]) || (baseProt ? `Não retirar da base ${baseProt} sem validar.` : "Validar antes de retirar material.");
     const protegidoLinha = disputaPessoaLineHtml_("Protegido", protegidoObj);
     const disputaLinha = disputas.length
-      ? disputas.map(d => disputaPessoaLineHtml_("Disputa", d)).join(`<span class="disputaSep">||</span>`)
+      ? disputas.map(d => disputaPessoaLineHtml_("Disputa", d)).join(`<span class="disputaSep">-/-</span>`)
       : `<b>Disputa:</b> ${escapeHtml(r["ID disputa"] || "—")}`;
     return `<div class="disputaCard ${pinned ? "pinned" : ""}">
       <div class="disputaLine protegido"><button class="disputaBell ${pinned ? "on" : ""}" type="button" title="Sinalizar disputa" onclick="toggleDisputaPin('${escapeHtml(key)}')">🔔</button>🤝 ${protegidoLinha}</div>
