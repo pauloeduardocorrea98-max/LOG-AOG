@@ -1547,25 +1547,81 @@ function splitDisputaIds(raw){
   }
   return out;
 }
+function splitDisputaMultiValue_(raw, expectedLen){
+  const txt = String(raw || "")
+    .replace(/\r/g, "\n")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\u00A0/g, " ")
+    .trim();
+  if(!txt) return [];
+  let parts = txt
+    .split(/\s*(?:\|\||-\/-)\s*|\n+/g)
+    .map(v => cleanVal(v))
+    .filter(Boolean);
+  if(parts.length > 1) return parts;
+  return [txt];
+}
+function getMappedDisputaValue_(map, id){
+  const ident = cleanVal(id);
+  if(!map || !ident) return "";
+  if(Object.prototype.hasOwnProperty.call(map, ident)) return stripDisputaIdEverywhere_(map[ident], ident);
+  const wanted = normalizeText(ident);
+  for(const k of Object.keys(map)){
+    if(normalizeText(k) === wanted) return stripDisputaIdEverywhere_(map[k], ident);
+  }
+  return "";
+}
+function getDisputaValueByIndex_(map, raw, id, index, total){
+  const ident = cleanVal(id);
+  const mapped = getMappedDisputaValue_(map, ident);
+  if(mapped) return mapped;
+  const direct = extractDisputaValueById_(raw || "", ident);
+  if(direct) return direct;
+  const parts = splitDisputaMultiValue_(raw, total);
+  if(parts.length > 1 && index >= 0 && index < parts.length) return stripDisputaIdEverywhere_(parts[index], ident);
+  if(parts.length === 1) return stripDisputaIdEverywhere_(parts[0], ident);
+  return "";
+}
+function expandDisputaObject_(d, fallbackPn){
+  const obj = (d && typeof d === "object") ? d : {};
+  const ids = splitDisputaIds(obj.id);
+  const baseIds = ids.length ? ids : (cleanVal(obj.id) ? [cleanVal(obj.id)] : [""]);
+  const maps = {
+    status: parseDisputaField(obj.status),
+    criticidade: parseDisputaField(obj.criticidade),
+    base: parseDisputaField(obj.base),
+    data: parseDisputaField(obj.data),
+    barcode: parseDisputaField(obj.barcode),
+    aeronave: parseDisputaField(obj.aeronave),
+    pn: parseDisputaField(obj.pn),
+    qtd: parseDisputaField(obj.qtd),
+    origem: parseDisputaField(obj.origem),
+    destino: parseDisputaField(obj.destino)
+  };
+  return baseIds.map((id, idx)=>{
+    const limpa = v => stripDisputaIdEverywhere_(v, id);
+    return {
+      id: cleanVal(id),
+      status: cleanVal(limpa(getDisputaValueByIndex_(maps.status, obj.status, id, idx, baseIds.length))),
+      criticidade: cleanVal(limpa(getDisputaValueByIndex_(maps.criticidade, obj.criticidade, id, idx, baseIds.length))),
+      base: cleanVal(limpa(getDisputaValueByIndex_(maps.base, obj.base, id, idx, baseIds.length))),
+      data: cleanVal(limpa(getDisputaValueByIndex_(maps.data, obj.data, id, idx, baseIds.length))),
+      barcode: cleanVal(limpa(getDisputaValueByIndex_(maps.barcode, obj.barcode, id, idx, baseIds.length))),
+      aeronave: cleanVal(limpa(getDisputaValueByIndex_(maps.aeronave, obj.aeronave, id, idx, baseIds.length))),
+      pn: cleanVal(limpa(getDisputaValueByIndex_(maps.pn, obj.pn || fallbackPn || "", id, idx, baseIds.length))),
+      qtd: cleanVal(limpa(getDisputaValueByIndex_(maps.qtd, obj.qtd, id, idx, baseIds.length))),
+      origem: cleanVal(limpa(getDisputaValueByIndex_(maps.origem, obj.origem, id, idx, baseIds.length))),
+      destino: cleanVal(limpa(getDisputaValueByIndex_(maps.destino, obj.destino, id, idx, baseIds.length)))
+    };
+  });
+}
 function buildDisputaItems(r){
   if(r && Array.isArray(r.__disputas) && r.__disputas.length){
-    return r.__disputas.map(d=>{
-      const id = cleanVal(d.id);
-      const limpa = v => stripDisputaIdEverywhere_(v, id);
-      return {
-        id,
-        status: cleanVal(limpa(d.status)),
-        criticidade: cleanVal(limpa(d.criticidade)),
-        base: cleanVal(limpa(d.base)),
-        data: cleanVal(limpa(d.data)),
-        barcode: cleanVal(limpa(d.barcode)),
-        aeronave: cleanVal(limpa(d.aeronave)),
-        pn: cleanVal(limpa(d.pn || r["PN protegido"])),
-        qtd: cleanVal(limpa(d.qtd)),
-        origem: cleanVal(limpa(d.origem)),
-        destino: cleanVal(limpa(d.destino))
-      };
-    }).filter(d => d.id || d.status || d.criticidade || d.base || d.barcode || d.aeronave || d.pn);
+    const expanded = [];
+    r.__disputas.forEach(d=>{
+      expandDisputaObject_(d, r["PN protegido"]).forEach(x=>expanded.push(x));
+    });
+    return expanded.filter(d => d.id || d.status || d.criticidade || d.base || d.barcode || d.aeronave || d.pn);
   }
   const ids = splitDisputaIds(r["ID disputa"]);
   if(!ids.length && cleanVal(r["ID disputa"])) ids.push(cleanVal(r["ID disputa"]));
@@ -1579,20 +1635,21 @@ function buildDisputaItems(r){
   const qtd = parseDisputaField(r["QTD disputa"]);
   const origem = parseDisputaField(r["Origem disputa"]);
   const destino = parseDisputaField(r["Destino disputa"]);
-  return ids.map(id=>({
+  return ids.map((id, idx)=>({
     id,
-    status: getDisputaValue(status, id, r["Status disputa"]),
-    criticidade: getDisputaValue(crit, id, r["Criticidade disputa"]),
-    base: getDisputaValue(base, id, r["Base disputa"]),
-    data: getDisputaValue(data, id, r["Data disputa"]),
-    barcode: getDisputaValue(barcode, id, r["Barcode disputa"]),
-    aeronave: getDisputaValue(aeronave, id, r["Aeronave disputa"]),
-    pn: getDisputaValue(pn, id, r["PN disputa"] || r["PN protegido"] || ""),
-    qtd: getDisputaValue(qtd, id, r["QTD disputa"]),
-    origem: getDisputaValue(origem, id, r["Origem disputa"]),
-    destino: getDisputaValue(destino, id, r["Destino disputa"])
+    status: getDisputaValueByIndex_(status, r["Status disputa"], id, idx, ids.length),
+    criticidade: getDisputaValueByIndex_(crit, r["Criticidade disputa"], id, idx, ids.length),
+    base: getDisputaValueByIndex_(base, r["Base disputa"], id, idx, ids.length),
+    data: getDisputaValueByIndex_(data, r["Data disputa"], id, idx, ids.length),
+    barcode: getDisputaValueByIndex_(barcode, r["Barcode disputa"], id, idx, ids.length),
+    aeronave: getDisputaValueByIndex_(aeronave, r["Aeronave disputa"], id, idx, ids.length),
+    pn: getDisputaValueByIndex_(pn, r["PN disputa"] || r["PN protegido"] || "", id, idx, ids.length),
+    qtd: getDisputaValueByIndex_(qtd, r["QTD disputa"], id, idx, ids.length),
+    origem: getDisputaValueByIndex_(origem, r["Origem disputa"], id, idx, ids.length),
+    destino: getDisputaValueByIndex_(destino, r["Destino disputa"], id, idx, ids.length)
   })).filter(d => d.id || d.status || d.criticidade || d.base || d.barcode || d.aeronave || d.pn);
 }
+
 
 function rotaTxt(o,d){
   const oo = cleanVal(o); const dd = cleanVal(d);
