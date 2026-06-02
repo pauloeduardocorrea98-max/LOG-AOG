@@ -10,6 +10,8 @@
 
 
 .disputaDate{width:170px;padding:10px;border:1px solid #e5e7eb;border-radius:10px;outline:none;background:#fff;color:#0f172a}.disputaDate:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.18)}.disputaClearBtn{padding:9px 11px;border:none;background:#334155;color:#fff;border-radius:10px;cursor:pointer}.disputaClearBtn:hover{filter:brightness(.95)}.disputaLine .disputaBell{margin-right:8px;vertical-align:middle}.disputaSep{display:inline-block;margin:0 10px;color:#64748b;font-weight:800}.disputaMuted{color:#64748b;font-size:12px}.disputaLine.protegido b{color:#065f46}.disputaLine.disputando b{color:#92400e}
+
+.disputaCheck{display:inline-flex;align-items:center;gap:6px;margin-right:10px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:999px;background:#ffffff;color:#0f172a;font-size:12px;font-weight:700;cursor:pointer;vertical-align:middle;white-space:nowrap}.disputaCheck input{margin:0;cursor:pointer}.disputaCard.analisada{border-color:#94a3b8;background:#f8fafc}.disputaCard.analisada .disputaProtegidoText{text-decoration:line-through;text-decoration-thickness:2px;opacity:.58}.disputaCard.analisada .disputaCheck{background:#dcfce7;border-color:#86efac;color:#166534}.disputaCard.analisada .disputaLine.protegido{border-left-color:#64748b}
 </style>
 </head>
 <body>
@@ -1173,14 +1175,18 @@ async function addLinkFromInput(){ const inp = document.getElementById("linkAddI
 
 const DISPUTA_SHEET_NAME = "DISPUTA DE RECURSOS";
 const DISPUTA_PIN_STORE_KEY = "AOG_DISPUTA_PINS_V1";
+const DISPUTA_ANALISADA_STORE_KEY = "AOG_DISPUTA_ANALISADAS_V1";
 let __disputaRows = [];
 let __disputaLastFetch = null;
 let __disputaLastFetchMs = 0;
 let __disputaError = "";
 let __disputaLoading = false;
 let __disputaPins = new Set(JSON.parse(localStorage.getItem(DISPUTA_PIN_STORE_KEY) || "[]"));
+let __disputaAnalisadas = new Set(JSON.parse(localStorage.getItem(DISPUTA_ANALISADA_STORE_KEY) || "[]"));
 
 function saveDisputaPins(){ try{ localStorage.setItem(DISPUTA_PIN_STORE_KEY, JSON.stringify(Array.from(__disputaPins || []))); }catch(e){} }
+function saveDisputaAnalisadas(){ try{ localStorage.setItem(DISPUTA_ANALISADA_STORE_KEY, JSON.stringify(Array.from(__disputaAnalisadas || []))); }catch(e){} }
+function toggleDisputaAnalisada(key){ const k = String(key || "").trim(); if(!k) return; if(__disputaAnalisadas.has(k)) __disputaAnalisadas.delete(k); else __disputaAnalisadas.add(k); saveDisputaAnalisadas(); renderDisputaRecursos(); }
 function hasGoogleScriptRun(){ try{ return !!(window.google && google.script && google.script.run); }catch(e){ return false; } }
 function googleScriptRunCall(fnName, ...args){
   return new Promise((resolve, reject)=>{
@@ -1812,6 +1818,7 @@ function renderDisputaRecursos(){
   list.innerHTML = rows.slice(0, 300).map(r=>{
     const key = disputaRowKey(r);
     const pinned = __disputaPins.has(key);
+    const analisada = __disputaAnalisadas.has(key);
     const rawProtegido = (r.__protegido && typeof r.__protegido === "object") ? r.__protegido : {};
     const protegidoObj = {
       id: cleanVal(rawProtegido.id) || cleanVal(r["ID protegido"]),
@@ -1835,8 +1842,8 @@ function renderDisputaRecursos(){
     const disputaLinha = disputas.length
       ? disputas.map(d => disputaPessoaLineHtml_("Disputa", d)).join(`<span class="disputaSep">-/-</span>`)
       : `<b>Disputa:</b> ${escapeHtml(r["ID disputa"] || "—")}`;
-    return `<div class="disputaCard ${pinned ? "pinned" : ""}">
-      <div class="disputaLine protegido"><button class="disputaBell ${pinned ? "on" : ""}" type="button" title="Sinalizar disputa" onclick="toggleDisputaPin('${escapeHtml(key)}')">🔔</button>🤝 ${protegidoLinha}</div>
+    return `<div class="disputaCard ${pinned ? "pinned" : ""} ${analisada ? "analisada" : ""}">
+      <div class="disputaLine protegido"><button class="disputaBell ${pinned ? "on" : ""}" type="button" title="Sinalizar disputa" onclick="toggleDisputaPin('${escapeHtml(key)}')">🔔</button><label class="disputaCheck" title="Marcar esta disputa como analisada"><input type="checkbox" ${analisada ? "checked" : ""} onclick="event.stopPropagation();toggleDisputaAnalisada('${escapeHtml(key)}')"> Disputa analisada</label><span class="disputaProtegidoText">🤝 ${protegidoLinha}</span></div>
       <div class="disputaLine disputando">${disputaLinha}</div>
       <div class="disputaLine acao"><b>Estoque MARD em ${escapeHtml(baseProt || "—")}:</b> ${escapeHtml(saldo || "0")} | <b>Demandas:</b> ${escapeHtml(demandas || "—")} | ${escapeHtml(acao)}</div>
     </div>`;
