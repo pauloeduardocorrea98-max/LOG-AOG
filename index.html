@@ -11,7 +11,7 @@
 
 .disputaDate{width:170px;padding:10px;border:1px solid #e5e7eb;border-radius:10px;outline:none;background:#fff;color:#0f172a}.disputaDate:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.18)}.disputaClearBtn{padding:9px 11px;border:none;background:#334155;color:#fff;border-radius:10px;cursor:pointer}.disputaClearBtn:hover{filter:brightness(.95)}.disputaLine .disputaBell{margin-right:8px;vertical-align:middle}.disputaSep{display:inline-block;margin:0 10px;color:#64748b;font-weight:800}.disputaMuted{color:#64748b;font-size:12px}.disputaLine.protegido b{color:#065f46}.disputaLine.disputando b{color:#92400e}
 
-.disputaCheck{display:inline-flex;align-items:center;gap:6px;margin-right:10px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:999px;background:#ffffff;color:#0f172a;font-size:12px;font-weight:700;cursor:pointer;vertical-align:middle;white-space:nowrap}.disputaCheck input{margin:0;cursor:pointer}.disputaCard.analisada{border-color:#94a3b8;background:#f8fafc}.disputaCard.analisada .disputaProtegidoText{text-decoration:line-through;text-decoration-thickness:2px;opacity:.58}.disputaCard.analisada .disputaCheck{background:#dcfce7;border-color:#86efac;color:#166534}.disputaCard.analisada .disputaLine.protegido{border-left-color:#64748b}
+.disputaCheck{display:inline-flex;align-items:center;gap:6px;margin-right:10px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:999px;background:#ffffff;color:#0f172a;font-size:12px;font-weight:700;cursor:pointer;vertical-align:middle;white-space:nowrap}.disputaCheck input{margin:0;cursor:pointer}.disputaCard.analisada{border-color:#94a3b8;background:#f8fafc}.disputaCard.analisada .disputaProtegidoText{text-decoration:line-through;text-decoration-thickness:2px;opacity:.58}.disputaCard.analisada .disputaCheck{background:#dcfce7;border-color:#86efac;color:#166534}.disputaCard.analisada .disputaLine.protegido{border-left-color:#64748b}.disputaAnalyzedBy{display:inline-block;margin-left:10px;font-size:12px;color:#166534;background:#dcfce7;border:1px solid #86efac;border-radius:999px;padding:4px 8px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -756,6 +756,8 @@ function gasCall(fnName, ...args){
   if(fn === "getLastProgress") return jsonpCall({ progressGet: 1 });
   if(fn === "getDisputaRecursosState") return jsonpCall({ disputaGet: 1 }, 25000);
   if(fn === "atualizarDisputaRecursos") return jsonpCall({ disputaUpdate: 1 }, 60000);
+  if(fn === "getSharedDisputaAnaliseState") return jsonpCall({ sharedDisputaAnaliseGet: 1 }, 20000);
+  if(fn === "setSharedDisputaAnalise") return jsonpCall({ sharedDisputaAnaliseSet: 1, key: args[0] || "", done: args[1] ? "1" : "0" }, 20000);
   return Promise.reject(new Error("Função não mapeada no GitHub: " + fn));
 }
 
@@ -1104,7 +1106,7 @@ async function refreshData(){
     if(!newData){ try{ __lastRefreshSource = "gas-chunk"; const out = await __gasGetDadosChunked__((p)=>{ try{ const st = document.getElementById("status"); if(st && __ADMIN_MODE){ st.style.display = "block"; st.innerHTML = makeStatusHtml(`⏳ Carregando chunks... ${p.doneCount}/${p.total} (${p.pct}%)`); } }catch(e){} }); newData = out.data; __lastRefreshMs = out.ms; }catch(e2){ const msg = e2 && e2.message ? e2.message : String(e2); erros.push("gas-chunk: " + msg); newData = null; } }
     if(!Array.isArray(newData) || newData.length === 0){ __lastRefreshError = erros.length ? erros.join(" | ") : "Sem dados"; return; }
     const __sameData=JSON.stringify(dados)===JSON.stringify(newData);dados=newData;__lastSuccessAt=new Date();__lastRefreshError="";if(__sameData){paintUpdateInfo();paintRefreshInfo();try{renderFrescorBanner();}catch(e){}return;}
-    try{ await syncSharedAllTables(); }catch(e){} try{ await syncSharedObs(); }catch(e){} try{ await syncSharedTurno(); }catch(e){} try{ await syncSharedAvisos(); }catch(e){} try{ await syncSharedLinks(); }catch(e){} try{ await syncDisputaRecursos(false); }catch(e){}
+    try{ await syncSharedAllTables(); }catch(e){} try{ await syncSharedObs(); }catch(e){} try{ await syncSharedTurno(); }catch(e){} try{ await syncSharedAvisos(); }catch(e){} try{ await syncSharedLinks(); }catch(e){} try{ await syncSharedDisputaAnalise(); }catch(e){} try{ await syncDisputaRecursos(false); }catch(e){}
     __dataVersion++; __sortedBaseVersion = -1; for(const tk of SHARED_TABLE_KEYS) invalidateFilterCache(tk); markAllTablesDirty(); prepareDataCache(); __lastUpdateDate = computeLastUpdateFromData();
     if(__isUserTyping__()){__pendingRerender=true;}else{rerenderAll({onlyActive:true});}
   }catch(err){ __lastRefreshError = (err && err.message) ? err.message : String(err); }finally{ __refreshInFlight = false; paintUpdateInfo(); paintRefreshInfo(); try{ renderFrescorBanner(); }catch(e){} }
@@ -1183,10 +1185,41 @@ let __disputaError = "";
 let __disputaLoading = false;
 let __disputaPins = new Set(JSON.parse(localStorage.getItem(DISPUTA_PIN_STORE_KEY) || "[]"));
 let __disputaAnalisadas = new Set(JSON.parse(localStorage.getItem(DISPUTA_ANALISADA_STORE_KEY) || "[]"));
+let __sharedDisputaAnaliseState = { keys: [], meta: {} };
 
 function saveDisputaPins(){ try{ localStorage.setItem(DISPUTA_PIN_STORE_KEY, JSON.stringify(Array.from(__disputaPins || []))); }catch(e){} }
 function saveDisputaAnalisadas(){ try{ localStorage.setItem(DISPUTA_ANALISADA_STORE_KEY, JSON.stringify(Array.from(__disputaAnalisadas || []))); }catch(e){} }
-function toggleDisputaAnalisada(key){ const k = String(key || "").trim(); if(!k) return; if(__disputaAnalisadas.has(k)) __disputaAnalisadas.delete(k); else __disputaAnalisadas.add(k); saveDisputaAnalisadas(); renderDisputaRecursos(); }
+function applySharedDisputaAnaliseState(st){
+  const safe = (st && typeof st === "object") ? st : { keys: [], meta: {} };
+  if(!Array.isArray(safe.keys)) safe.keys = [];
+  if(!safe.meta || typeof safe.meta !== "object") safe.meta = {};
+  __sharedDisputaAnaliseState = safe;
+  __disputaAnalisadas = new Set(safe.keys.map(k => String(k || "").trim()).filter(Boolean));
+  saveDisputaAnalisadas();
+}
+async function syncSharedDisputaAnalise(){
+  try{
+    const st = await gasCall("getSharedDisputaAnaliseState");
+    applySharedDisputaAnaliseState(st);
+    const active = document.querySelector(".section.active");
+    if(active && active.id === "disputa") renderDisputaRecursos();
+  }catch(e){}
+}
+async function setDisputaAnalisada(key, done){
+  const k = String(key || "").trim();
+  if(!k) return;
+  if(done) __disputaAnalisadas.add(k); else __disputaAnalisadas.delete(k);
+  saveDisputaAnalisadas();
+  renderDisputaRecursos();
+  try{
+    const st = await gasCall("setSharedDisputaAnalise", k, !!done);
+    applySharedDisputaAnaliseState(st);
+  }catch(e){
+    try{ await syncSharedDisputaAnalise(); }catch(e2){}
+  }
+  renderDisputaRecursos();
+}
+function toggleDisputaAnalisada(key){ const k = String(key || "").trim(); if(!k) return; setDisputaAnalisada(k, !__disputaAnalisadas.has(k)); }
 function hasGoogleScriptRun(){ try{ return !!(window.google && google.script && google.script.run); }catch(e){ return false; } }
 function googleScriptRunCall(fnName, ...args){
   return new Promise((resolve, reject)=>{
@@ -1412,6 +1445,7 @@ async function syncDisputaRecursos(forceRender){
     }
     const rowsRaw = await fetchDisputaRows_();
     __disputaRows = normalizeDisputaRows(rowsRaw);
+    try{ await syncSharedDisputaAnalise(); }catch(e){}
     __disputaLastFetch = new Date();
     __disputaLastFetchMs = Date.now();
     markDirty("disputa");
@@ -1819,6 +1853,8 @@ function renderDisputaRecursos(){
     const key = disputaRowKey(r);
     const pinned = __disputaPins.has(key);
     const analisada = __disputaAnalisadas.has(key);
+    const analiseMeta = (__sharedDisputaAnaliseState && __sharedDisputaAnaliseState.meta) ? (__sharedDisputaAnaliseState.meta[key] || null) : null;
+    const analiseInfoHtml = (analisada && analiseMeta) ? `<span class="disputaAnalyzedBy">Analisada por: <b>${escapeHtml(analiseMeta.by || "desconhecido")}</b>${analiseMeta.t ? " • " + escapeHtml(fmtBR(parseMaybeDate(analiseMeta.t) || new Date(analiseMeta.t))) : ""}</span>` : "";
     const rawProtegido = (r.__protegido && typeof r.__protegido === "object") ? r.__protegido : {};
     const protegidoObj = {
       id: cleanVal(rawProtegido.id) || cleanVal(r["ID protegido"]),
@@ -1843,7 +1879,7 @@ function renderDisputaRecursos(){
       ? disputas.map(d => disputaPessoaLineHtml_("Disputa", d)).join(`<span class="disputaSep">-/-</span>`)
       : `<b>Disputa:</b> ${escapeHtml(r["ID disputa"] || "—")}`;
     return `<div class="disputaCard ${pinned ? "pinned" : ""} ${analisada ? "analisada" : ""}">
-      <div class="disputaLine protegido"><button class="disputaBell ${pinned ? "on" : ""}" type="button" title="Sinalizar disputa" onclick="toggleDisputaPin('${escapeHtml(key)}')">🔔</button><label class="disputaCheck" title="Marcar esta disputa como analisada"><input type="checkbox" ${analisada ? "checked" : ""} onclick="event.stopPropagation();toggleDisputaAnalisada('${escapeHtml(key)}')"> Disputa analisada</label><span class="disputaProtegidoText">🤝 ${protegidoLinha}</span></div>
+      <div class="disputaLine protegido"><button class="disputaBell ${pinned ? "on" : ""}" type="button" title="Sinalizar disputa" onclick="toggleDisputaPin('${escapeHtml(key)}')">🔔</button><label class="disputaCheck" title="Marcar esta disputa como analisada"><input type="checkbox" ${analisada ? "checked" : ""} onchange="event.stopPropagation();setDisputaAnalisada('${escapeHtml(key)}', this.checked)"> Disputa analisada</label><span class="disputaProtegidoText">🤝 ${protegidoLinha}</span>${analiseInfoHtml}</div>
       <div class="disputaLine disputando">${disputaLinha}</div>
       <div class="disputaLine acao"><b>Estoque MARD em ${escapeHtml(baseProt || "—")}:</b> ${escapeHtml(saldo || "0")} | <b>Demandas:</b> ${escapeHtml(demandas || "—")} | ${escapeHtml(acao)}</div>
     </div>`;
@@ -1949,6 +1985,7 @@ function initCtxMenuHandlers(){
       try{ await syncSharedTurno(); }catch(e){} 
       try{ await syncSharedAvisos(); }catch(e){} 
       try{ await syncSharedLinks(); }catch(e){} 
+      try{ await syncSharedDisputaAnalise(); }catch(e){} 
     }
     try{ if(!__disputaLastFetchMs || (Date.now() - __disputaLastFetchMs > getAutoRefreshMs())) await syncDisputaRecursos(false); }catch(e){}
     renderSharedList("turno"); renderSharedList("avisos"); renderLinksUteis(); renderDisputaRecursos();
